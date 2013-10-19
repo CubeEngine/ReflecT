@@ -18,6 +18,7 @@
             <type>jar</type>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -33,6 +34,25 @@
                     <showWarnings>true</showWarnings>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <configuration>
+                    <header>/header.txt</header>
+                    <strictCheck>true</strictCheck>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>add-license-headers</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+
 </project>
