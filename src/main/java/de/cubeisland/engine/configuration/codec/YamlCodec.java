@@ -93,9 +93,8 @@ public class YamlCodec extends MultiConfigurationCodec
      *
      * @param value the value at given path
      * @param offset the current offset
-     * @param inCollection
      */
-    private static void convertValue(OutputStreamWriter writer, Node value, int offset, boolean inCollection) throws IOException
+    private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
         StringBuilder sb = new StringBuilder();
         if (!(value instanceof NullNode)) // null-Node ?
@@ -194,7 +193,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             else // Other Node (list / normal)
             {
-                convertValue(writer, entry.getValue(), offset, false);
+                convertValue(writer, entry.getValue(), offset);
                 endOfMapOrList = false;
             }
             first = false;
@@ -224,7 +223,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             else
             {
-                convertValue(writer, listedNode, offset + 1, true);
+                convertValue(writer, listedNode, offset + 1);
                 endOfMap = false;
             }
         }

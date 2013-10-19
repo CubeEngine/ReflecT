@@ -65,10 +65,7 @@ public abstract class ParentNode<V> extends Node<V>
             }
             else if (!(baseNode instanceof ParentNode))
             {
-                // TODO what to do here? This is an error but configuration could proceed loading ignoring this value
-                //CubeEngine.getCore().getLog().warn("Could not resolve path ({}) for {}", path, baseNode);
-                //CubeEngine.getCore().getLog().warn("Is your configuration outdated?");
-                return null;
+                return new ErrorNode("Could not resolve path ("  + path + ") for " + baseNode + "\nIs your configuration outdated?");
             }
             return ((ParentNode)baseNode).getNodeAt(subPath, pathSeparator);
         }

@@ -22,20 +22,14 @@ public class Convert
     private static ArrayConverter arrayConverter;
     private static CollectionConverter collectionConverter;
 
-    public synchronized static void init()
+    public static void init()
     {
-        if (converters != null)
-        {
-            return;
-        }
-
         converters = new ConcurrentHashMap<>();
         mapConverter = new MapConverter();
         arrayConverter = new ArrayConverter();
         collectionConverter = new CollectionConverter();
 
         Converter<?> converter;
-
         registerConverter(Integer.class, converter = new IntegerConverter());
         registerConverter(int.class, converter);
         registerConverter(Short.class, converter = new ShortConverter());
@@ -44,19 +38,14 @@ public class Convert
         registerConverter(byte.class, converter);
         registerConverter(Double.class, converter = new DoubleConverter());
         registerConverter(double.class, converter);
-        registerConverter(Date.class, new DateConverter());
-
         registerConverter(Float.class, converter = new FloatConverter());
         registerConverter(float.class, converter);
         registerConverter(Long.class, converter = new LongConverter());
         registerConverter(long.class, converter);
-
-        registerConverter(boolean.class, converter = new BooleanConverter());
-        registerConverter(Boolean.class, converter);
+        registerConverter(Boolean.class, converter = new BooleanConverter());
+        registerConverter(boolean.class, converter);
         registerConverter(String.class, new StringConverter());
-
-
-
+        registerConverter(Date.class, new DateConverter());
     }
 
     public synchronized static void cleanup()

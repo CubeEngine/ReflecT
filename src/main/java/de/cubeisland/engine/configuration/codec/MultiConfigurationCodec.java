@@ -16,6 +16,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -53,9 +54,9 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param config the config to load
      * @param is the InputStream to load from
      */
-    public void loadChildConfig(MultiConfiguration config, InputStream is) throws InstantiationException, IllegalAccessException
+    public Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is) throws InstantiationException, IllegalAccessException
     {
-        this.dumpIntoFields(config, this.loadFromInputStream(is), config.getParent());
+        return this.dumpIntoFields(config, this.loadFromInputStream(is), config.getParent());
     }
 
     /**
@@ -66,12 +67,13 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param parentConfig the optional parentConfig
      */
     @SuppressWarnings("unchecked cast")
-    protected void dumpIntoFields(MultiConfiguration config, MapNode currentNode, MultiConfiguration parentConfig)
+    protected Collection<ErrorNode> dumpIntoFields(MultiConfiguration config, MapNode currentNode, MultiConfiguration parentConfig)
     {
         if (parentConfig == null)
         {
-            this.dumpIntoFields(config,currentNode);
+            return this.dumpIntoFields(config,currentNode);
         }
+        Collection<ErrorNode> errorNodes = new HashSet<>();
         for (Field field : config.getClass().getFields()) // ONLY public fields are allowed
         {
             try
@@ -80,6 +82,11 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 {
                     String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
                     Node fieldNode = currentNode.getNodeAt(path, PATH_SEPARATOR);
+                    if (fieldNode instanceof ErrorNode)
+                    {
+                        errorNodes.add((ErrorNode) fieldNode);
+                        continue;
+                    }
                     Type type = field.getGenericType();
                     FieldType fieldType = getFieldType(field);
                     switch (fieldType)
@@ -127,7 +134,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                                                                         "\nConfig:" + config.getClass() +
                                                                         "\nSubConfig:" + singleSubConfig.getClass());
                         }
-                        this.dumpIntoFields(singleSubConfig, loadFrom_singleConfig,(MultiConfiguration)field.get(parentConfig));
+                        errorNodes.addAll(this.dumpIntoFields(singleSubConfig, loadFrom_singleConfig,(MultiConfiguration)field.get(parentConfig)));
                         continue;
                     case COLLECTION_CONFIG_FIELD:
                         ListNode loadFrom_List;
@@ -175,7 +182,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                             }
                             if (loadFrom_listElem instanceof MapNode)
                             {
-                                this.dumpIntoFields(subConfig, (MapNode)loadFrom_listElem, parentConfig_Iterator.next());
+                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode)loadFrom_listElem, parentConfig_Iterator.next()));
                             }
                             else
                             {
@@ -221,7 +228,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                                 }
                                 if (valueNode instanceof MapNode)
                                 {
-                                    this.dumpIntoFields(entry.getValue(), (MapNode)valueNode, parentMapConfigs.get(entry.getKey()));
+                                    errorNodes.addAll(this.dumpIntoFields(entry.getValue(), (MapNode)valueNode, parentMapConfigs.get(entry.getKey())));
                                 }
                                 else
                                 {
@@ -248,6 +255,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         "\ncurrent Field:" + field.getName(), e);
             }
         }
+        return errorNodes;
     }
 
     /**

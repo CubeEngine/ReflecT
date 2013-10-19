@@ -1,6 +1,7 @@
 package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
+import de.cubeisland.engine.configuration.node.ErrorNode;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,12 +10,21 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * This abstract class represents a configuration.
  */
 public abstract class Configuration<Codec extends ConfigurationCodec>
 {
+    protected static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
+
+    public static void setLogger(Logger logger)
+    {
+        LOGGER = logger;
+    }
+
     public final Codec codec;
     protected Path file;
 
@@ -141,7 +151,15 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
     public void loadFrom(InputStream is)
     {
         assert is != null : "You hae to provide a InputStream to load from";
-        this.codec.load(this, is); //load config in maps -> updates -> sets fields
+        Collection<ErrorNode> errors = this.codec.load(this, is);//load config in maps -> updates -> sets fields
+        if (!errors.isEmpty())
+        {
+            LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
+            for (ErrorNode error : errors)
+            {
+                LOGGER.warning(error.getErrorMessage());
+            }
+        }
         this.onLoaded(file);
     }
 

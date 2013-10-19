@@ -19,6 +19,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,9 +39,9 @@ public abstract class ConfigurationCodec
      * @param config the config to load
      * @param is the InputStream to load from
      */
-    public void load(Configuration config, InputStream is)
+    public Collection<ErrorNode> load(Configuration config, InputStream is)
     {
-        this.dumpIntoFields(config, this.loadFromInputStream(is));
+        return this.dumpIntoFields(config, this.loadFromInputStream(is));
     }
 
     /**
@@ -120,7 +121,7 @@ public abstract class ConfigurationCodec
                 Node nodeAt = baseNode.getNodeAt(comment.path(), "."); // TODO option to not create the Node
                 if (nodeAt != null) // if null ignore comment
                 {
-                    if (nodeAt instanceof NullNode)
+                    if (nodeAt instanceof NullNode || nodeAt instanceof ErrorNode)
                     {
                         nodeAt.getParentNode().removeNode(nodeAt);
                     }
@@ -194,8 +195,9 @@ public abstract class ConfigurationCodec
      * @param currentNode the current MapNode
      */
     @SuppressWarnings("unchecked cast")
-    protected void dumpIntoFields(Configuration config, MapNode currentNode)
+    protected Collection<ErrorNode> dumpIntoFields(Configuration config, MapNode currentNode)
     {
+        Collection<ErrorNode> errorNodes = new HashSet<>();
         for (Field field : config.getClass().getFields()) // ONLY public fields are allowed
         {
             try
@@ -204,6 +206,11 @@ public abstract class ConfigurationCodec
                 {
                     String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
                     Node fieldNode = currentNode.getNodeAt(path, PATH_SEPARATOR);
+                    if (fieldNode instanceof ErrorNode)
+                    {
+                        errorNodes.add((ErrorNode) fieldNode);
+                        continue;
+                    }
                     Type type = field.getGenericType();
                     FieldType fieldType = getFieldType(field);
                     switch (fieldType)
@@ -241,7 +248,7 @@ public abstract class ConfigurationCodec
                                                                         "\nConfig:" + config.getClass() +
                                                                         "\nSubConfig:" + singleSubConfig.getClass());
                         }
-                        this.dumpIntoFields(singleSubConfig, singleConfigNode);
+                        errorNodes.addAll(this.dumpIntoFields(singleSubConfig, singleConfigNode));
                         continue;
                     case COLLECTION_CONFIG_FIELD:
                         ListNode loadFrom_List;
@@ -281,7 +288,7 @@ public abstract class ConfigurationCodec
                             }
                             if (listElemNode instanceof MapNode)
                             {
-                                this.dumpIntoFields(subConfig, (MapNode)listElemNode);
+                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode)listElemNode));
                             }
                             else
                             {
@@ -322,7 +329,7 @@ public abstract class ConfigurationCodec
                             }
                             else if (valueNode instanceof MapNode)
                             {
-                                this.dumpIntoFields(value = clazz.newInstance(), (MapNode)valueNode);
+                                errorNodes.addAll(this.dumpIntoFields(value = clazz.newInstance(), (MapNode)valueNode));
                             }
                             else
                             {
@@ -345,6 +352,7 @@ public abstract class ConfigurationCodec
                         "\ncurrent Node: " + currentNode.toString() , e);
             }
         }
+        return errorNodes;
     }
 
 
