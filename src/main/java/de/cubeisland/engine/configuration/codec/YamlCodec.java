@@ -158,15 +158,6 @@ public class YamlCodec extends MultiConfigurationCodec
     private static void convertMapNode(OutputStreamWriter writer, MapNode values, int offset, boolean inCollection) throws IOException
     {
         Map<String, Node> map = values.getMappedNodes();
-        if (map.isEmpty())
-        {
-            if (!inCollection)
-            {
-                writer.append(getOffset(offset));
-            }
-            writer.append("{}").append(LINE_BREAK);
-            return;
-        }
         boolean endOfMapOrList = false;
         boolean first = true;
         for (Entry<String, Node> entry : map.entrySet())
@@ -197,9 +188,16 @@ public class YamlCodec extends MultiConfigurationCodec
             // Now convert the value
             if (entry.getValue() instanceof MapNode) // Map-Node?
             {
-                writer.append(LINE_BREAK);
-                convertMapNode(writer, ((MapNode)entry.getValue()), offset + 1, inCollection);
-                endOfMapOrList = true;
+                if (((MapNode) entry.getValue()).isEmpty())
+                {
+                    writer.append("{}");
+                }
+                else
+                {
+                    writer.append(LINE_BREAK);
+                    convertMapNode(writer, ((MapNode)entry.getValue()), offset + 1, false);
+                    endOfMapOrList = true;
+                }
             }
             else if (entry.getValue() instanceof ListNode) // List-Node? -> list the nodes
             {
@@ -235,8 +233,15 @@ public class YamlCodec extends MultiConfigurationCodec
             writer.append(getOffset(offset)).append(OFFSET).append("- ");
             if (listedNode instanceof MapNode)
             {
-                convertMapNode(writer, (MapNode)listedNode, offset + 2, true);
-                endOfMap = true;
+                if (((MapNode) listedNode).isEmpty())
+                {
+                    writer.append("{}");
+                }
+                else
+                {
+                    convertMapNode(writer, (MapNode)listedNode, offset + 2, true);
+                    endOfMap = true;
+                }
             }
             else if (listedNode instanceof ListNode)
             {
