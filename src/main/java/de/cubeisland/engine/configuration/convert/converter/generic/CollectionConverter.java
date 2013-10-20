@@ -23,7 +23,6 @@
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
 import de.cubeisland.engine.configuration.convert.ConversionException;
-import de.cubeisland.engine.configuration.convert.Convert;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -31,6 +30,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
+import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
 
 public class CollectionConverter
 {
@@ -50,7 +52,7 @@ public class CollectionConverter
         }
         for (Object value : collection)
         {
-            result.addNode(Convert.toNode(value));
+            result.addNode(convertToNode(value));
         }
         return result;
     }
@@ -76,7 +78,7 @@ public class CollectionConverter
                 Type subType = pType.getActualTypeArguments()[0];
                 for (Node node : listNode.getListedNodes())
                 {
-                    V value = Convert.fromNode(node, subType);
+                    V value = convertFromNode(node, subType);
                     result.add(value);
                 }
                 return result;

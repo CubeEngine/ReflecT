@@ -27,7 +27,6 @@ import de.cubeisland.engine.configuration.FieldType;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.MultiConfiguration;
 import de.cubeisland.engine.configuration.annotations.Option;
-import de.cubeisland.engine.configuration.convert.Convert;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
@@ -41,6 +40,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+
+import static de.cubeisland.engine.configuration.Configuration.*;
 
 /**
  * This abstract Codec can be implemented to read and write configurations that allow child-configs
@@ -121,7 +122,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         }
                         else
                         {
-                            Object object = Convert.fromNode(fieldNode, type); // Convert the value
+                            Object object = convertFromNode(fieldNode, type); // Convert the value
                             if (object != null)
                             {
                                 field.set(config, object);//Set loaded Value into Field
@@ -239,7 +240,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         field.set(config, mapConfigs);
                         for (Map.Entry<Object, MultiConfiguration> entry : mapConfigs.entrySet())
                         {
-                            Node keyNode = Convert.toNode(entry.getKey());
+                            Node keyNode = convertToNode(entry.getKey());
                             if (keyNode instanceof StringNode)
                             {
                                 Node valueNode = loadFrom_Map.getNodeAt(((StringNode)keyNode).getValue(), PATH_SEPARATOR);
@@ -343,7 +344,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             switch (fieldType)
             {
                 case NORMAL_FIELD:
-                    node = Convert.toNode(fieldValue);
+                    node = convertToNode(fieldValue);
                     break;
                 case CONFIG_FIELD:
                     node = this.fillFromFields((MultiConfiguration)field.get(parentConfig), (MultiConfiguration)fieldValue);
@@ -357,7 +358,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     Map<Object, MultiConfiguration> childFieldMap = MapConverter.getMapFor((ParameterizedType)field.getGenericType());
                     for (Map.Entry<Object, MultiConfiguration> parentEntry : parentFieldMap.entrySet())
                     {
-                        Node keyNode = Convert.toNode(parentEntry.getKey());
+                        Node keyNode = convertToNode(parentEntry.getKey());
                         if (keyNode instanceof StringNode)
                         {
                             MapNode configNode = this.fillFromFields(parentEntry.getValue(), childFieldMap.get(parentEntry.getKey()));

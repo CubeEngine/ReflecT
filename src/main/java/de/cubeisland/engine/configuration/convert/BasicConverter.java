@@ -24,6 +24,8 @@ package de.cubeisland.engine.configuration.convert;
 
 import de.cubeisland.engine.configuration.node.Node;
 
+import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
+
 public abstract class BasicConverter<T> implements Converter<T>
 {
     @Override
@@ -36,7 +38,7 @@ public abstract class BasicConverter<T> implements Converter<T>
             || CharSequence.class.isAssignableFrom(clazz)
             || Boolean.class.isAssignableFrom(clazz))
         {
-            return Convert.wrapIntoNode(object);
+            return wrapIntoNode(object);
         }
         throw new ConversionException("Illegal object type");
     }

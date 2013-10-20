@@ -22,12 +22,12 @@
  */
 package de.cubeisland.engine.configuration.node;
 
-import de.cubeisland.engine.configuration.convert.Convert;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
 public class ListNode extends ParentNode
 {
@@ -40,7 +40,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : list)
             {
-                Node node = Convert.wrapIntoNode(object);
+                Node node = wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }
@@ -53,7 +53,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : array)
             {
-                Node node = Convert.wrapIntoNode(object);
+                Node node = wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }

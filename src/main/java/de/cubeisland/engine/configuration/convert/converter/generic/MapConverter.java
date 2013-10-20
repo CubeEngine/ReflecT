@@ -23,7 +23,6 @@
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
 import de.cubeisland.engine.configuration.convert.ConversionException;
-import de.cubeisland.engine.configuration.convert.Convert;
 import de.cubeisland.engine.configuration.node.MapNode;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
@@ -33,6 +32,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 
 public class MapConverter
 {
@@ -52,14 +54,14 @@ public class MapConverter
         }
         for (Object key : map.keySet())
         {
-            Node keyNode = Convert.toNode(key);
+            Node keyNode = convertToNode(key);
             if (keyNode instanceof StringNode)
             {
-                result.setNode((StringNode)keyNode, Convert.toNode(map.get(key)));
+                result.setNode((StringNode)keyNode, convertToNode(map.get(key)));
             }
             else
             {
-                result.setNode(StringNode.of(keyNode.asText()),Convert.toNode(map.get(key)));
+                result.setNode(StringNode.of(keyNode.asText()), convertToNode(map.get(key)));
             }
         }
         return result;
@@ -89,8 +91,8 @@ public class MapConverter
                 for (Map.Entry<String, Node> entry : mapNode.getMappedNodes().entrySet())
                 {
                     StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey())); // preserve Casing in Key
-                    K newKey = Convert.fromNode(keyNode, keyType);
-                    V newVal = Convert.fromNode(entry.getValue(), valType);
+                    K newKey = convertFromNode(keyNode, keyType);
+                    V newVal = convertFromNode(entry.getValue(), valType);
                     result.put(newKey, newVal);
                 }
                 return result;

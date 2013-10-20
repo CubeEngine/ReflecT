@@ -25,7 +25,6 @@ package de.cubeisland.engine.configuration.codec;
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.StringUtils;
-import de.cubeisland.engine.configuration.convert.Convert;
 import de.cubeisland.engine.configuration.node.*;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.reader.ReaderException;
@@ -34,6 +33,8 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
 /**
  * A Codec for YAML-Configurations allowing child-configurations
@@ -90,7 +91,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             else
             {
-                values = (MapNode)Convert.wrapIntoNode(map);
+                values = (MapNode) wrapIntoNode(map);
             }
         }
         catch (ReaderException ex)

@@ -29,7 +29,6 @@ import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.MapComment;
 import de.cubeisland.engine.configuration.annotations.MapComments;
 import de.cubeisland.engine.configuration.annotations.Option;
-import de.cubeisland.engine.configuration.convert.Convert;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
@@ -46,6 +45,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
+import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
 import static de.cubeisland.engine.configuration.FieldType.*;
 
 /**
@@ -240,7 +241,7 @@ public abstract class ConfigurationCodec
                     case NORMAL_FIELD:
                         if (!(fieldNode instanceof NullNode))
                         {
-                            Object object = Convert.fromNode(fieldNode, type); // Convert the value
+                            Object object = convertFromNode(fieldNode, type); // Convert the value
                             if (object != null)
                             {
                                 field.set(config, object);//Set loaded Value into Field
@@ -310,7 +311,7 @@ public abstract class ConfigurationCodec
                             }
                             if (listElemNode instanceof MapNode)
                             {
-                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode)listElemNode));
+                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode) listElemNode));
                             }
                             else
                             {
@@ -340,9 +341,9 @@ public abstract class ConfigurationCodec
                         Map<Object, Configuration> configs = MapConverter.getMapFor((ParameterizedType) type);
                         for (Entry<String, Node> entry : loadFrom_Map.getMappedNodes().entrySet())
                         {
-                            Node keyNode = Convert.toNode(entry.getKey());
+                            Node keyNode = convertToNode(entry.getKey());
                             Node valueNode = loadFrom_Map.getNodeAt(entry.getKey(), PATH_SEPARATOR);
-                            Object key = Convert.fromNode(keyNode,((ParameterizedType)type).getActualTypeArguments()[0]);
+                            Object key = convertFromNode(keyNode, ((ParameterizedType) type).getActualTypeArguments()[0]);
                             Configuration value;
                             if (valueNode instanceof NullNode)
                             {
@@ -351,7 +352,7 @@ public abstract class ConfigurationCodec
                             }
                             else if (valueNode instanceof MapNode)
                             {
-                                errorNodes.addAll(this.dumpIntoFields(value = clazz.newInstance(), (MapNode)valueNode));
+                                errorNodes.addAll(this.dumpIntoFields(value = clazz.newInstance(), (MapNode) valueNode));
                             }
                             else
                             {
@@ -433,7 +434,7 @@ public abstract class ConfigurationCodec
             switch (fieldType)
             {
                 case NORMAL_FIELD:
-                    node = Convert.toNode(fieldValue);
+                    node = convertToNode(fieldValue);
                     break;
                 case CONFIG_FIELD:
                     node = this.fillFromFields((Configuration)fieldValue);
@@ -451,7 +452,7 @@ public abstract class ConfigurationCodec
                     Map<Object, Configuration> fieldMap = (Map<Object, Configuration>)fieldValue;
                     for (Map.Entry<Object, Configuration> entry : fieldMap.entrySet())
                     {
-                        Node keyNode = Convert.toNode(entry.getKey());
+                        Node keyNode = convertToNode(entry.getKey());
                         if (keyNode instanceof StringNode)
                         {
                             MapNode mapConfigNode = this.fillFromFields(entry.getValue());
