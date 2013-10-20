@@ -22,6 +22,8 @@
  */
 package de.cubeisland.engine.configuration.node;
 
+import de.cubeisland.engine.configuration.ConfigPath;
+
 /**
  * A config Node
  */
@@ -57,13 +59,13 @@ public abstract class Node<V>
      * @param pathSeparator the path-separator to use
      * @return the path or null if this de.cubeisland.engine.configuration.node is a root-de.cubeisland.engine.configuration.node
      */
-    public String getPath(String pathSeparator)
+    public ConfigPath getPath(String pathSeparator)
     {
         if (this.getParentNode() == null)
         {
             return null;
         }
-        return this.getParentNode().getPathOfSubNode(this, pathSeparator);
+        return this.getParentNode().getPathOfSubNode(this);
     }
 
     /**

@@ -49,8 +49,6 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
-    static final String PATH_SEPARATOR = ":";
-
     /**
      * Loads in the given configuration using the InputStream
      *
@@ -177,13 +175,13 @@ public abstract class ConfigurationCodec
         return !(field.isAnnotationPresent(Transient.class) && field.getAnnotation(Transient.class).value());
     }
 
-    protected String getPathFor(Field field)
+    protected ConfigPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {
-            return field.getAnnotation(Name.class).value().replace(".", PATH_SEPARATOR);
+            return ConfigPath.forName(field.getAnnotation(Name.class).value());
         }
-        return StringUtils.fieldNameToPath(field.getName());
+        return ConfigPath.forName(StringUtils.fieldNameToPath(field.getName()));
     }
 
     /**
@@ -200,7 +198,7 @@ public abstract class ConfigurationCodec
         {
             if (isConfigField(field))
             {
-                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field), PATH_SEPARATOR);
+                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
                     errorNodes.add((ErrorNode) fieldNode);
@@ -356,7 +354,7 @@ public abstract class ConfigurationCodec
             {
                 try
                 {
-                    baseNode.setNodeAt(this.getPathFor(field), PATH_SEPARATOR, this.convertField(field, section));
+                    baseNode.setNodeAt(this.getPathFor(field), this.convertField(field, section));
                 }
                 catch (Exception e)
                 {

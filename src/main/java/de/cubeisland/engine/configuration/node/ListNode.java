@@ -22,6 +22,8 @@
  */
 package de.cubeisland.engine.configuration.node;
 
+import de.cubeisland.engine.configuration.ConfigPath;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -197,32 +199,32 @@ public class ListNode extends ParentNode
     }
 
     @Override
-    protected String getPathOfSubNode(Node node, String path, String pathSeparator)
+    protected ConfigPath getPathOfSubNode(Node node, ConfigPath path)
     {
         int pos = this.listedNodes.indexOf(node);
         if (pos == -1)
         {
-            throw new IllegalArgumentException("Parented de.cubeisland.engine.configuration.node not in list!");
+            throw new IllegalArgumentException("Parented Node not in list!");
         }
-        if (path.isEmpty())
+        if (path == null)
         {
-            path = "[" + pos;
+            path = ConfigPath.forName("["+ pos);
         }
         else
         {
-            path = "[" + pos + pathSeparator + path;
+            path = new ConfigPath("[" + pos, path);
         }
         if (this.getParentNode() != null)
         {
-            return this.getParentNode().getPathOfSubNode(this, path, pathSeparator);
+            return this.getParentNode().getPathOfSubNode(this, path);
         }
         return path;
     }
 
     @Override
-    public String getPathOfSubNode(Node node, String pathSeparator)
+    public ConfigPath getPathOfSubNode(Node node)
     {
-        return this.getPathOfSubNode(node, "", pathSeparator);
+        return this.getPathOfSubNode(node, null);
     }
 
     @Override

@@ -22,6 +22,8 @@
  */
 package de.cubeisland.engine.configuration.node;
 
+import de.cubeisland.engine.configuration.ConfigPath;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -64,7 +66,7 @@ public class MapNode extends ParentNode<Map<String,Node>>
 
     /**
      * Returns an empty MapNode
-     * <p>This is equivalueent to {@link #MapNode(Map)} with null parameter
+     * <p>This is equivalent to {@link #MapNode(Map)} with null parameter
      *
      * @return an empty MapNode
      */
@@ -139,32 +141,32 @@ public class MapNode extends ParentNode<Map<String,Node>>
     }
 
     @Override
-    protected String getPathOfSubNode(Node node, String path, String pathSeparator)
+    protected ConfigPath getPathOfSubNode(Node node, ConfigPath path)
     {
         String key = this.reverseMappedNodes.get(node);
         if (key == null)
         {
-            throw new IllegalArgumentException("Parented de.cubeisland.engine.configuration.node not in map!");
+            throw new IllegalArgumentException("Parented Node not in map!");
         }
-        if (path.isEmpty())
+        if (path == null)
         {
-            path = key;
+            path = ConfigPath.forName(key);
         }
         else
         {
-            path = key + pathSeparator + path;
+            path = new ConfigPath(key, path);
         }
         if (this.getParentNode() != null)
         {
-            return this.getParentNode().getPathOfSubNode(this, path, pathSeparator);
+            return this.getParentNode().getPathOfSubNode(this, path);
         }
         return path;
     }
 
     @Override
-    public String getPathOfSubNode(Node node, String pathSeparator)
+    public ConfigPath getPathOfSubNode(Node node)
     {
-        return this.getPathOfSubNode(node, "", pathSeparator);
+        return this.getPathOfSubNode(node, null);
     }
 
     @Override

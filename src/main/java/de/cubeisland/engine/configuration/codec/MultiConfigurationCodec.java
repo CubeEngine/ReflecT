@@ -112,7 +112,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         {
             if (isConfigField(field))
             {
-                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field), PATH_SEPARATOR);
+                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
                     errorNodes.add((ErrorNode) fieldNode);
@@ -266,8 +266,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             }
             if (isConfigField(field))
             {
-                String path = this.getPathFor(field);
-                baseNode.setNodeAt(path, PATH_SEPARATOR, this.convertField(field, parentSection, section, config));
+                baseNode.setNodeAt(this.getPathFor(field), this.convertField(field, parentSection, section, config));
             }
         }
         baseNode.cleanUpEmptyNodes();
