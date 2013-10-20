@@ -30,8 +30,8 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 
 public class ArrayConverter
 {

@@ -25,13 +25,15 @@ package de.cubeisland.engine.configuration.codec;
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.FieldType;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.Section;
 import de.cubeisland.engine.configuration.annotations.Comment;
-import de.cubeisland.engine.configuration.annotations.MapComment;
-import de.cubeisland.engine.configuration.annotations.MapComments;
-import de.cubeisland.engine.configuration.annotations.Option;
+import de.cubeisland.engine.configuration.annotations.Name;
+import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
+import java.beans.Transient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -41,12 +43,11 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 import static de.cubeisland.engine.configuration.FieldType.*;
 
 /**
@@ -54,7 +55,7 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
-    protected static final String PATH_SEPARATOR = ":";
+    static final String PATH_SEPARATOR = ":";
 
     /**
      * Loads in the given configuration using the InputStream
@@ -64,7 +65,7 @@ public abstract class ConfigurationCodec
      */
     public Collection<ErrorNode> load(Configuration config, InputStream is)
     {
-        return this.dumpIntoFields(config, this.loadFromInputStream(is));
+        return this.dumpIntoSection(config, this.loadFromInputStream(is));
     }
 
     /**
@@ -81,7 +82,7 @@ public abstract class ConfigurationCodec
             {
                 throw new IllegalStateException("Tried to save config without File.");
             }
-            this.saveIntoFile(config, this.fillFromFields(config), file);
+            this.saveIntoFile(config, this.convertSection(config), file);
         }
         catch (Exception ex)
         {
@@ -129,35 +130,6 @@ public abstract class ConfigurationCodec
     }
 
     /**
-     * Adds declared map-comments of the configuration
-     *
-     * @param baseNode the baseNode containing all nodes
-     * @param configClass the class of the configuration
-     */
-    protected void addMapComments(MapNode baseNode, Class<? extends Configuration> configClass)
-    {
-        if (configClass.isAnnotationPresent(MapComments.class))
-        {
-            MapComment[] mapComments = configClass.getAnnotation(MapComments.class).value();
-            for (MapComment comment : mapComments)
-            {
-                Node nodeAt = baseNode.getNodeAt(comment.path(), "."); // TODO option to not create the Node
-                if (nodeAt != null) // if null ignore comment
-                {
-                    if (nodeAt instanceof NullNode || nodeAt instanceof ErrorNode)
-                    {
-                        nodeAt.getParentNode().removeNode(nodeAt);
-                    }
-                    else
-                    {
-                        nodeAt.setComment(comment.text());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Detects the Type of a field
      *
      * @param field the field
@@ -165,10 +137,10 @@ public abstract class ConfigurationCodec
      */
     protected static FieldType getFieldType(Field field)
     {
-        FieldType fieldType = NORMAL_FIELD;
-        if (Configuration.class.isAssignableFrom(field.getType()))
+        FieldType fieldType = NORMAL;
+        if (Section.class.isAssignableFrom(field.getType()))
         {
-            return CONFIG_FIELD;
+            return SECTION;
         }
         Type type = field.getGenericType();
         if (type instanceof ParameterizedType)
@@ -177,18 +149,18 @@ public abstract class ConfigurationCodec
             if (Collection.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType1 = pType.getActualTypeArguments()[0];
-                if (subType1 instanceof Class && Configuration.class.isAssignableFrom((Class)subType1))
+                if (subType1 instanceof Class && Section.class.isAssignableFrom((Class)subType1))
                 {
-                    return COLLECTION_CONFIG_FIELD;
+                    return SECTION_COLLECTION;
                 }
             }
 
             if (Map.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType2 = pType.getActualTypeArguments()[1];
-                if (subType2 instanceof Class && Configuration.class.isAssignableFrom((Class)subType2))
+                if (subType2 instanceof Class && Section.class.isAssignableFrom((Class)subType2))
                 {
-                    return MAP_CONFIG_FIELD;
+                    return SECTION_MAP;
                 }
             }
         }
@@ -208,272 +180,234 @@ public abstract class ConfigurationCodec
         {
             return false;
         }
-        return field.isAnnotationPresent(Option.class);
+        // else disallow when Transient
+        return !(field.isAnnotationPresent(Transient.class) && field.getAnnotation(Transient.class).value());
+    }
+
+    protected String getPathFor(Field field)
+    {
+        if (field.isAnnotationPresent(Name.class))
+        {
+            return field.getAnnotation(Name.class).value().replace(".", PATH_SEPARATOR);
+        }
+        return field.getName(); // TODO replace CamelCasing with -
     }
 
     /**
-     * Dumps the contents of the MapNode into the fields odf the configuration
+     * Dumps the contents of the MapNode into the fields of the section
      *
-     * @param config the configuration
-     * @param currentNode the current MapNode
+     * @param section the configuration-section
+     * @param currentNode the Node to load from
+     * @return a collection of all erroneous Nodes
      */
-    @SuppressWarnings("unchecked cast")
-    protected Collection<ErrorNode> dumpIntoFields(Configuration config, MapNode currentNode)
+    protected Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
     {
         Collection<ErrorNode> errorNodes = new HashSet<>();
-        for (Field field : config.getClass().getFields()) // ONLY public fields are allowed
+        for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
-            try
+            if (isConfigField(field))
             {
-                if (isConfigField(field))
+                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field), PATH_SEPARATOR);
+                if (fieldNode instanceof ErrorNode)
                 {
-                    String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
-                    Node fieldNode = currentNode.getNodeAt(path, PATH_SEPARATOR);
-                    if (fieldNode instanceof ErrorNode)
+                    errorNodes.add((ErrorNode) fieldNode);
+                }
+                else if (!(fieldNode instanceof NullNode)) // Empty Node => default value
+                {
+                    try
                     {
-                        errorNodes.add((ErrorNode) fieldNode);
-                        continue;
+                        errorNodes.addAll(this.dumpIntoField(section, field, fieldNode));
                     }
-                    Type type = field.getGenericType();
-                    FieldType fieldType = getFieldType(field);
-                    switch (fieldType)
+                    catch (Exception e)
                     {
-                    case NORMAL_FIELD:
-                        if (!(fieldNode instanceof NullNode))
-                        {
-                            Object object = convertFromNode(fieldNode, type); // Convert the value
-                            if (object != null)
-                            {
-                                field.set(config, object);//Set loaded Value into Field
-                            }
-                        }
-                        continue;
-                    case CONFIG_FIELD:
-                        MapNode singleConfigNode;
-                        Configuration singleSubConfig = (Configuration)field.get(config); // Get Config from field
-                        if (singleSubConfig == null)
-                        {
-                            singleSubConfig = (Configuration)field.getType().newInstance(); // create new if null
-                            field.set(config, singleSubConfig); // Set new instance
-                        }
-                        if (fieldNode instanceof MapNode)
-                        {
-                            singleConfigNode = (MapNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            singleConfigNode = MapNode.emptyMap(); // Create Empty Map
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, singleConfigNode); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for Configuration at " + path +
-                                                                        "\nConfig:" + config.getClass() +
-                                                                        "\nSubConfig:" + singleSubConfig.getClass());
-                        }
-                        errorNodes.addAll(this.dumpIntoFields(singleSubConfig, singleConfigNode));
-                        continue;
-                    case COLLECTION_CONFIG_FIELD:
-                        ListNode loadFrom_List;
-                        if (fieldNode instanceof ListNode)
-                        {
-                            loadFrom_List = (ListNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            loadFrom_List = ListNode.emptyList(); // Create Empty List
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, loadFrom_List); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for List-Configurations at " + path +
-                                                                        "\nConfig:" + config.getClass());
-                        }
-                        Collection<Configuration> subConfigs = (Collection<Configuration>)field.get(config);;
-                        // Now iterate through the subConfigs
-                        Iterator<Node> loadFrom_Iterator = loadFrom_List.getListedNodes().iterator();
-                        for (Configuration subConfig : subConfigs)
-                        {
-                            Node listElemNode;
-                            if (loadFrom_Iterator.hasNext())
-                            {
-                                listElemNode = loadFrom_Iterator.next();
-                                if (listElemNode instanceof NullNode)
-                                {
-                                    listElemNode = MapNode.emptyMap();
-                                    loadFrom_List.addNode(listElemNode);
-                                }
-                            }
-                            else
-                            {
-                                listElemNode = MapNode.emptyMap();
-                                loadFrom_List.addNode(listElemNode);
-                            }
-                            if (listElemNode instanceof MapNode)
-                            {
-                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode) listElemNode));
-                            }
-                            else
-                            {
-                                throw new InvalidConfigurationException("Invalid Node for List-Configurations at " + path +
-                                                                            "\nConfig:" + config.getClass() +
-                                                                            "\nSubConfig:" + subConfig.getClass());
-                            }
-                        }
-                        continue;
-                    case MAP_CONFIG_FIELD:
-                        MapNode loadFrom_Map;
-                        if (fieldNode instanceof MapNode)
-                        {
-                            loadFrom_Map = (MapNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            loadFrom_Map = MapNode.emptyMap(); // Create Empty List
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, loadFrom_Map); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for Map-Configurations at " + path +
-                                                                        "\nConfig:" + config.getClass());
-                        }
-                        Class<? extends Configuration> clazz = (Class<? extends Configuration>)((ParameterizedType)type).getActualTypeArguments()[1];
-                        Map<Object, Configuration> configs = MapConverter.getMapFor((ParameterizedType) type);
-                        for (Entry<String, Node> entry : loadFrom_Map.getMappedNodes().entrySet())
-                        {
-                            Node keyNode = convertToNode(entry.getKey());
-                            Node valueNode = loadFrom_Map.getNodeAt(entry.getKey(), PATH_SEPARATOR);
-                            Object key = convertFromNode(keyNode, ((ParameterizedType) type).getActualTypeArguments()[0]);
-                            Configuration value;
-                            if (valueNode instanceof NullNode)
-                            {
-                                value = clazz.newInstance();
-
-                            }
-                            else if (valueNode instanceof MapNode)
-                            {
-                                errorNodes.addAll(this.dumpIntoFields(value = clazz.newInstance(), (MapNode) valueNode));
-                            }
-                            else
-                            {
-                                throw new InvalidConfigurationException("Invalid Value-Node for Map of de.cubeisland.engine.configuration.Configuration at " + path +
-                                                                            "\nConfig:" + config.getClass() +
-                                                                            "\nSubConfig:" + clazz);
-                            }
-                            configs.put(key,value);
-                            field.set(config,configs);
-                        }
+                        throw InvalidConfigurationException.of("Error while dumping loaded section into fields!" , this.getPathFor(field), section.getClass(), field, e);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                throw new InvalidConfigurationException(
-                    "Error while dumping loaded config into fields!" +
-                        "\ncurrent Configuration: " + config.getClass().toString() +
-                        "\ncurrent Field:" + field.getName() +
-                        "\ncurrent Node: " + currentNode.toString() , e);
             }
         }
         return errorNodes;
     }
 
-
-
     /**
-     * Fills a MapNode with values from the fields to later save
+     * Dumps the contents of the Node into a field of the section
      *
-     * @param config the configuration
+     * @param section the configuration section
+     * @param field the Field to load into
+     * @param fieldNode the Node to load from
+     * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked cast")
-    public <C extends Configuration> MapNode fillFromFields(C config)
+    protected Collection<ErrorNode> dumpIntoField(Section section, Field field, Node fieldNode) throws IllegalAccessException, ConversionException, InstantiationException
+    {
+        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Type type = field.getGenericType();
+        FieldType fieldType = getFieldType(field);
+        Object fieldValue = null;
+        Class<? extends Section> subSectionClass;
+        switch (fieldType)
+        {
+            case NORMAL:
+                fieldValue = convertFromNode(fieldNode, type); // Convert the value
+                break;
+            case SECTION:
+                if (fieldNode instanceof MapNode)
+                {
+                    fieldValue = field.getType().newInstance();
+                    errorNodes.addAll(this.dumpIntoSection((Section) fieldValue, (MapNode)fieldNode));
+                }
+                else
+                {
+                    throw new InvalidConfigurationException("Node for Section is not a MapNode!\n" + fieldNode);
+                }
+                break;
+            case SECTION_COLLECTION:
+                if (fieldNode instanceof ListNode)
+                {
+                    fieldValue = CollectionConverter.getCollectionFor((ParameterizedType) type);
+                    if (((ListNode)fieldNode).isEmpty())
+                    {
+                        break;
+                    }
+                    subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[0];
+                    for (Node listedNode : ((ListNode)fieldNode).getListedNodes())
+                    {
+                        if (listedNode instanceof NullNode)
+                        {
+                            listedNode = MapNode.emptyMap();
+                        }
+                        if (listedNode instanceof MapNode)
+                        {
+                            Section subSection = subSectionClass.newInstance();
+                            errorNodes.addAll(this.dumpIntoSection(subSection, (MapNode) listedNode));
+                            ((Collection<Section>)fieldValue).add(subSection);
+                        }
+                        else
+                        {
+                            throw new InvalidConfigurationException("Node for listed Section is not a MapNode!\n" + listedNode);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new InvalidConfigurationException("Node for listed Sections is not a ListNode!\n" + fieldNode);
+                }
+                break;
+            case SECTION_MAP:
+                if (fieldNode instanceof MapNode)
+                {
+                    fieldValue = MapConverter.getMapFor((ParameterizedType) type);
+                    if (((MapNode) fieldNode).isEmpty())
+                    {
+                        break;
+                    }
+                    subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
+                    for (Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
+                    {
+                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Section value = subSectionClass.newInstance();
+                        if (entry.getValue() instanceof NullNode)
+                        {
+                            errorNodes.addAll(this.dumpIntoSection(value, MapNode.emptyMap()));
+                        }
+                        else if (entry.getValue() instanceof MapNode)
+                        {
+                            errorNodes.addAll(this.dumpIntoSection(value, (MapNode) entry.getValue()));
+                        }
+                        else
+                        {
+                            throw new InvalidConfigurationException("Value-Node for mapped Section is not a MapNode!\n" + entry.getValue());
+                        }
+                        ((Map<Object, Section>)fieldValue).put(key, value);
+                    }
+                }
+                else
+                {
+                    throw new InvalidConfigurationException("Node for mapped Sections is not a MapNode!\n" + fieldNode);
+                }
+        }
+        if (fieldValue == null)
+        {
+            throw new IllegalStateException();
+        }
+        field.set(section, fieldValue); //Set loaded Value into Field
+        return errorNodes;
+    }
+
+    /**
+     * Converts an entire Section into a MapNode
+     *
+     * @param section the section to convert
+     */
+    protected MapNode convertSection(Section section)
     {
         MapNode baseNode = MapNode.emptyMap();
-        Class<C> configClass = (Class<C>) config.getClass();
-
-        boolean advanced = true;
-        try
-        // to get a boolean advanced field (if not found ignore)
-        {
-            Field field = configClass.getField("advanced");
-            advanced = field.getBoolean(config);
-        }
-        catch (Exception ignored)
-        {}
+        Class<? extends Section> configClass = section.getClass();
         for (Field field : configClass.getFields())
         {
             if (isConfigField(field))
             {
-                if (!advanced && field.getAnnotation(Option.class).advanced())
+                try
                 {
-                    continue;
+                    baseNode.setNodeAt(this.getPathFor(field), PATH_SEPARATOR, this.convertField(field, section));
                 }
-                this.fillFromField(field, config, baseNode);
+                catch (Exception e)
+                {
+                    throw InvalidConfigurationException.of(
+                            "Error while converting Section into a MapNode!",
+                            this.getPathFor(field), section.getClass(), field, e);
+                }
             }
         }
-        this.addMapComments(baseNode, config.getClass());
         return baseNode;
     }
 
     /**
-     * Fills the values of the given field into the MapNode
+     * Converts a single field of a section into a node
      *
      * @param field the field to get the values from
-     * @param config the configuration containing the values
-     * @param baseNode the MapNode to insert the values into
+     * @param section the section containing the fields value
      */
     @SuppressWarnings("unchecked cast")
-    protected void fillFromField(Field field, Configuration config, MapNode baseNode)
+    protected Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException
     {
-        String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
-        try
+        Object fieldValue = field.get(section);
+        FieldType fieldType = getFieldType(field);
+        Node node = null;
+        switch (fieldType)
         {
-            Object fieldValue = field.get(config);
-            FieldType fieldType = getFieldType(field);
-            Node node = null;
-            switch (fieldType)
-            {
-                case NORMAL_FIELD:
-                    node = convertToNode(fieldValue);
-                    break;
-                case CONFIG_FIELD:
-                    node = this.fillFromFields((Configuration)fieldValue);
-                    break;
-                case COLLECTION_CONFIG_FIELD:
-                    node = ListNode.emptyList();
-                    for (Configuration subConfig : (Collection<Configuration>)fieldValue)
+            case NORMAL:
+                node = convertToNode(fieldValue);
+                break;
+            case SECTION:
+                node = this.convertSection((Section) fieldValue);
+                break;
+            case SECTION_COLLECTION:
+                node = ListNode.emptyList();
+                for (Section subSection : (Collection<Section>)fieldValue)
+                {
+                    MapNode listElemNode = this.convertSection(subSection);
+                    ((ListNode)node).addNode(listElemNode);
+                }
+                break;
+            case SECTION_MAP:
+                node = MapNode.emptyMap();
+                Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
+                for (Map.Entry<Object, Section> entry : fieldMap.entrySet())
+                {
+                    Node keyNode = convertToNode(entry.getKey());
+                    if (keyNode instanceof StringNode)
                     {
-                        MapNode collectionConfigNode = this.fillFromFields(subConfig);
-                        ((ListNode)node).addNode(collectionConfigNode);
+                        MapNode valueNode = this.convertSection(entry.getValue());
+                        ((MapNode)node).setNode((StringNode)keyNode, valueNode);
                     }
-                    break;
-                case MAP_CONFIG_FIELD:
-                    node = MapNode.emptyMap();
-                    Map<Object, Configuration> fieldMap = (Map<Object, Configuration>)fieldValue;
-                    for (Map.Entry<Object, Configuration> entry : fieldMap.entrySet())
+                    else
                     {
-                        Node keyNode = convertToNode(entry.getKey());
-                        if (keyNode instanceof StringNode)
-                        {
-                            MapNode mapConfigNode = this.fillFromFields(entry.getValue());
-                            ((MapNode)node).setNode((StringNode)keyNode, mapConfigNode);
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Key-Node for Map of Configuration at " + path
-                                            + "\nConfiguration:" + config.getClass());
-                        }
+                        throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", this.getPathFor(field), section.getClass(), field, null);
                     }
-            }
-            this.addComment(node, field);
-            baseNode.setNodeAt(path, PATH_SEPARATOR, node);
+                }
         }
-        catch (Exception e)
-        {
-            throw InvalidConfigurationException.of(
-                    "Error while dumping loaded config into fields!",
-                    config.getPath(), path, config.getClass(), field, e);
-        }
+        this.addComment(node, field);
+        return node;
     }
 
 }

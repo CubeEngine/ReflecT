@@ -154,7 +154,7 @@ public class YamlCodec extends MultiConfigurationCodec
      *
      * @param values the values at given path
      * @param offset the current offset
-     * @param inCollection
+     * @param inCollection true if directly under a collection
      */
     private static void convertMapNode(OutputStreamWriter writer, MapNode values, int offset, boolean inCollection) throws IOException
     {

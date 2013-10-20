@@ -39,10 +39,10 @@ public class StringUtils {
         }
         else
         {
-            StringBuilder sb = new StringBuilder();
-            for (String s : strings)
+            StringBuilder sb = new StringBuilder(strings[0]);
+            for (int i = 1; i < strings.length; i++)
             {
-                sb.append(s);
+                sb.append(delimiter).append(strings[i]);
             }
             return sb.toString();
         }

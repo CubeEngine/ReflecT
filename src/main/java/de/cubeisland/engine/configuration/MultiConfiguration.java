@@ -23,14 +23,12 @@
 package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.MultiConfigurationCodec;
-import de.cubeisland.engine.configuration.node.ErrorNode;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 
 /**
@@ -47,16 +45,16 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      */
     public final void saveChild()
     {
-        if (this.codec == null)
+        if (this.getCodec() == null)
         {
             throw new IllegalStateException("A configuration cannot be saved without a valid de.cubeisland.engine.configuration.codec!");
         }
-        if (this.file == null)
+        if (this.getPath() == null)
         {
             throw new IllegalStateException("A configuration cannot be saved without a valid file!");
         }
-        this.codec.saveChildConfig(this.parent, this, this.file);
-        this.onSaved(this.file);
+        this.getCodec().saveChildConfig(this.parent, this, this.getPath());
+        this.onSaved(this.getPath());
     }
 
     /**
@@ -67,7 +65,7 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      * @return the loaded child-configuration
      */
     @SuppressWarnings("unchecked")
-    public <T extends Configuration> T loadChild(Path sourcePath) //and save
+    public <T extends Configuration> T loadChild(Path sourcePath)
     {
         MultiConfiguration<ConfigCodec> childConfig;
         try
@@ -76,24 +74,15 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
             childConfig.inheritedFields = new HashSet<>();
             childConfig.setPath(sourcePath);
             childConfig.parent = this;
-            Collection<ErrorNode> errors;
             try (InputStream is = new FileInputStream(sourcePath.toFile()))
             {
-                errors = childConfig.getCodec().loadChildConfig(childConfig, is);
+                this.showLoadErrors(childConfig.getCodec().loadChildConfig(childConfig, is));
             }
             catch (IOException ignored) // not found load from parent / save child
             {
-                errors = childConfig.getCodec().loadChildConfig(childConfig, null);
+                this.showLoadErrors(childConfig.getCodec().loadChildConfig(childConfig, null));
             }
-            if (!errors.isEmpty())
-            {
-                LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
-                for (ErrorNode error : errors)
-                {
-                    LOGGER.warning(error.getErrorMessage());
-                }
-            }
-            childConfig.onLoaded(file);
+            childConfig.onLoaded(this.getPath());
             childConfig.saveChild();
             return (T)childConfig;
         }

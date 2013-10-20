@@ -22,31 +22,20 @@
  */
 package de.cubeisland.engine.configuration.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * This annotation is used to attach Comments to values inside maps.
+ * This annotation is used declare a field to be loaded by the configuration.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
-public @interface MapComment
+public @interface Name
 {
     /**
-     * Needed to add a Comment at given path
+     * The path to save this Field in a config
      *
      * @return the path
      */
-    public String path();
-
-    /**
-     * Needed to add a Comment at given path
-     *
-     * @return the comment
-     */
-    public String text();
+    public String value();
 }

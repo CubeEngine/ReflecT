@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 /**
  * This abstract class represents a configuration.
  */
-public abstract class Configuration<Codec extends ConfigurationCodec>
+public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
 {
     protected static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
 
@@ -59,8 +59,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
         LOGGER = logger;
     }
 
-    public final Codec codec;
-    protected Path file;
+    private final Codec codec;
+    private Path path;
 
     public Configuration()
     {
@@ -146,12 +146,12 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
      */
     public boolean reload(boolean save) throws InvalidConfigurationException
     {
-        if (this.file == null)
+        if (this.path == null)
         {
             throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
         }
         boolean result = false;
-        try (InputStream is = new FileInputStream(this.file.toFile()))
+        try (InputStream is = new FileInputStream(this.path.toFile()))
         {
             this.loadFrom(is);
         }
@@ -185,7 +185,12 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
     public void loadFrom(InputStream is)
     {
         assert is != null : "You hae to provide a InputStream to load from";
-        Collection<ErrorNode> errors = this.codec.load(this, is);//load config in maps -> updates -> sets fields
+        this.showLoadErrors(this.codec.load(this, is));//load config in maps -> updates -> sets fields
+        this.onLoaded(path);
+    }
+
+    protected void showLoadErrors(Collection<ErrorNode> errors)
+    {
         if (!errors.isEmpty())
         {
             LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
@@ -194,7 +199,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
                 LOGGER.warning(error.getErrorMessage());
             }
         }
-        this.onLoaded(file);
     }
 
     /**
@@ -202,7 +206,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
      */
     public final void save()
     {
-        this.save(this.file);
+        this.save(this.path);
     }
 
     /**
@@ -223,7 +227,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
     public final void setPath(Path path)
     {
         assert path != null: "The file must not be null!";
-        this.file = path;
+        this.path = path;
     }
 
     /**
@@ -233,7 +237,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
      */
     public final Path getPath()
     {
-        return this.file;
+        return this.path;
     }
 
     /**
@@ -326,7 +330,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
     public static <T extends Configuration> T load(Class<T> clazz, File file, boolean save)
     {
         T config = create(clazz); // loading
-        config.file = file.toPath(); // IMPORTANT TO SET BEFORE LOADING!
+        config.setPath(file.toPath()); // IMPORTANT TO SET BEFORE LOADING!
         config.reload(save);
         return config;
     }
@@ -532,6 +536,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
      * @param object the Object
      * @return the serialized Node
      */
+    @SuppressWarnings("unchecked cast")
     public static <T> Node convertToNode(T object) throws ConversionException
     {
         if (object == null)
@@ -561,6 +566,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec>
      * @param type the type of the object
      * @return
      */
+    @SuppressWarnings("unchecked cast")
     public static <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)

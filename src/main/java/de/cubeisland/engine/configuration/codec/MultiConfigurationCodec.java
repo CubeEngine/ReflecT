@@ -22,12 +22,11 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.FieldType;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.MultiConfiguration;
-import de.cubeisland.engine.configuration.annotations.Option;
-import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
+import de.cubeisland.engine.configuration.Section;
+import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
@@ -38,10 +37,10 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 
-import static de.cubeisland.engine.configuration.Configuration.*;
+import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 
 /**
  * This abstract Codec can be implemented to read and write configurations that allow child-configs
@@ -63,255 +62,205 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             {
                 throw new IllegalStateException("Tried to save config without File.");
             }
-            this.saveIntoFile(config, this.fillFromFields(parentConfig, config), file);
+            this.saveIntoFile(config, this.convertSection(parentConfig, config, config), file);
         }
         catch (Exception ex)
         {
-            throw new InvalidConfigurationException("Error while saving de.cubeisland.engine.configuration.Configuration!", ex);
+            throw new InvalidConfigurationException("Error while saving Configuration!", ex);
         }
     }
 
     /**
-     * Loads in the given configuration using the InputStream
+     *
      *
      * @param config the config to load
      * @param is the InputStream to load from
      */
-    public Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is) throws InstantiationException, IllegalAccessException
+
+    /**
+     * Loads in the given configuration using the InputStream
+     *
+     * @param config the MultiConfiguration to load
+     * @param is the InputStream to load from
+     * @return a collection of all erroneous Nodes
+     */
+    public Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is)
     {
-        return this.dumpIntoFields(config, this.loadFromInputStream(is), config.getParent());
+        return this.dumpIntoSection(config.getParent(), config, this.loadFromInputStream(is), config);
     }
 
     /**
-     * Dumps the values from given Node into the fields of the Configuration
+     * Dumps the contents of the MapNode into the fields of the section using the parentSection as backup if a node is not given
      *
-     * @param config the config
+     * @param parentSection the parent configuration-section
+     * @param section the configuration-section
      * @param currentNode the Node to load from
-     * @param parentConfig the optional parentConfig
+     * @param config the MultiConfiguration containing this section
+     * @return a collection of all erroneous Nodes
      */
-    @SuppressWarnings("unchecked cast")
-    protected Collection<ErrorNode> dumpIntoFields(MultiConfiguration config, MapNode currentNode, MultiConfiguration parentConfig)
+
+    protected Collection<ErrorNode> dumpIntoSection(Section parentSection, Section section, MapNode currentNode, MultiConfiguration config)
     {
-        if (parentConfig == null)
+        if (parentSection == null) // Not a child Config! Use default behaviour
         {
-            return this.dumpIntoFields(config,currentNode);
+            return this.dumpIntoSection(section, currentNode);
+        }
+        if (!parentSection.getClass().equals(section.getClass()))
+        {
+            throw new IllegalStateException("Parent and child-section have to be the same type of section!");
         }
         Collection<ErrorNode> errorNodes = new HashSet<>();
-        for (Field field : config.getClass().getFields()) // ONLY public fields are allowed
+        for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
-            try
+            if (isConfigField(field))
             {
-                if (isConfigField(field))
+                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field), PATH_SEPARATOR);
+                if (fieldNode instanceof ErrorNode)
                 {
-                    String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
-                    Node fieldNode = currentNode.getNodeAt(path, PATH_SEPARATOR);
-                    if (fieldNode instanceof ErrorNode)
+                    errorNodes.add((ErrorNode) fieldNode);
+                }
+                else
+                {
+                    try
                     {
-                        errorNodes.add((ErrorNode) fieldNode);
-                        continue;
-                    }
-                    Type type = field.getGenericType();
-                    FieldType fieldType = getFieldType(field);
-                    switch (fieldType)
-                    {
-                    case NORMAL_FIELD:
                         if (fieldNode instanceof NullNode)
                         {
-                            field.set(config, field.get(parentConfig));
+                            errorNodes.addAll(this.dumpParentIntoField(parentSection, section, field));
                             config.addinheritedField(field);
                         }
                         else
                         {
-                            Object object = convertFromNode(fieldNode, type); // Convert the value
-                            if (object != null)
-                            {
-                                field.set(config, object);//Set loaded Value into Field
-                            }
-                            else // If not loaded but is child-config get from parent-config
-                            {
-                                field.set(config, field.get(parentConfig));
-                                config.addinheritedField(field);
-                            }
+                            errorNodes.addAll(this.dumpIntoField(parentSection, section, field, fieldNode, config));
                         }
-                        continue;
-                    case CONFIG_FIELD:
-                        MapNode loadFrom_singleConfig;
-                        MultiConfiguration singleSubConfig = (MultiConfiguration)field.get(config); // Get Config from field
-                        if (singleSubConfig == null)
-                        {
-                            singleSubConfig = (MultiConfiguration)field.getType().newInstance(); // create new if null
-                            field.set(config, singleSubConfig); // Set new instance
-                        }
-                        if (fieldNode instanceof MapNode)
-                        {
-                            loadFrom_singleConfig = (MapNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            loadFrom_singleConfig = MapNode.emptyMap(); // Create Empty Map
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, loadFrom_singleConfig); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for Configuration at " + path +
-                                                                        "\nConfig:" + config.getClass() +
-                                                                        "\nSubConfig:" + singleSubConfig.getClass());
-                        }
-                        errorNodes.addAll(this.dumpIntoFields(singleSubConfig, loadFrom_singleConfig,(MultiConfiguration)field.get(parentConfig)));
-                        continue;
-                    case COLLECTION_CONFIG_FIELD:
-                        ListNode loadFrom_List;
-                        if (fieldNode instanceof ListNode)
-                        {
-                            loadFrom_List = (ListNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            loadFrom_List = ListNode.emptyList(); // Create Empty List
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, loadFrom_List); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for List-Configurations at " + path +
-                                                                        "\nConfiguration:" + config.getClass());
-                        }
-                        Collection<MultiConfiguration> parentSubConfigs = (Collection<MultiConfiguration>)field.get(parentConfig);
-                        Collection<MultiConfiguration> subConfigs = CollectionConverter
-                            .getCollectionFor((ParameterizedType)type);
-                        for (MultiConfiguration configuration : parentSubConfigs)
-                        {
-                            subConfigs.add(configuration.getClass().newInstance());
-                        }
-                        field.set(config, subConfigs);
-                        Iterator<MultiConfiguration> parentConfig_Iterator = parentSubConfigs.iterator();
-                        // Now iterate through the subConfigs
-                        Iterator<Node> loadFrom_Iterator = loadFrom_List.getListedNodes().iterator();
-                        for (MultiConfiguration subConfig : subConfigs)
-                        {
-                            Node loadFrom_listElem;
-                            if (loadFrom_Iterator.hasNext())
-                            {
-                                loadFrom_listElem = loadFrom_Iterator.next();
-                                if (loadFrom_listElem instanceof NullNode)
-                                {
-                                    loadFrom_listElem = MapNode.emptyMap();
-                                    loadFrom_List.addNode(loadFrom_listElem);
-                                }
-                            }
-                            else
-                            {
-                                loadFrom_listElem = MapNode.emptyMap();
-                                loadFrom_List.addNode(loadFrom_listElem);
-                            }
-                            if (loadFrom_listElem instanceof MapNode)
-                            {
-                                errorNodes.addAll(this.dumpIntoFields(subConfig, (MapNode)loadFrom_listElem, parentConfig_Iterator.next()));
-                            }
-                            else
-                            {
-                                throw new InvalidConfigurationException("Invalid Node for List-Configurations at " + path +
-                                                                            "\nConfiguration:" + config.getClass() +
-                                                                            "\nSubConfiguration:" + subConfig.getClass());
-                            }
-                        }
-                        continue;
-                    case MAP_CONFIG_FIELD:
-                        MapNode loadFrom_Map;
-                        if (fieldNode instanceof MapNode)
-                        {
-                            loadFrom_Map = (MapNode)fieldNode;
-                        }
-                        else if (fieldNode instanceof NullNode) // Empty Node
-                        {
-                            loadFrom_Map = MapNode.emptyMap(); // Create Empty List
-                            currentNode.setNodeAt(path, PATH_SEPARATOR, loadFrom_Map); // and attach
-                        }
-                        else
-                        {
-                            throw new InvalidConfigurationException("Invalid Node for Map-Configurations at " + path +
-                                                                        "\nConfiguration:" + config.getClass());
-                        }
-                        Map<Object, MultiConfiguration> mapConfigs = MapConverter.getMapFor((ParameterizedType)type);
-                        Map<Object, MultiConfiguration> parentMapConfigs = (Map<Object, MultiConfiguration>)field.get(parentConfig);
-                        for (Map.Entry<Object, MultiConfiguration> entry : parentMapConfigs.entrySet())
-                        {
-                            mapConfigs.put(entry.getKey(), entry.getValue().getClass().newInstance());
-                        }
-                        field.set(config, mapConfigs);
-                        for (Map.Entry<Object, MultiConfiguration> entry : mapConfigs.entrySet())
-                        {
-                            Node keyNode = convertToNode(entry.getKey());
-                            if (keyNode instanceof StringNode)
-                            {
-                                Node valueNode = loadFrom_Map.getNodeAt(((StringNode)keyNode).getValue(), PATH_SEPARATOR);
-                                if (valueNode instanceof NullNode)
-                                {
-                                    valueNode = MapNode.emptyMap();
-                                    loadFrom_Map.setNode((StringNode)keyNode, valueNode);
-                                }
-                                if (valueNode instanceof MapNode)
-                                {
-                                    errorNodes.addAll(this.dumpIntoFields(entry.getValue(), (MapNode)valueNode, parentMapConfigs.get(entry.getKey())));
-                                }
-                                else
-                                {
-                                    throw new InvalidConfigurationException("Invalid Value-Node for Map of Configuration at " + path +
-                                                                                "\nConfiguration:" + config.getClass() +
-                                                                                "\nSubConfiguration:" + entry.getValue().getClass());
-                                }
-                            }
-                            else
-                            {
-                                throw new InvalidConfigurationException("Invalid Key-Node for Map of at " + path +
-                                                                            "\nConfiguration:" + config.getClass() +
-                                                                            "\nSubConfiguration:" + entry.getValue().getClass());
-                            }
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", this.getPathFor(field), section.getClass(), field, e);
                     }
                 }
             }
-            catch (Exception e)
-            {
-                throw new InvalidConfigurationException(
-                    "Error while dumping loaded config into fields!" +
-                        "\ncurrent Configuration: " + config.getClass().toString() +
-                        "\ncurrent Field:" + field.getName(), e);
-            }
+
         }
+        return errorNodes;
+    }
+
+    /**
+     * Copy the contents of the parent section into a field of the section
+     *
+     * @param parentSection the parent configuration-section
+     * @param section the configuration-section
+     * @param field the Field to load into
+     *
+     * @return a collection of all erroneous Nodes
+     */
+    protected Collection<ErrorNode> dumpParentIntoField(Section parentSection, Section section, Field field) throws ConversionException, IllegalAccessException, InstantiationException
+    {
+        if (getFieldType(field) == FieldType.SECTION_COLLECTION)
+        {
+            throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+        }
+        return this.dumpIntoField(section, field, this.convertField(field, parentSection)); // convert parent in node and dump back in
+    }
+
+    /**
+     * Dumps the contents of the Node into a field of the section
+     *
+     * @param parentSection the parent configuration-section
+     * @param section the configuration-section
+     * @param field the Field to load into
+     * @param fieldNode the Node to load from
+     * @param config the MultiConfiguration containing this section
+     *
+     * @return a collection of all erroneous Nodes
+     */
+    @SuppressWarnings("unchecked cast")
+    protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws IllegalAccessException, ConversionException, InstantiationException
+    {
+        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Type type = field.getGenericType();
+        FieldType fieldType = getFieldType(field);
+        Object fieldValue = null;
+        Class<? extends Section> subSectionClass;
+        switch (fieldType)
+        {
+            case NORMAL:
+                fieldValue = convertFromNode(fieldNode, type); // Convert the value
+                if (fieldValue == null)
+                {
+                    fieldValue = field.get(parentSection);
+                    config.addinheritedField(field);
+                }
+                break;
+            case SECTION:
+                fieldValue = field.getType().newInstance();
+                if (fieldNode instanceof MapNode)
+                {
+                    errorNodes.addAll(this.dumpIntoSection((Section) field.get(parentSection), (Section)fieldValue, (MapNode) fieldNode, config));
+                }
+                else
+                {
+                    throw new InvalidConfigurationException("Node for Section is not a MapNode!\n" + fieldNode);
+                }
+                break;
+            case SECTION_COLLECTION:
+                throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+            case SECTION_MAP:
+                if (fieldNode instanceof MapNode)
+                {
+                    fieldValue = MapConverter.getMapFor((ParameterizedType)type);
+                    if (((MapNode) fieldNode).isEmpty()) // No values set => load from parent-section
+                    {
+                        break;
+                    } // else load values for child-section using parent-section as backup
+                    Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(parentSection);
+                    subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
+                    for (Map.Entry<String, Node> entry : ((MapNode) fieldNode).getMappedNodes().entrySet())
+                    {
+                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Section value = subSectionClass.newInstance();
+                        if (entry.getValue() instanceof NullNode)
+                        {
+                            errorNodes.addAll(this.dumpIntoSection(parentSection, section, MapNode.emptyMap(), config));
+                        }
+                        else if (entry.getValue() instanceof MapNode)
+                        {
+                            errorNodes.addAll(this.dumpIntoSection(mappedParentSections.get(key), value, (MapNode) entry.getValue(), config));
+                        }
+                        else
+                        {
+                            throw new InvalidConfigurationException("Value-Node for mapped Section is not a MapNode!\n" + entry.getValue());
+                        }
+                        ((Map<Object, Section>)fieldValue).put(key, value);
+                    }
+                }
+                else
+                {
+                    throw new InvalidConfigurationException("Node for mapped Sections is not a MapNode!\n" + fieldNode);
+                }
+        }
+        field.set(section, fieldValue);
         return errorNodes;
     }
 
     /**
      * Fills the map with values from the Fields to save
      *
-     * @param parentConfig the parent config
-     * @param config the config
+     * @param parentSection the parent config
+     * @param section the config
      */
     @SuppressWarnings("unchecked cast")
-    public <C extends MultiConfiguration> MapNode fillFromFields(C parentConfig, C config)
+    public MapNode convertSection(Section parentSection, Section section, MultiConfiguration config)
     {
         MapNode baseNode = MapNode.emptyMap();
-        if (parentConfig != null)
+        if (parentSection == null)
         {
-            if (!parentConfig.getClass().equals(config.getClass()))
-            {
-                throw new IllegalStateException("parent and child-config have to be the same type of config!");
-            }
+            return this.convertSection(section);
         }
-        else
+        if (!parentSection.getClass().equals(section.getClass()))
         {
-            return this.fillFromFields(config);
+            throw new IllegalStateException("Parent and child-section have to be the same type of section!");
         }
-        Class<C> configClass = (Class<C>) config.getClass();
-        boolean advanced = true;
-        try
-        // to get a boolean advanced field (if not found ignore)
-        {
-            Field field = configClass.getField("advanced");
-            advanced = field.getBoolean(config);
-        }
-        catch (Exception ignored)
-        {}
+        Class<? extends Section> configClass = section.getClass();
         for (Field field : configClass.getFields())
         {
             if (config.isInheritedField(field))
@@ -320,66 +269,56 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             }
             if (isConfigField(field))
             {
-                if (!advanced && field.getAnnotation(Option.class).advanced())
-                {
-                    continue;
-                }
-                String path = field.getAnnotation(Option.class).value().replace(".", PATH_SEPARATOR);
-                this.fillFromField(field,parentConfig,config,baseNode,path);
+                String path = this.getPathFor(field);
+                baseNode.setNodeAt(path, PATH_SEPARATOR, this.convertField(field, parentSection, section, config));
             }
         }
-        this.addMapComments(baseNode, config.getClass());
         baseNode.cleanUpEmptyNodes();
         return baseNode;
     }
 
     @SuppressWarnings("unchecked cast")
-    protected void fillFromField(Field field, Configuration parentConfig, Configuration config, MapNode baseNode, String path)
+    protected Node convertField(Field field, Section parentSection, Section section, MultiConfiguration config)
     {
         try
         {
-            Object fieldValue = field.get(config);
+            Object fieldValue = field.get(section);
             FieldType fieldType = getFieldType(field);
             Node node = null;
             switch (fieldType)
             {
-                case NORMAL_FIELD:
+                case NORMAL:
                     node = convertToNode(fieldValue);
                     break;
-                case CONFIG_FIELD:
-                    node = this.fillFromFields((MultiConfiguration)field.get(parentConfig), (MultiConfiguration)fieldValue);
+                case SECTION:
+                    node = this.convertSection((Section) field.get(parentSection), (Section) fieldValue, config);
                     break;
-                case COLLECTION_CONFIG_FIELD:
-                    throw new InvalidConfigurationException("ChildConfigs are not allowed for Configurations in Collections" +
-                                                                "\nConfig:" + config.getClass());
-                case MAP_CONFIG_FIELD:
+                case SECTION_COLLECTION:
+                    throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", this.getPathFor(field), section.getClass(), field, null);
+                case SECTION_MAP:
                     node = MapNode.emptyMap();
-                    Map<Object, MultiConfiguration> parentFieldMap = (Map<Object, MultiConfiguration>)field.get(parentConfig);
-                    Map<Object, MultiConfiguration> childFieldMap = MapConverter.getMapFor((ParameterizedType)field.getGenericType());
-                    for (Map.Entry<Object, MultiConfiguration> parentEntry : parentFieldMap.entrySet())
+                    Map<Object, Section> parentFieldMap = (Map<Object, Section>)field.get(parentSection);
+                    Map<Object, Section> childFieldMap = MapConverter.getMapFor((ParameterizedType)field.getGenericType());
+                    for (Map.Entry<Object, Section> parentEntry : parentFieldMap.entrySet())
                     {
                         Node keyNode = convertToNode(parentEntry.getKey());
                         if (keyNode instanceof StringNode)
                         {
-                            MapNode configNode = this.fillFromFields(parentEntry.getValue(), childFieldMap.get(parentEntry.getKey()));
+                            MapNode configNode = this.convertSection(parentEntry.getValue(), childFieldMap.get(parentEntry.getKey()), config);
                             ((MapNode)node).setNode((StringNode)keyNode, configNode);
                         }
                         else
                         {
-                            throw new InvalidConfigurationException("Invalid Key-Node for Map of Configuration at " + path +
-                                                                        "\nConfiguration:" + config.getClass());
+                            throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", this.getPathFor(field), section.getClass(), field, null);
                         }
                     }
                 }
                 this.addComment(node, field);
-                baseNode.setNodeAt(path, PATH_SEPARATOR, node);
+                return node;
         }
         catch (Exception e)
         {
-            throw new InvalidConfigurationException(
-                "Error while dumping loaded config into fields!" +
-                    "\ncurrent Configuration: " + config.getClass().toString() +
-                    "\ncurrent Field:" + field.getName(), e);
+            throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", this.getPathFor(field), section.getClass(), field, e);
         }
     }
 }

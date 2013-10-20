@@ -31,8 +31,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
+import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 
 public class CollectionConverter
 {
