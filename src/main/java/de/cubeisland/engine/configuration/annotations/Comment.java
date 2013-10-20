@@ -38,5 +38,5 @@ public @interface Comment
      *
      * @return the comment
      */
-    public String value();
+    public String[] value();
 }

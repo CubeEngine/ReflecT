@@ -31,9 +31,7 @@ import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter
 import de.cubeisland.engine.configuration.node.*;
 
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
@@ -153,7 +151,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    protected Collection<ErrorNode> dumpParentIntoField(Section parentSection, Section section, Field field) throws ConversionException, IllegalAccessException, InstantiationException
+    protected Collection<ErrorNode> dumpParentIntoField(Section parentSection, Section section, Field field) throws ConversionException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException
     {
         if (getFieldType(field) == FieldType.SECTION_COLLECTION)
         {
@@ -174,13 +172,12 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked cast")
-    protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws IllegalAccessException, ConversionException, InstantiationException
+    protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
     {
         Collection<ErrorNode> errorNodes = new HashSet<>();
         Type type = field.getGenericType();
         FieldType fieldType = getFieldType(field);
         Object fieldValue = null;
-        Class<? extends Section> subSectionClass;
         switch (fieldType)
         {
             case NORMAL:
@@ -192,7 +189,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 }
                 break;
             case SECTION:
-                fieldValue = field.getType().newInstance();
+                fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType());
                 if (fieldNode instanceof MapNode)
                 {
                     errorNodes.addAll(this.dumpIntoSection((Section) field.get(parentSection), (Section)fieldValue, (MapNode) fieldNode, config));
@@ -213,11 +210,11 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         break;
                     } // else load values for child-section using parent-section as backup
                     Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(parentSection);
-                    subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
+                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType) type).getActualTypeArguments()[1];
                     for (Map.Entry<String, Node> entry : ((MapNode) fieldNode).getMappedNodes().entrySet())
                     {
                         Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
-                        Section value = subSectionClass.newInstance();
+                        Section value = newSectionInstance(section, subSectionClass);
                         if (entry.getValue() instanceof NullNode)
                         {
                             errorNodes.addAll(this.dumpIntoSection(parentSection, section, MapNode.emptyMap(), config));

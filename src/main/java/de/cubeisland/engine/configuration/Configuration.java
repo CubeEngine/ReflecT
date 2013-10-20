@@ -623,13 +623,4 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         throw new IllegalArgumentException("Unknown Type: " + type);
     }
-
-    public synchronized static void cleanup()
-    {
-        removeConverters();
-        converters = null;
-        mapConverter = null;
-        arrayConverter = null;
-        collectionConverter = null;
-    }
 }
