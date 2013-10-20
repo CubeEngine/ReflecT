@@ -228,6 +228,10 @@ public abstract class ConfigurationCodec
         {
             return subSectionClass.newInstance();
         }
+        else if (Modifier.isStatic(subSectionClass.getModifiers()))
+        {
+            return subSectionClass.newInstance();
+        }
         else
         {
             return subSectionClass.getDeclaredConstructor(parentSection.getClass()).newInstance(parentSection);
