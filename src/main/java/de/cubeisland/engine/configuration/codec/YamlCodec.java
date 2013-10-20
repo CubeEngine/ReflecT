@@ -73,7 +73,7 @@ public class YamlCodec extends MultiConfigurationCodec
     }
 
     @Override
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     public MapNode loadFromInputStream(InputStream is)
     {
         MapNode values;

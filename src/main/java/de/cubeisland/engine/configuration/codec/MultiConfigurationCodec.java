@@ -171,7 +171,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
     {
         Collection<ErrorNode> errorNodes = new HashSet<>();
@@ -245,7 +245,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param parentSection the parent config
      * @param section the config
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     public MapNode convertSection(Section parentSection, Section section, MultiConfiguration config)
     {
         MapNode baseNode = MapNode.emptyMap();
@@ -274,7 +274,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         return baseNode;
     }
 
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     protected Node convertField(Field field, Section parentSection, Section section, MultiConfiguration config)
     {
         try

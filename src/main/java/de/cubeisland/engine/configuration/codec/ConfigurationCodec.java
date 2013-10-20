@@ -245,7 +245,7 @@ public abstract class ConfigurationCodec
      * @param fieldNode the Node to load from
      * @return a collection of all erroneous Nodes
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     protected Collection<ErrorNode> dumpIntoField(Section section, Field field, Node fieldNode) throws ConversionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<>();
@@ -375,7 +375,7 @@ public abstract class ConfigurationCodec
      * @param field the field to get the values from
      * @param section the section containing the fields value
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     protected Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException
     {
         Object fieldValue = field.get(section);

@@ -77,10 +77,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @throws InvalidConfigurationException if no Codec was defined through the GenericType
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     private static <C extends ConfigurationCodec, Config extends Configuration> C getCodec(Class<Config> clazz)
     {
-        Type genericSuperclass = clazz.getGenericSuperclass(); // Get genegeric superclass
+        Type genericSuperclass = clazz.getGenericSuperclass(); // Get generic superclass
         Class<C> codecClass = null;
         try
         {
@@ -536,7 +536,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * @param object the Object
      * @return the serialized Node
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     public static <T> Node convertToNode(T object) throws ConversionException
     {
         if (object == null)
@@ -564,9 +564,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param node the node
      * @param type the type of the object
-     * @return
+     * @return the original object
      */
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     public static <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
