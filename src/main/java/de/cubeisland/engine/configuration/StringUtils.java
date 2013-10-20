@@ -22,12 +22,15 @@
  */
 package de.cubeisland.engine.configuration;
 
+/**
+ * @author Anselm Brehme, Phillip Schichtel
+ */
 public class StringUtils {
 
     /**
      * This method merges an array of strings to a single string
      *
-     * @param delimiter   the delimiter
+     * @param delimiter the delimiter
      * @param strings the strings to implode
      * @return the imploded string
      */
@@ -46,5 +49,41 @@ public class StringUtils {
             }
             return sb.toString();
         }
+    }
+
+    /**
+     * Converts a fieldName into a readable path
+     *
+     * @param fieldName the field name
+     * @return the converted field
+     */
+    public static String fieldNameToPath(String fieldName)
+    {
+        final StringBuilder path = new StringBuilder();
+        boolean lastUpper = true;
+        for (char c : fieldName.toCharArray())
+        {
+            if (c == '_')
+            {
+                lastUpper = true;
+                path.append('.');
+                continue;
+            }
+            if (Character.isUpperCase(c))
+            {
+                c = Character.toLowerCase(c);
+                if (!lastUpper)
+                {
+                    lastUpper = true;
+                    path.append('-');
+                }
+            }
+            else
+            {
+                lastUpper = false;
+            }
+            path.append(c);
+        }
+        return path.toString();
     }
 }

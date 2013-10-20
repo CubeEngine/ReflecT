@@ -170,7 +170,7 @@ public class YamlCodec extends MultiConfigurationCodec
                 hasLine = true;
             }
             StringBuilder sb = new StringBuilder();
-            String comment = buildComment(entry.getValue().getComment(), offset);
+            String comment = buildComment(entry.getValue().getComments(), offset);
             if (!comment.isEmpty())
             {
                 if (!hasLine && !first) // if not already one line free
@@ -273,16 +273,27 @@ public class YamlCodec extends MultiConfigurationCodec
         return off.toString();
     }
 
-    private static String buildComment(String comment, int offset)
+    private static String buildComment(String[] comments, int offset)
     {
-        if (comment == null || comment.isEmpty())
+        if (comments == null || comments.length == 0)
         {
             return ""; //No Comment
         }
         String off = getOffset(offset);
-        comment = comment.replace(LINE_BREAK, LINE_BREAK + off + COMMENT_PREFIX); // multi line
-        comment = off + COMMENT_PREFIX + comment + LINE_BREAK;
-        return comment;
+        StringBuilder sb = new StringBuilder();
+        for (String comment : comments)
+        {
+            if (comment.isEmpty())
+            {
+                continue;
+            }
+            if (comment.contains("\n"))
+            {
+                comment = comment.replace(LINE_BREAK, LINE_BREAK + off + COMMENT_PREFIX); // multi line
+            }
+            sb.append(off).append(COMMENT_PREFIX).append(comment).append(LINE_BREAK);
+        }
+        return sb.toString();
     }
 
     private static boolean needsQuote(String s)

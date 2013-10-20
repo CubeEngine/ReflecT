@@ -118,8 +118,7 @@ public abstract class ConfigurationCodec
     {
         if (field.isAnnotationPresent(Comment.class))
         {
-            Comment comment = field.getAnnotation(Comment.class);
-            node.setComment(StringUtils.implode("\n", comment.value()));
+            node.setComments(field.getAnnotation(Comment.class).value());
         }
     }
 
@@ -184,7 +183,7 @@ public abstract class ConfigurationCodec
         {
             return field.getAnnotation(Name.class).value().replace(".", PATH_SEPARATOR);
         }
-        return field.getName(); // TODO replace CamelCasing with -
+        return StringUtils.fieldNameToPath(field.getName());
     }
 
     /**

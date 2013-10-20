@@ -29,7 +29,7 @@ public abstract class Node<V>
 {
     private ParentNode parentNode;
 
-    private String comment;
+    private String[] comments;
 
     /**
      * Gets the ParentNode
@@ -142,14 +142,14 @@ public abstract class Node<V>
         }
     }
 
-    public String getComment()
+    public String[] getComments()
     {
-        return this.comment;
+        return this.comments;
     }
 
-    public void setComment(String comment)
+    public void setComments(String[] comments)
     {
-        this.comment = comment;
+        this.comments = comments;
     }
 
     public abstract String toString();
