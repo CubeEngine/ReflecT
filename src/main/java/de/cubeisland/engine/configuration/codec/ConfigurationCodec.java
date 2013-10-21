@@ -344,7 +344,7 @@ public abstract class ConfigurationCodec
      *
      * @param section the section to convert
      */
-    protected MapNode convertSection(Section section)
+    public MapNode convertSection(Section section)
     {
         MapNode baseNode = MapNode.emptyMap();
         Class<? extends Section> configClass = section.getClass();
@@ -374,7 +374,7 @@ public abstract class ConfigurationCodec
      * @param section the section containing the fields value
      */
     @SuppressWarnings("unchecked")
-    protected Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException
+    public Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException
     {
         Object fieldValue = field.get(section);
         FieldType fieldType = getFieldType(field);

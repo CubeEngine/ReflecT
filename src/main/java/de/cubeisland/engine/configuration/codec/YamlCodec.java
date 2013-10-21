@@ -116,6 +116,7 @@ public class YamlCodec extends MultiConfigurationCodec
      *
      * @param value the value at given path
      * @param offset the current offset
+     * @return true if no free line is allowed after this value
      */
     private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
@@ -304,6 +305,7 @@ public class YamlCodec extends MultiConfigurationCodec
             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
             || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",")
             || s.contains("&")
-            || s.matches("[0-9]+:[0-9]+")) || s.isEmpty() || s.equals("*");
+            || s.matches("[0-9]+:[0-9]+")) || s.isEmpty() || s.equals("*")
+            || s.matches("[0][0-9]+");
     }
 }

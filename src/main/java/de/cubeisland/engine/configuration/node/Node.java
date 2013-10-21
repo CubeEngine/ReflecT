@@ -24,6 +24,8 @@ package de.cubeisland.engine.configuration.node;
 
 import de.cubeisland.engine.configuration.ConfigPath;
 
+import java.util.Arrays;
+
 /**
  * A config Node
  */
@@ -155,4 +157,28 @@ public abstract class Node<V>
     }
 
     public abstract String toString();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node node = (Node) o;
+        if (node.getValue() == null && this.getValue() == null)
+        {
+            return true;
+        }
+        if (node.getValue() != null)
+        {
+            return node.getValue().equals(this.getValue());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = parentNode != null ? parentNode.hashCode() : 0;
+        result = 31 * result + (comments != null ? Arrays.hashCode(comments) : 0);
+        return result;
+    }
 }

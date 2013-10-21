@@ -33,8 +33,8 @@ public class ConfigPath
     {
         if (name.contains("."))
         {
-            this.basePath = name.substring(name.indexOf(".") + 1);
-            this.subPath = new ConfigPath(name.substring(0, name.indexOf(".")));
+            this.basePath = name.substring(0, name.indexOf("."));
+            this.subPath = new ConfigPath(name.substring(name.indexOf(".") + 1));
         }
         else
         {
