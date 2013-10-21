@@ -24,8 +24,6 @@ package de.cubeisland.engine.configuration.node;
 
 import de.cubeisland.engine.configuration.ConfigPath;
 
-import java.util.Arrays;
-
 /**
  * A config Node
  */
@@ -56,12 +54,11 @@ public abstract class Node<V>
     }
 
     /**
-     * Constructs a path down too the root de.cubeisland.engine.configuration.node for this de.cubeisland.engine.configuration.node
+     * Constructs a path down too the root Node for this Node
      *
-     * @param pathSeparator the path-separator to use
-     * @return the path or null if this de.cubeisland.engine.configuration.node is a root-de.cubeisland.engine.configuration.node
+     * @return the path or null if this Node is a root-Node
      */
-    public ConfigPath getPath(String pathSeparator)
+    public ConfigPath getPath()
     {
         if (this.getParentNode() == null)
         {
@@ -71,9 +68,9 @@ public abstract class Node<V>
     }
 
     /**
-     * Tries to convert the value of the de.cubeisland.engine.configuration.node into a string
+     * Tries to convert the value of the Node into a string
      *
-     * @return the converted de.cubeisland.engine.configuration.node value
+     * @return the converted Node value
      */
     public abstract String asText();
 
@@ -83,68 +80,6 @@ public abstract class Node<V>
      * @return the NodeValue
      */
     public abstract V getValue();
-
-    /**
-     * Returns the last subKey of this path
-     *
-     * <p>Example: first.second.third -> third
-     *
-     * @param path the path
-     * @param pathSeparator the pathSeparator
-     * @return the last subKey
-     */
-    public static String getSubKey(String path, String pathSeparator)
-    {
-        if (path.contains(pathSeparator))
-        {
-            return path.substring(path.lastIndexOf(pathSeparator) + 1);
-        }
-        else
-        {
-            return path;
-        }
-    }
-
-    /**
-     * Returns the subPath of this path
-     *
-     * <p>Example: first.second.third -> second.third
-     *
-     * @param path the path
-     * @param pathSeparator the pathSeparator
-     * @return the subPath
-     */
-    public static String getSubPath(String path, String pathSeparator)
-    {
-        if (path.contains(pathSeparator))
-        {
-            return path.substring(path.indexOf(pathSeparator) + 1);
-        }
-        else
-        {
-            return path;
-        }
-    }
-
-    /**
-     * Returns the base path of this path
-     * <p>Example: first.second.third -> first
-     *
-     * @param path the path
-     * @param pathSeparator the pathSeparator
-     * @return the basePath
-     */
-    public static String getBasePath(String path, String pathSeparator)
-    {
-        if (path.contains(pathSeparator))
-        {
-            return path.substring(0, path.indexOf(pathSeparator));
-        }
-        else
-        {
-            return path;
-        }
-    }
 
     public String[] getComments()
     {
@@ -157,28 +92,4 @@ public abstract class Node<V>
     }
 
     public abstract String toString();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Node node = (Node) o;
-        if (node.getValue() == null && this.getValue() == null)
-        {
-            return true;
-        }
-        if (node.getValue() != null)
-        {
-            return node.getValue().equals(this.getValue());
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = parentNode != null ? parentNode.hashCode() : 0;
-        result = 31 * result + (comments != null ? Arrays.hashCode(comments) : 0);
-        return result;
-    }
 }

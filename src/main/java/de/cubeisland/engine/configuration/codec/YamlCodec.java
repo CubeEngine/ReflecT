@@ -197,9 +197,9 @@ public class YamlCodec extends MultiConfigurationCodec
                 else
                 {
                     writer.append(LINE_BREAK);
-                    convertMapNode(writer, ((MapNode)entry.getValue()), offset + 1, false);
-                    endOfMapOrList = true;
+                    convertMapNode(writer, ((MapNode) entry.getValue()), offset + 1, false);
                 }
+                endOfMapOrList = true;
             }
             else if (entry.getValue() instanceof ListNode) // List-Node? -> list the nodes
             {
@@ -209,7 +209,7 @@ public class YamlCodec extends MultiConfigurationCodec
                 }
                 else
                 {
-                    convertListNode(writer, (ListNode)entry.getValue(), offset);
+                    convertListNode(writer, (ListNode) entry.getValue(), offset);
                 }
                 endOfMapOrList = true;
             }
@@ -225,10 +225,10 @@ public class YamlCodec extends MultiConfigurationCodec
     private static void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
     {
         writer.append(LINE_BREAK);
-        boolean endOfMap = false;
+        boolean endOfMapOrList = false;
         for (Node listedNode : value.getListedNodes()) //Convert Collection
         {
-            if (endOfMap)
+            if (endOfMapOrList)
             {
                 writer.append(LINE_BREAK);
             }
@@ -241,19 +241,19 @@ public class YamlCodec extends MultiConfigurationCodec
                 }
                 else
                 {
-                    convertMapNode(writer, (MapNode)listedNode, offset + 2, true);
-                    endOfMap = true;
+                    convertMapNode(writer, (MapNode) listedNode, offset + 2, true);
                 }
+                endOfMapOrList = true;
             }
             else if (listedNode instanceof ListNode)
             {
-                convertListNode(writer, (ListNode)listedNode, offset);
-                endOfMap = true;
+                convertListNode(writer, (ListNode) listedNode, offset);
+                endOfMapOrList = true;
             }
             else
             {
                 convertValue(writer, listedNode, offset + 1);
-                endOfMap = false;
+                endOfMapOrList = false;
             }
         }
     }
