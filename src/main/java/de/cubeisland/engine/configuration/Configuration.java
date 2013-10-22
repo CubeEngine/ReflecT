@@ -115,7 +115,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param target the Path to the file to save into
      */
-    public final void save(Path target)
+    public void save(Path target)
     {
         if (target == null)
         {
@@ -129,7 +129,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Reloads the configuration from file
      * <p>This will only work if the file of the configuration got set previously (usually through loading from file)
      */
-    public void reload()
+    public final void reload()
     {
         this.reload(false);
     }

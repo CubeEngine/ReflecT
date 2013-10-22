@@ -22,6 +22,9 @@
  */
 package de.cubeisland.engine.configuration;
 
+/**
+ * The Path to a value inside a Node
+ */
 public class ConfigPath
 {
     private static final String LIST = "[";
@@ -43,17 +46,34 @@ public class ConfigPath
         }
     }
 
+    /**
+     * Creates a new ConfigPath
+     *
+     * @param basepath the basePath
+     * @param path the subPath
+     */
     public ConfigPath(String basepath, ConfigPath path)
     {
         this.basePath = basepath;
         this.subPath = path;
     }
 
+    /**
+     * Creates a ConfigPath for given name. The Path will be splitted at every . into basePath and a subPath
+     *
+     * @param name the textual path
+     * @return the ConfigPath
+     */
     public static ConfigPath forName(String name)
     {
         return new ConfigPath(name);
     }
 
+    /**
+     * Returns true if this ConfigPath has no subPath
+     *
+     * @return true if this ConfigPath is a basePath
+     */
     public boolean isBasePath()
     {
         return this.subPath == null;
@@ -69,21 +89,41 @@ public class ConfigPath
         return basePath + "." + subPath.toString();
     }
 
+    /**
+     * Returns the basePath of this ConfigPath
+     *
+     * @return the basePath
+     */
     public String getBasePath()
     {
         return basePath;
     }
 
+    /**
+     * Gets the subPath of this ConfigPath
+     *
+     * @return the subPath or null if {@link #isBasePath()}
+     */
     public ConfigPath getSubPath()
     {
         return subPath;
     }
 
+    /**
+     * Returns true if the basePath of this ConfigPath points to a list
+     *
+     * @return whether this path points to a list next
+     */
     public boolean isListPath()
     {
         return this.basePath.startsWith(LIST);
     }
 
+    /**
+     * Gets the last part of this path
+     *
+     * @return the last subPath or if {@link #isBasePath()} the basePath
+     */
     public String getLastSubPath()
     {
         if (this.isBasePath())

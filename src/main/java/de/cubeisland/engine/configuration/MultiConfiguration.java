@@ -25,6 +25,7 @@ package de.cubeisland.engine.configuration;
 import de.cubeisland.engine.configuration.codec.MultiConfigurationCodec;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -41,20 +42,26 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     protected MultiConfiguration parent = null;
 
     /**
+     * Saves the fields that got inherited from the parent-configuration
+     */
+    private HashSet<Field> inheritedFields;
+
+    /**
      * Saves this configuration as a child-configuration of the set parent-configuration
      */
-    public final void saveChild()
+    private final void saveChild()
+    {
+        this.saveChild(this.getPath());
+    }
+
+    private final void saveChild(Path target)
     {
         if (this.getCodec() == null)
         {
-            throw new IllegalStateException("A configuration cannot be saved without a valid de.cubeisland.engine.configuration.codec!");
+            throw new IllegalStateException("A configuration cannot be saved without a valid Codec!");
         }
-        if (this.getPath() == null)
-        {
-            throw new IllegalStateException("A configuration cannot be saved without a valid file!");
-        }
-        this.getCodec().saveChildConfig(this.parent, this, this.getPath());
-        this.onSaved(this.getPath());
+        this.getCodec().saveChildConfig(this.parent, this, target);
+        this.onSaved(target);
     }
 
     /**
@@ -65,30 +72,84 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      * @return the loaded child-configuration
      */
     @SuppressWarnings("unchecked")
-    public <T extends Configuration> T loadChild(Path sourcePath)
+    public <T extends MultiConfiguration> T loadChild(Path sourcePath)
     {
         MultiConfiguration<ConfigCodec> childConfig;
         try
         {
-            childConfig = this.getClass().newInstance();
+            childConfig = Configuration.create(this.getClass());
             childConfig.inheritedFields = new HashSet<>();
             childConfig.setPath(sourcePath);
-            childConfig.parent = this;
-            try (InputStream is = new FileInputStream(sourcePath.toFile()))
-            {
-                this.showLoadErrors(childConfig.getCodec().loadChildConfig(childConfig, is));
-            }
-            catch (IOException ignored) // not found load from parent / save child
-            {
-                this.showLoadErrors(childConfig.getCodec().loadChildConfig(childConfig, null));
-            }
-            childConfig.onLoaded(this.getPath());
-            childConfig.saveChild();
+            childConfig.setParentConfiguration(this);
+            childConfig.reload(true);
             return (T)childConfig;
         }
         catch (Exception ex)
         {
             throw new IllegalStateException("Could not load ChildConfig!", ex);
+        }
+    }
+
+    /**
+     * Sets the parent-configuration for this configuration
+     * <p>if the parent-configuration is null
+     *
+     * @param parentConfiguration the parent-configuration (can be null)
+     */
+    public void setParentConfiguration(MultiConfiguration parentConfiguration)
+    {
+        if (parentConfiguration != null)
+        {
+            if (!this.getClass().equals(parentConfiguration.getClass()))
+            {
+                throw new IllegalArgumentException("Parent and child-configuration have to be the same type of configuration!");
+            }
+        }
+        this.parent = parentConfiguration;
+    }
+
+    @Override
+    public boolean reload(boolean save) throws InvalidConfigurationException
+    {
+        if (this.isChildConfiguration()) // This is a child-config!
+        {
+            boolean result = false;
+            try (InputStream is = new FileInputStream(this.getPath().toFile()))
+            {
+                this.showLoadErrors(this.getCodec().loadChildConfig(this, is));
+            }
+            catch (FileNotFoundException ex) // file not found load from parent & save child
+            {
+                result = true;
+                this.showLoadErrors(this.getCodec().loadChildConfig(this, null));
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidConfigurationException("Could not load configuration from file!", ex);
+            }
+            this.onLoaded(this.getPath());
+            if (save)
+            {
+                this.saveChild();
+            }
+            return result;
+        }
+        else
+        {
+            return super.reload(save);
+        }
+    }
+
+    @Override
+    public void save(Path target)
+    {
+        if (this.isChildConfiguration())
+        {
+            this.saveChild(target);
+        }
+        else
+        {
+            super.save(target);
         }
     }
 
@@ -101,8 +162,6 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     {
         return parent;
     }
-
-    private HashSet<Field> inheritedFields;
 
     /**
      * Marks a field as being inherited from the parent configuration and thus not being saved
@@ -123,5 +182,15 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     public boolean isInheritedField(Field field)
     {
         return inheritedFields.contains(field);
+    }
+
+    /**
+     * Returns true if this configuration has a parent-configuration set
+     *
+     * @return true if this configuration has a parent-configuration set
+     */
+    public boolean isChildConfiguration()
+    {
+        return this.parent == null;
     }
 }

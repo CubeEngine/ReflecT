@@ -46,7 +46,7 @@ import static de.cubeisland.engine.configuration.Configuration.convertToNode;
 public abstract class MultiConfigurationCodec extends ConfigurationCodec
 {
     /**
-     * Saves a configuration with another configuration s parent
+     * Saves a configuration with another configuration as parent
      *
      * @param parentConfig the parent configuration
      * @param config the configuration to save
@@ -105,7 +105,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         }
         if (!parentSection.getClass().equals(section.getClass()))
         {
-            throw new IllegalStateException("Parent and child-section have to be the same type of section!");
+            throw new IllegalArgumentException("Parent and child-section have to be the same type of section!");
         }
         Collection<ErrorNode> errorNodes = new HashSet<>();
         for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
