@@ -30,6 +30,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.reader.ReaderException;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,9 +54,10 @@ public class YamlCodec extends MultiConfigurationCodec
     }
 
     @Override
-    protected void saveIntoFile(Configuration config, MapNode node, Path file) throws IOException
+    protected void saveIntoFile(Configuration config, MapNode node, Path path) throws IOException
     {
-        try (OutputStream os = new FileOutputStream(file.toFile()))
+        Files.createDirectories(path.getParent());
+        try (OutputStream os = new FileOutputStream(path.toFile()))
         {
             OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
             if (config.head() != null)

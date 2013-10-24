@@ -378,7 +378,7 @@ public abstract class ConfigurationCodec
     {
         Object fieldValue = field.get(section);
         FieldType fieldType = getFieldType(field);
-        Node node = null;
+        Node node = NullNode.emptyNode();
         switch (fieldType)
         {
             case NORMAL:
