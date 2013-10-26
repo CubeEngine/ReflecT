@@ -219,7 +219,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public void loadFrom(InputStream is)
     {
-        assert is != null : "You hae to provide a InputStream to load from";
+        if (is == null)
+        {
+            throw new IllegalArgumentException("The input stream must not be null!");
+        }
         this.showLoadErrors(this.codec.load(this, is));//load config in maps -> updates -> sets fields
         this.onLoaded(file);
     }
@@ -261,7 +264,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void setFile(File file)
     {
-        assert file != null : "The file must not be null!";
+        if (file == null)
+        {
+            throw new IllegalArgumentException("The file must not be null!");
+        }
         this.file = file;
     }
 
