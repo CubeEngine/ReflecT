@@ -51,6 +51,6 @@ public class ErrorNode extends Node<Void>
     @Override
     public String toString()
     {
-        return "ErrorNode=["+message+"]";
+        return "ErrorNode=[" + message + "]";
     }
 }

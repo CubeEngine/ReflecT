@@ -25,11 +25,20 @@ package de.cubeisland.engine.configuration.codec;
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.StringUtils;
-import de.cubeisland.engine.configuration.node.*;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
+import de.cubeisland.engine.configuration.node.StringNode;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.reader.ReaderException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -101,7 +110,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             else
             {
-                values = (MapNode) wrapIntoNode(map);
+                values = (MapNode)wrapIntoNode(map);
             }
         }
         catch (ReaderException ex)
@@ -124,7 +133,7 @@ public class YamlCodec extends MultiConfigurationCodec
     /**
      * Serializes a single value
      *
-     * @param value the value at given path
+     * @param value  the value at given path
      * @param offset the current offset
      */
     private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
@@ -162,8 +171,8 @@ public class YamlCodec extends MultiConfigurationCodec
     /**
      * Serializes the values in the map
      *
-     * @param values the values at given path
-     * @param offset the current offset
+     * @param values       the values at given path
+     * @param offset       the current offset
      * @param inCollection true if directly under a collection
      */
     private static void convertMapNode(OutputStreamWriter writer, MapNode values, int offset, boolean inCollection) throws IOException
@@ -199,14 +208,14 @@ public class YamlCodec extends MultiConfigurationCodec
             // Now convert the value
             if (entry.getValue() instanceof MapNode) // Map-Node?
             {
-                if (((MapNode) entry.getValue()).isEmpty())
+                if (((MapNode)entry.getValue()).isEmpty())
                 {
                     writer.append("{}");
                 }
                 else
                 {
                     writer.append(LINE_BREAK);
-                    convertMapNode(writer, ((MapNode) entry.getValue()), offset + 1, false);
+                    convertMapNode(writer, ((MapNode)entry.getValue()), offset + 1, false);
                 }
                 endOfMapOrList = true;
             }
@@ -218,7 +227,7 @@ public class YamlCodec extends MultiConfigurationCodec
                 }
                 else
                 {
-                    convertListNode(writer, (ListNode) entry.getValue(), offset);
+                    convertListNode(writer, (ListNode)entry.getValue(), offset);
                 }
                 endOfMapOrList = true;
             }
@@ -244,19 +253,19 @@ public class YamlCodec extends MultiConfigurationCodec
             writer.append(getOffset(offset)).append(OFFSET).append("- ");
             if (listedNode instanceof MapNode)
             {
-                if (((MapNode) listedNode).isEmpty())
+                if (((MapNode)listedNode).isEmpty())
                 {
                     writer.append("{}");
                 }
                 else
                 {
-                    convertMapNode(writer, (MapNode) listedNode, offset + 2, true);
+                    convertMapNode(writer, (MapNode)listedNode, offset + 2, true);
                 }
                 endOfMapOrList = true;
             }
             else if (listedNode instanceof ListNode)
             {
-                convertListNode(writer, (ListNode) listedNode, offset);
+                convertListNode(writer, (ListNode)listedNode, offset);
                 endOfMapOrList = true;
             }
             else
@@ -271,6 +280,7 @@ public class YamlCodec extends MultiConfigurationCodec
      * Returns the offset as String
      *
      * @param offset the offset
+     *
      * @return the offset
      */
     private static String getOffset(int offset)
@@ -308,13 +318,8 @@ public class YamlCodec extends MultiConfigurationCodec
 
     private static boolean needsQuote(String s)
     {
-        return (s.startsWith("#") || s.contains(" #") || s.startsWith("@")
-            || s.startsWith("`") || s.startsWith("[") || s.startsWith("]")
-            || s.startsWith("{") || s.startsWith("}") || s.startsWith("|")
-            || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
-            || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",")
-            || s.contains("&")
-            || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s.equals("*")
-            || s.matches("[0][0-9]+");
+        return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`") || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|") || s
+                .startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s
+                .equals("*") || s.matches("[0][0-9]+");
     }
 }

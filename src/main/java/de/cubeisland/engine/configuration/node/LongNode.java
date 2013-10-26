@@ -46,6 +46,6 @@ public class LongNode extends Node<Long>
     @Override
     public String toString()
     {
-        return "LongNode=["+value+"]";
+        return "LongNode=[" + value + "]";
     }
 }

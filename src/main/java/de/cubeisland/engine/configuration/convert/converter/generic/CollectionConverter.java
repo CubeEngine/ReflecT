@@ -29,7 +29,13 @@ import de.cubeisland.engine.configuration.node.Node;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
 import static de.cubeisland.engine.configuration.Configuration.convertToNode;
@@ -40,7 +46,9 @@ public class CollectionConverter
      * Returns the converted collection
      *
      * @param collection the collection to convert
+     *
      * @return the converted collection
+     *
      * @throws ConversionException
      */
     public ListNode toNode(Collection collection) throws ConversionException
@@ -60,11 +68,13 @@ public class CollectionConverter
     /**
      * Deserializes an object back to a collection
      *
-     * @param <V>            the ValueType
-     * @param <S>            the Type of collection
-     * @param pType          the Type of the collection
-     * @param listNode       the Node to convert
+     * @param <V>      the ValueType
+     * @param <S>      the Type of collection
+     * @param pType    the Type of the collection
+     * @param listNode the Node to convert
+     *
      * @return the converted collection
+     *
      * @throws ConversionException
      */
     @SuppressWarnings("unchecked")

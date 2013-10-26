@@ -46,6 +46,6 @@ public class FloatNode extends Node<Float>
     @Override
     public String toString()
     {
-        return "FloatNode=["+value+"]";
+        return "FloatNode=[" + value + "]";
     }
 }

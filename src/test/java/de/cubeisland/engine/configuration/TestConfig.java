@@ -25,7 +25,13 @@ package de.cubeisland.engine.configuration;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class TestConfig extends YamlConfiguration
 {
@@ -36,7 +42,7 @@ public class TestConfig extends YamlConfiguration
     @Comment("This is a comment\nwith multiple\nlines using\\n")
     public String subsectionUsing_annotation_string = "Using fieldName = subsectionUsing_annotation_string for path";
 
-    @Comment({"This is a multi-line comment too","but using the array"})
+    @Comment({"This is a multi-line comment too", "but using the array"})
     @Name("subsection-using.annotation.quoted")
     public String s3 = "|This will be quoted";
 
@@ -79,10 +85,9 @@ public class TestConfig extends YamlConfiguration
 
     public class CollectionsStuff implements Section
     {
-        public String[] stringArray =
-                {
-                        "text1", "text2", "text3"
-                };
+        public String[] stringArray = {
+                "text1", "text2", "text3"
+        };
 
         public LinkedList<String> stringList = new LinkedList<String>()
         {
@@ -102,13 +107,13 @@ public class TestConfig extends YamlConfiguration
         };
 
         @Comment("map in collection")
-        public Collection<Map<String,String>> mapInCollection;
+        public Collection<Map<String, String>> mapInCollection;
 
         {
             Map<String, String> map = new HashMap<String, String>();
             map.put("abc", "123");
             map.put("def", "456");
-            mapInCollection = new ArrayList<Map<String,String>>();
+            mapInCollection = new ArrayList<Map<String, String>>();
             mapInCollection.add(map);
             map = new HashMap<String, String>();
             map.put("ghi", "789");
@@ -132,7 +137,7 @@ public class TestConfig extends YamlConfiguration
         public LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> mapinmapinmap = new LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>>()
         {
             {
-                LinkedHashMap <String, LinkedHashMap<String, Integer>> map1 = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
+                LinkedHashMap<String, LinkedHashMap<String, Integer>> map1 = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
                 LinkedHashMap<String, Integer> map2 = new LinkedHashMap<String, Integer>();
                 map2.put("oneTwoThree", 123);
                 map1.put("inmap", map2);
@@ -150,5 +155,4 @@ public class TestConfig extends YamlConfiguration
     }
 
     public ExternalSection externalSection = new ExternalSection();
-
 }

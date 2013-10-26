@@ -188,8 +188,8 @@ public class ListNode extends ParentNode
         {
             if (node instanceof ParentNode)
             {
-                ((ParentNode) node).cleanUpEmptyNodes();
-                if (((ParentNode) node).isEmpty())
+                ((ParentNode)node).cleanUpEmptyNodes();
+                if (((ParentNode)node).isEmpty())
                 {
                     nodesToRemove.add(node);
                 }
@@ -208,7 +208,7 @@ public class ListNode extends ParentNode
         }
         if (path == null)
         {
-            path = ConfigPath.forName("["+ pos);
+            path = ConfigPath.forName("[" + pos);
         }
         else
         {

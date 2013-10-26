@@ -30,8 +30,9 @@ public interface Converter<T extends Object>
     /**
      * Converts this class to an serializable object
      *
-     * @param object the fieldvalue
-     * @return the fieldvalue as node
+     * @param object the field value
+     *
+     * @return the field value as node
      */
     public Node toNode(T object) throws ConversionException;
 
@@ -39,7 +40,8 @@ public interface Converter<T extends Object>
      * Converts the given object to this class
      *
      * @param node the node to deserialize
-     * @return the deserialized fieldvalue
+     *
+     * @return the deserialized field value
      */
     public T fromNode(Node node) throws ConversionException;
 }

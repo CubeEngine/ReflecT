@@ -28,11 +28,18 @@ import de.cubeisland.engine.configuration.MultiConfiguration;
 import de.cubeisland.engine.configuration.Section;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.*;
+import de.cubeisland.engine.configuration.node.ErrorNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
+import de.cubeisland.engine.configuration.node.StringNode;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,8 +56,8 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Saves a configuration with another configuration as parent
      *
      * @param parentConfig the parent configuration
-     * @param config the configuration to save
-     * @param file the file to save into
+     * @param config       the configuration to save
+     * @param file         the file to save into
      */
     public void saveChildConfig(MultiConfiguration parentConfig, MultiConfiguration config, File file)
     {
@@ -79,7 +86,8 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Loads in the given configuration using the InputStream
      *
      * @param config the MultiConfiguration to load
-     * @param is the InputStream to load from
+     * @param is     the InputStream to load from
+     *
      * @return a collection of all erroneous Nodes
      */
     public Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is)
@@ -91,9 +99,10 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Dumps the contents of the MapNode into the fields of the section using the parentSection as backup if a node is not given
      *
      * @param parentSection the parent configuration-section
-     * @param section the configuration-section
-     * @param currentNode the Node to load from
-     * @param config the MultiConfiguration containing this section
+     * @param section       the configuration-section
+     * @param currentNode   the Node to load from
+     * @param config        the MultiConfiguration containing this section
+     *
      * @return a collection of all erroneous Nodes
      */
 
@@ -115,7 +124,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
-                    errorNodes.add((ErrorNode) fieldNode);
+                    errorNodes.add((ErrorNode)fieldNode);
                 }
                 else
                 {
@@ -137,7 +146,6 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     }
                 }
             }
-
         }
         return errorNodes;
     }
@@ -146,8 +154,8 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Copy the contents of the parent section into a field of the section
      *
      * @param parentSection the parent configuration-section
-     * @param section the configuration-section
-     * @param field the Field to load into
+     * @param section       the configuration-section
+     * @param field         the Field to load into
      *
      * @return a collection of all erroneous Nodes
      */
@@ -164,10 +172,10 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Dumps the contents of the Node into a field of the section
      *
      * @param parentSection the parent configuration-section
-     * @param section the configuration-section
-     * @param field the Field to load into
-     * @param fieldNode the Node to load from
-     * @param config the MultiConfiguration containing this section
+     * @param section       the configuration-section
+     * @param field         the Field to load into
+     * @param fieldNode     the Node to load from
+     * @param config        the MultiConfiguration containing this section
      *
      * @return a collection of all erroneous Nodes
      */
@@ -189,10 +197,10 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 }
                 break;
             case SECTION:
-                fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType());
+                fieldValue = newSectionInstance(section, (Class<? extends Section>)field.getType());
                 if (fieldNode instanceof MapNode)
                 {
-                    errorNodes.addAll(this.dumpIntoSection((Section) field.get(parentSection), (Section)fieldValue, (MapNode) fieldNode, config));
+                    errorNodes.addAll(this.dumpIntoSection((Section)field.get(parentSection), (Section)fieldValue, (MapNode)fieldNode, config));
                 }
                 else
                 {
@@ -205,15 +213,15 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 if (fieldNode instanceof MapNode)
                 {
                     fieldValue = MapConverter.getMapFor((ParameterizedType)type);
-                    if (((MapNode) fieldNode).isEmpty()) // No values set => load from parent-section
+                    if (((MapNode)fieldNode).isEmpty()) // No values set => load from parent-section
                     {
                         break;
                     } // else load values for child-section using parent-section as backup
                     Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(parentSection);
-                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType) type).getActualTypeArguments()[1];
-                    for (Map.Entry<String, Node> entry : ((MapNode) fieldNode).getMappedNodes().entrySet())
+                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
+                    for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
-                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType)type).getActualTypeArguments()[0]);
                         Section value = newSectionInstance(section, subSectionClass);
                         if (entry.getValue() instanceof NullNode)
                         {
@@ -221,7 +229,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         }
                         else if (entry.getValue() instanceof MapNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(mappedParentSections.get(key), value, (MapNode) entry.getValue(), config));
+                            errorNodes.addAll(this.dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), config));
                         }
                         else
                         {
@@ -243,7 +251,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * Fills the map with values from the Fields to save
      *
      * @param parentSection the parent config
-     * @param section the config
+     * @param section       the config
      */
     @SuppressWarnings("unchecked")
     public MapNode convertSection(Section parentSection, Section section, MultiConfiguration config)
@@ -287,7 +295,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     node = convertToNode(fieldValue);
                     break;
                 case SECTION:
-                    node = this.convertSection((Section) field.get(parentSection), (Section) fieldValue, config);
+                    node = this.convertSection((Section)field.get(parentSection), (Section)fieldValue, config);
                     break;
                 case SECTION_COLLECTION:
                     throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", this.getPathFor(field), section.getClass(), field, null);
@@ -308,9 +316,9 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                             throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", this.getPathFor(field), section.getClass(), field, null);
                         }
                     }
-                }
-                this.addComment(node, field);
-                return node;
+            }
+            this.addComment(node, field);
+            return node;
         }
         catch (Exception e)
         {

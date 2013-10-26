@@ -49,12 +49,12 @@ public class ConfigPath
     /**
      * Creates a new ConfigPath
      *
-     * @param basepath the basePath
-     * @param path the subPath
+     * @param basePath the basePath
+     * @param path     the subPath
      */
-    public ConfigPath(String basepath, ConfigPath path)
+    public ConfigPath(String basePath, ConfigPath path)
     {
-        this.basePath = basepath;
+        this.basePath = basePath;
         this.subPath = path;
     }
 
@@ -62,6 +62,7 @@ public class ConfigPath
      * Creates a ConfigPath for given name. The Path will be splitted at every . into basePath and a subPath
      *
      * @param name the textual path
+     *
      * @return the ConfigPath
      */
     public static ConfigPath forName(String name)

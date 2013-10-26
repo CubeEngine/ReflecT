@@ -25,12 +25,16 @@ package de.cubeisland.engine.configuration.node;
 import de.cubeisland.engine.configuration.ConfigPath;
 import de.cubeisland.engine.configuration.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
-public class MapNode extends ParentNode<Map<String,Node>>
+public class MapNode extends ParentNode<Map<String, Node>>
 {
     private LinkedHashMap<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
     private HashMap<String, String> keys = new HashMap<String, String>(); // LowerCase trimmed -> Original
@@ -178,8 +182,8 @@ public class MapNode extends ParentNode<Map<String,Node>>
         {
             if (this.mappedNodes.get(key) instanceof ParentNode)
             {
-                ((ParentNode) this.mappedNodes.get(key)).cleanUpEmptyNodes();
-                if (((ParentNode) this.mappedNodes.get(key)).isEmpty())
+                ((ParentNode)this.mappedNodes.get(key)).cleanUpEmptyNodes();
+                if (((ParentNode)this.mappedNodes.get(key)).isEmpty())
                 {
                     nodesToRemove.add(key);
                 }

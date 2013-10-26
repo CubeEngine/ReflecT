@@ -28,12 +28,12 @@ public class StringUtilsTest extends TestCase
 {
     public void testimplode() throws Exception
     {
-        assertEquals("a.b.c", StringUtils.implode(".", new String[]{"a", "b", "c"}));
+        assertEquals("a.b.c", StringUtils.implode(".", new String[] {"a", "b", "c"}));
     }
 
     public void testfieldNameToPath() throws Exception
     {
-        assertEquals("camel-casing",StringUtils.fieldNameToPath("CamelCasing"));
-        assertEquals("camel.casing",StringUtils.fieldNameToPath("Camel_Casing"));
+        assertEquals("camel-casing", StringUtils.fieldNameToPath("CamelCasing"));
+        assertEquals("camel.casing", StringUtils.fieldNameToPath("Camel_Casing"));
     }
 }

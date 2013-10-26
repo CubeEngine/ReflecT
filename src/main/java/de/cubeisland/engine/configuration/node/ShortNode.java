@@ -46,6 +46,6 @@ public class ShortNode extends Node<Short>
     @Override
     public String toString()
     {
-        return "ShortNode=["+value+"]";
+        return "ShortNode=[" + value + "]";
     }
 }

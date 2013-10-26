@@ -61,6 +61,6 @@ public class BooleanNode extends Node<Boolean>
     @Override
     public String toString()
     {
-        return "BooleanNode=["+bool+"]";
+        return "BooleanNode=[" + bool + "]";
     }
 }

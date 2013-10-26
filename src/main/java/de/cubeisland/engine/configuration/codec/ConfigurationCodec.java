@@ -22,18 +22,32 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.*;
+import de.cubeisland.engine.configuration.ConfigPath;
+import de.cubeisland.engine.configuration.Configuration;
+import de.cubeisland.engine.configuration.FieldType;
+import de.cubeisland.engine.configuration.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.Section;
+import de.cubeisland.engine.configuration.StringUtils;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.*;
+import de.cubeisland.engine.configuration.node.ErrorNode;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
+import de.cubeisland.engine.configuration.node.StringNode;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,7 +55,10 @@ import java.util.Map.Entry;
 
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
 import static de.cubeisland.engine.configuration.Configuration.convertToNode;
-import static de.cubeisland.engine.configuration.FieldType.*;
+import static de.cubeisland.engine.configuration.FieldType.NORMAL;
+import static de.cubeisland.engine.configuration.FieldType.SECTION;
+import static de.cubeisland.engine.configuration.FieldType.SECTION_COLLECTION;
+import static de.cubeisland.engine.configuration.FieldType.SECTION_MAP;
 
 /**
  * This abstract Codec can be implemented to read and write configurations.
@@ -52,7 +69,7 @@ public abstract class ConfigurationCodec
      * Loads in the given configuration using the InputStream
      *
      * @param config the config to load
-     * @param is the InputStream to load from
+     * @param is     the InputStream to load from
      */
     public Collection<ErrorNode> load(Configuration config, InputStream is)
     {
@@ -63,7 +80,7 @@ public abstract class ConfigurationCodec
      * Saves the configuration into given file
      *
      * @param config the configuration to save
-     * @param file the file to save into
+     * @param file   the file to save into
      */
     public void save(Configuration config, File file)
     {
@@ -85,8 +102,9 @@ public abstract class ConfigurationCodec
      * Saves the configuration with the values contained in the Node into a file for given path
      *
      * @param config the configuration to save
-     * @param node the Node containing all data to save
-     * @param file the file to save into
+     * @param node   the Node containing all data to save
+     * @param file   the file to save into
+     *
      * @throws IOException
      */
     protected abstract void saveIntoFile(Configuration config, MapNode node, File file) throws IOException;
@@ -108,7 +126,7 @@ public abstract class ConfigurationCodec
     /**
      * Adds a comment to the given Node
      *
-     * @param node the Node to add the comment to
+     * @param node  the Node to add the comment to
      * @param field the field possibly having a {@link Comment} annotation
      */
     protected void addComment(Node node, Field field)
@@ -123,6 +141,7 @@ public abstract class ConfigurationCodec
      * Detects the Type of a field
      *
      * @param field the field
+     *
      * @return the Type of the field
      */
     protected static FieldType getFieldType(Field field)
@@ -161,6 +180,7 @@ public abstract class ConfigurationCodec
      * Detects if given field needs to be serialized
      *
      * @param field the field to check
+     *
      * @return whether the field is a field of the configuration that needs to be serialized
      */
     protected static boolean isConfigField(Field field)
@@ -189,8 +209,9 @@ public abstract class ConfigurationCodec
     /**
      * Dumps the contents of the MapNode into the fields of the section
      *
-     * @param section the configuration-section
+     * @param section     the configuration-section
      * @param currentNode the Node to load from
+     *
      * @return a collection of all erroneous Nodes
      */
     protected Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
@@ -203,7 +224,7 @@ public abstract class ConfigurationCodec
                 Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
-                    errorNodes.add((ErrorNode) fieldNode);
+                    errorNodes.add((ErrorNode)fieldNode);
                 }
                 else if (!(fieldNode instanceof NullNode)) // Empty Node => default value
                 {
@@ -213,7 +234,7 @@ public abstract class ConfigurationCodec
                     }
                     catch (Exception e)
                     {
-                        throw InvalidConfigurationException.of("Error while dumping loaded section into fields!" , this.getPathFor(field), section.getClass(), field, e);
+                        throw InvalidConfigurationException.of("Error while dumping loaded section into fields!", this.getPathFor(field), section.getClass(), field, e);
                     }
                 }
             }
@@ -240,9 +261,10 @@ public abstract class ConfigurationCodec
     /**
      * Dumps the contents of the Node into a field of the section
      *
-     * @param section the configuration section
-     * @param field the Field to load into
+     * @param section   the configuration section
+     * @param field     the Field to load into
      * @param fieldNode the Node to load from
+     *
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
@@ -260,8 +282,8 @@ public abstract class ConfigurationCodec
             case SECTION:
                 if (fieldNode instanceof MapNode)
                 {
-                    fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType());
-                    errorNodes.addAll(this.dumpIntoSection((Section) fieldValue, (MapNode)fieldNode));
+                    fieldValue = newSectionInstance(section, (Class<? extends Section>)field.getType());
+                    errorNodes.addAll(this.dumpIntoSection((Section)fieldValue, (MapNode)fieldNode));
                 }
                 else
                 {
@@ -271,12 +293,12 @@ public abstract class ConfigurationCodec
             case SECTION_COLLECTION:
                 if (fieldNode instanceof ListNode)
                 {
-                    fieldValue = CollectionConverter.getCollectionFor((ParameterizedType) type);
+                    fieldValue = CollectionConverter.getCollectionFor((ParameterizedType)type);
                     if (((ListNode)fieldNode).isEmpty())
                     {
                         break;
                     }
-                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType) type).getActualTypeArguments()[0];
+                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[0];
                     for (Node listedNode : ((ListNode)fieldNode).getListedNodes())
                     {
                         if (listedNode instanceof NullNode)
@@ -286,7 +308,7 @@ public abstract class ConfigurationCodec
                         if (listedNode instanceof MapNode)
                         {
                             Section subSection = newSectionInstance(section, subSectionClass);
-                            errorNodes.addAll(this.dumpIntoSection(subSection, (MapNode) listedNode));
+                            errorNodes.addAll(this.dumpIntoSection(subSection, (MapNode)listedNode));
                             ((Collection<Section>)fieldValue).add(subSection);
                         }
                         else
@@ -303,15 +325,15 @@ public abstract class ConfigurationCodec
             case SECTION_MAP:
                 if (fieldNode instanceof MapNode)
                 {
-                    fieldValue = MapConverter.getMapFor((ParameterizedType) type);
-                    if (((MapNode) fieldNode).isEmpty())
+                    fieldValue = MapConverter.getMapFor((ParameterizedType)type);
+                    if (((MapNode)fieldNode).isEmpty())
                     {
                         break;
                     }
-                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType) type).getActualTypeArguments()[1];
+                    Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
                     for (Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
-                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType)type).getActualTypeArguments()[0]);
                         Section value = newSectionInstance(section, subSectionClass);
                         if (entry.getValue() instanceof NullNode)
                         {
@@ -319,7 +341,7 @@ public abstract class ConfigurationCodec
                         }
                         else if (entry.getValue() instanceof MapNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(value, (MapNode) entry.getValue()));
+                            errorNodes.addAll(this.dumpIntoSection(value, (MapNode)entry.getValue()));
                         }
                         else
                         {
@@ -360,9 +382,7 @@ public abstract class ConfigurationCodec
                 }
                 catch (Exception e)
                 {
-                    throw InvalidConfigurationException.of(
-                            "Error while converting Section into a MapNode!",
-                            this.getPathFor(field), section.getClass(), field, e);
+                    throw InvalidConfigurationException.of("Error while converting Section into a MapNode!", this.getPathFor(field), section.getClass(), field, e);
                 }
             }
         }
@@ -372,7 +392,7 @@ public abstract class ConfigurationCodec
     /**
      * Converts a single field of a section into a node
      *
-     * @param field the field to get the values from
+     * @param field   the field to get the values from
      * @param section the section containing the fields value
      */
     @SuppressWarnings("unchecked")
@@ -387,7 +407,7 @@ public abstract class ConfigurationCodec
                 node = convertToNode(fieldValue);
                 break;
             case SECTION:
-                node = this.convertSection((Section) fieldValue);
+                node = this.convertSection((Section)fieldValue);
                 break;
             case SECTION_COLLECTION:
                 node = ListNode.emptyList();
@@ -417,5 +437,4 @@ public abstract class ConfigurationCodec
         this.addComment(node, field);
         return node;
     }
-
 }

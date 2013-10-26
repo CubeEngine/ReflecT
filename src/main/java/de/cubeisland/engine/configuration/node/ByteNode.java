@@ -46,6 +46,6 @@ public class ByteNode extends Node<Byte>
     @Override
     public String toString()
     {
-        return "ByteNode=["+value+"]";
+        return "ByteNode=[" + value + "]";
     }
 }

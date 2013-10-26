@@ -41,7 +41,7 @@ public class InvalidConfigurationException extends RuntimeException
         super(msg, t);
     }
 
-    public static InvalidConfigurationException of(String msg, ConfigPath path, Class<? extends Section> clazz, Field field , Throwable t)
+    public static InvalidConfigurationException of(String msg, ConfigPath path, Class<? extends Section> clazz, Field field, Throwable t)
     {
         msg += "\nPath: " + path;
         msg += "\nSection: " + clazz.toString();
@@ -50,6 +50,6 @@ public class InvalidConfigurationException extends RuntimeException
         {
             return new InvalidConfigurationException(msg);
         }
-        return new InvalidConfigurationException(msg,t);
+        return new InvalidConfigurationException(msg, t);
     }
 }

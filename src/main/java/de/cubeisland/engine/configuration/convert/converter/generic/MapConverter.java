@@ -42,7 +42,9 @@ public class MapConverter
      * Makes a map serializable for configs
      *
      * @param map the map to convert
+     *
      * @return the serializable map
+     *
      * @throws ConversionException
      */
     public MapNode toNode(Map<?, ?> map) throws ConversionException
@@ -74,8 +76,10 @@ public class MapConverter
      * @param <V>     the ValueType
      * @param <S>     the MapType
      * @param ptype   the MapTypeClass
-     * @param mapNode  the object to convert
+     * @param mapNode the object to convert
+     *
      * @return the converted map
+     *
      * @throws ConversionException
      */
     @SuppressWarnings("unchecked")

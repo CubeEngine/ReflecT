@@ -46,6 +46,6 @@ public class DoubleNode extends Node<Double>
     @Override
     public String toString()
     {
-        return "DoubleNode=["+value+"]";
+        return "DoubleNode=[" + value + "]";
     }
 }

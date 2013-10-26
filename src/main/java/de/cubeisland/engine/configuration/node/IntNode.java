@@ -47,6 +47,6 @@ public class IntNode extends Node<Integer>
     @Override
     public String toString()
     {
-        return "IntNode=["+value+"]";
+        return "IntNode=[" + value + "]";
     }
 }

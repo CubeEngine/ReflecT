@@ -26,13 +26,38 @@ import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
-import de.cubeisland.engine.configuration.convert.converter.*;
+import de.cubeisland.engine.configuration.convert.converter.BooleanConverter;
+import de.cubeisland.engine.configuration.convert.converter.ByteConverter;
+import de.cubeisland.engine.configuration.convert.converter.DateConverter;
+import de.cubeisland.engine.configuration.convert.converter.DoubleConverter;
+import de.cubeisland.engine.configuration.convert.converter.FloatConverter;
+import de.cubeisland.engine.configuration.convert.converter.IntegerConverter;
+import de.cubeisland.engine.configuration.convert.converter.LongConverter;
+import de.cubeisland.engine.configuration.convert.converter.ShortConverter;
+import de.cubeisland.engine.configuration.convert.converter.StringConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.*;
+import de.cubeisland.engine.configuration.node.BooleanNode;
+import de.cubeisland.engine.configuration.node.ByteNode;
+import de.cubeisland.engine.configuration.node.CharNode;
+import de.cubeisland.engine.configuration.node.DoubleNode;
+import de.cubeisland.engine.configuration.node.ErrorNode;
+import de.cubeisland.engine.configuration.node.FloatNode;
+import de.cubeisland.engine.configuration.node.IntNode;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.LongNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
+import de.cubeisland.engine.configuration.node.ShortNode;
+import de.cubeisland.engine.configuration.node.StringNode;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Date;
@@ -66,9 +91,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     /**
      * Tries to get the Codec of a configuration implementation.
      *
-     * @param clazz the clazz of the configuration
-     * @param <C> the CodecType
+     * @param clazz    the clazz of the configuration
+     * @param <C>      the CodecType
      * @param <Config> the ConfigType
+     *
      * @return the Codec
      *
      * @throws InvalidConfigurationException if no Codec was defined through the GenericType
@@ -171,7 +197,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             {
                 this.save();
             }
-
         }
         catch (FileNotFoundException e)
         {
@@ -236,7 +261,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void setFile(File file)
     {
-        assert file != null: "The file must not be null!";
+        assert file != null : "The file must not be null!";
         this.file = file;
     }
 
@@ -289,7 +314,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * <p>The configuration has to have the default Constructor for this to work!
      *
      * @param clazz the configurations class
-     * @param <T> The Type of the returned configuration
+     * @param <T>   The Type of the returned configuration
+     *
      * @return the created configuration
      */
     public static <T extends Configuration> T create(Class<T> clazz)
@@ -308,8 +334,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Loads the configuration from given file and optionally saves it afterwards
      *
      * @param clazz the configurations class
-     * @param file the file to load from and save to
-     * @param save whether to save the configuration or not
+     * @param file  the file to load from and save to
+     * @param save  whether to save the configuration or not
+     *
      * @return the loaded Configuration
      */
     public static <T extends Configuration> T load(Class<T> clazz, File file, boolean save)
@@ -324,7 +351,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Loads the configuration from given file and saves it afterwards
      *
      * @param clazz the configurations class
-     * @param file the file to load from and save to
+     * @param file  the file to load from and save to
+     *
      * @return the loaded Configuration
      */
     public static <T extends Configuration> T load(Class<T> clazz, File file)
@@ -336,7 +364,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Loads the configuration from the InputStream
      *
      * @param clazz the configurations class
-     * @param is the InputStream to load from
+     * @param is    the InputStream to load from
+     *
      * @return the loaded configuration
      */
     public static <T extends Configuration> T load(Class<T> clazz, InputStream is)
@@ -383,7 +412,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     /**
      * registers a converter to check for when converting
      *
-     * @param clazz the class
+     * @param clazz     the class
      * @param converter the converter
      */
     public static void registerConverter(Class clazz, Converter converter)
@@ -419,6 +448,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Searches matching Converter
      *
      * @param objectClass the class to search for
+     *
      * @return a matching converter or null if not found
      */
     @SuppressWarnings("unchecked")
@@ -455,6 +485,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Wraps a serialized Object into a Node
      *
      * @param o a serialized Object
+     *
      * @return the Node
      */
     public static Node wrapIntoNode(Object o)
@@ -512,13 +543,13 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             return new CharNode((Character)o);
         }
         throw new IllegalArgumentException("Cannot wrap into Node: " + o.getClass());
-
     }
 
     /**
      * Converts a convertible Object into a Node
      *
      * @param object the Object
+     *
      * @return the serialized Node
      */
     @SuppressWarnings("unchecked")
@@ -549,13 +580,14 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param node the node
      * @param type the type of the object
+     *
      * @return the original object
      */
     @SuppressWarnings("unchecked")
     public static <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
-            return null;
+        { return null; }
         if (type instanceof Class)
         {
             if (((Class)type).isArray())
@@ -601,7 +633,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                     {
                         throw new ConversionException("Cannot convert to Map! Node is not a MapNode!");
                     }
-
                 }
             }
         }

@@ -34,6 +34,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @param path the path
      * @param node Node to set
+     *
      * @return the previously mapped Node or null if not set
      */
     public Node setNodeAt(ConfigPath path, Node node)
@@ -55,6 +56,7 @@ public abstract class ParentNode<V> extends Node<V>
      * <p>Will create new Nodes if not found!
      *
      * @param path the path
+     *
      * @return the Node at given path
      */
     public Node getNodeAt(ConfigPath path)
@@ -92,7 +94,7 @@ public abstract class ParentNode<V> extends Node<V>
             }
             else if (!(baseNode instanceof ParentNode))
             {
-                return new ErrorNode("Could not resolve path ("  + path + ") for " + baseNode + "\nIs your configuration outdated?");
+                return new ErrorNode("Could not resolve path (" + path + ") for " + baseNode + "\nIs your configuration outdated?");
             }
             return ((ParentNode)baseNode).getNodeAt(subPath);
         }
@@ -102,6 +104,7 @@ public abstract class ParentNode<V> extends Node<V>
      * Removes the Node for given path
      *
      * @param path the path
+     *
      * @return the previously mapped Node or null if not set
      */
     public Node removeNode(ConfigPath path)
@@ -116,7 +119,7 @@ public abstract class ParentNode<V> extends Node<V>
             Node baseNode = this.getExactNode(path.getBasePath());
             if (baseNode instanceof ParentNode)
             {
-                return ((ParentNode) baseNode).removeNode(path.getSubPath());
+                return ((ParentNode)baseNode).removeNode(path.getSubPath());
             }
             return null; // Node not found
         }
@@ -126,8 +129,9 @@ public abstract class ParentNode<V> extends Node<V>
      * Sets this Node for given direct key
      * <p>The key will be lowercased!
      *
-     * @param key the key
+     * @param key  the key
      * @param node the Node to set
+     *
      * @return the previously mapped Node or null if not set
      */
     protected abstract Node setExactNode(String key, Node node);
@@ -137,7 +141,9 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @param node the Node to get the path for
      * @param path the current path
+     *
      * @return the path to given Node OR if path is not empty to the Node pointed in that path
+     *
      * @throws IllegalArgumentException when the Node is not managed by this ParentNode
      */
     protected abstract ConfigPath getPathOfSubNode(Node node, ConfigPath path);
@@ -146,7 +152,9 @@ public abstract class ParentNode<V> extends Node<V>
      * Generates the path for a Node having this Node as ParentNode
      *
      * @param node the Node to get the path for
+     *
      * @return the path to given Node
+     *
      * @throws IllegalArgumentException when the Node is not managed by this ParentNode
      */
     public abstract ConfigPath getPathOfSubNode(Node node);
@@ -156,6 +164,7 @@ public abstract class ParentNode<V> extends Node<V>
      * <p>The key will be lowercased!
      *
      * @param key the key
+     *
      * @return the matched Node or null
      */
     public abstract Node getExactNode(String key);
@@ -165,6 +174,7 @@ public abstract class ParentNode<V> extends Node<V>
      * <p>The key will be lowercased!
      *
      * @param key the key
+     *
      * @return the previously mapped Node or null if not set
      */
     protected abstract Node removeExactNode(String key);
@@ -181,8 +191,6 @@ public abstract class ParentNode<V> extends Node<V>
      */
     public abstract boolean isEmpty();
 
-
-
     public abstract boolean removeNode(Node node);
 
     @Override
@@ -190,5 +198,4 @@ public abstract class ParentNode<V> extends Node<V>
     {
         throw new UnsupportedOperationException("ParentNodes cannot be serialized to a simple String! Use toString() if you want a textual representation of this node.");
     }
-
 }

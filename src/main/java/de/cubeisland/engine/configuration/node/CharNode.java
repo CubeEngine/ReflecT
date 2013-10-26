@@ -46,6 +46,6 @@ public class CharNode extends Node<Character>
     @Override
     public String toString()
     {
-        return "CharNode=["+value+"]";
+        return "CharNode=[" + value + "]";
     }
 }

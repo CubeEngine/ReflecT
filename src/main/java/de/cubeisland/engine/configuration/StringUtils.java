@@ -25,13 +25,15 @@ package de.cubeisland.engine.configuration;
 /**
  * @author Anselm Brehme, Phillip Schichtel
  */
-public class StringUtils {
+public class StringUtils
+{
 
     /**
      * This method merges an array of strings to a single string
      *
      * @param delimiter the delimiter
-     * @param strings the strings to implode
+     * @param strings   the strings to implode
+     *
      * @return the imploded string
      */
     public static String implode(String delimiter, String[] strings)
@@ -55,6 +57,7 @@ public class StringUtils {
      * Converts a fieldName into a readable path
      *
      * @param fieldName the field name
+     *
      * @return the converted field
      */
     public static String fieldNameToPath(String fieldName)

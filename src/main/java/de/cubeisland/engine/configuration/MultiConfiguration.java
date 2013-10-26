@@ -24,7 +24,11 @@ package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.MultiConfigurationCodec;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 
@@ -64,7 +68,8 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      * Loads and saves a child-configuration from given path
      *
      * @param sourceFile the path to the file
-     * @param <T> the ConfigurationType
+     * @param <T>        the ConfigurationType
+     *
      * @return the loaded child-configuration
      */
     @SuppressWarnings("unchecked")
@@ -186,6 +191,7 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      * Returns whether the given field-value was inherited from a parent-configuration
      *
      * @param field the field to check
+     *
      * @return true if the field got inherited
      */
     public boolean isInheritedField(Field field)
