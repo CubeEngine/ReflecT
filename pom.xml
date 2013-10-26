@@ -27,8 +27,8 @@
 
     <scm>
         <url>https://github.com/CubeEngineDev/ConfigurationAPI</url>
-        <connection>scm:git:git@github.com:CubeEngineDev/ConfigurationAPI.git</connection>
-        <developerConnection>scm:git:git@github.com:CubeEngineDev/ConfigurationAPI.git</developerConnection>
+        <connection>scm:git:https://github.com/CubeEngineDev/ConfigurationAPI</connection>
+        <developerConnection>scm:git:https://github.com/CubeEngineDev/ConfigurationAPI</developerConnection>
     </scm>
 
     <distributionManagement>
@@ -50,6 +50,11 @@
             <id>Faithcaio</id>
             <name>Anselm Brehme</name>
             <email>faithcaio@cubeisland.de</email>
+        </developer>
+        <developer>
+            <id>quick_wango</id>
+            <name>Phillip Schichtel</name>
+            <email>quick_wango@code-infection.de</email>
         </developer>
     </developers>
 
