@@ -396,7 +396,7 @@ public abstract class ConfigurationCodec
      * @param section the section containing the fields value
      */
     @SuppressWarnings("unchecked")
-    public Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException
+    public Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException, NoSuchMethodException, InstantiationException, InvocationTargetException
     {
         Object fieldValue = field.get(section);
         FieldType fieldType = getFieldType(field);
@@ -407,6 +407,10 @@ public abstract class ConfigurationCodec
                 node = convertToNode(fieldValue);
                 break;
             case SECTION:
+                if (fieldValue == null)
+                {
+                    fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType()); // You do not need to instantiate sections
+                }
                 node = this.convertSection((Section)fieldValue);
                 break;
             case SECTION_COLLECTION:
