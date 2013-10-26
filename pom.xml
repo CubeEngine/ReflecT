@@ -26,9 +26,9 @@
     </parent>
 
     <scm>
-        <url>https://github.com/Faithcaio/ConfigurationAPI</url>
-        <connection>scm:git:git@github.com:Faithcaio/ConfigurationAPI.git</connection>
-        <developerConnection>scm:git:git@github.com:Faithcaio/ConfigurationAPI.git</developerConnection>
+        <url>https://github.com/CubeEngineDev/ConfigurationAPI</url>
+        <connection>scm:git:git@github.com:CubeEngineDev/ConfigurationAPI.git</connection>
+        <developerConnection>scm:git:git@github.com:CubeEngineDev/ConfigurationAPI.git</developerConnection>
     </scm>
 
     <distributionManagement>
