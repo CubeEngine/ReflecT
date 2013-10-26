@@ -26,32 +26,11 @@ import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
-import de.cubeisland.engine.configuration.convert.converter.BooleanConverter;
-import de.cubeisland.engine.configuration.convert.converter.ByteConverter;
-import de.cubeisland.engine.configuration.convert.converter.DateConverter;
-import de.cubeisland.engine.configuration.convert.converter.DoubleConverter;
-import de.cubeisland.engine.configuration.convert.converter.FloatConverter;
-import de.cubeisland.engine.configuration.convert.converter.IntegerConverter;
-import de.cubeisland.engine.configuration.convert.converter.LongConverter;
-import de.cubeisland.engine.configuration.convert.converter.ShortConverter;
-import de.cubeisland.engine.configuration.convert.converter.StringConverter;
+import de.cubeisland.engine.configuration.convert.converter.*;
 import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.BooleanNode;
-import de.cubeisland.engine.configuration.node.ByteNode;
-import de.cubeisland.engine.configuration.node.CharNode;
-import de.cubeisland.engine.configuration.node.DoubleNode;
-import de.cubeisland.engine.configuration.node.ErrorNode;
-import de.cubeisland.engine.configuration.node.FloatNode;
-import de.cubeisland.engine.configuration.node.IntNode;
-import de.cubeisland.engine.configuration.node.ListNode;
-import de.cubeisland.engine.configuration.node.LongNode;
-import de.cubeisland.engine.configuration.node.MapNode;
-import de.cubeisland.engine.configuration.node.Node;
-import de.cubeisland.engine.configuration.node.NullNode;
-import de.cubeisland.engine.configuration.node.ShortNode;
-import de.cubeisland.engine.configuration.node.StringNode;
+import de.cubeisland.engine.configuration.node.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,6 +44,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -413,6 +393,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         registerConverter(boolean.class, converter);
         registerConverter(String.class, new StringConverter());
         registerConverter(Date.class, new DateConverter());
+        registerConverter(UUID.class, new UUIDConverter());
     }
 
     /**
