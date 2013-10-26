@@ -30,12 +30,11 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.reader.ReaderException;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
+import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
 
 /**
  * A Codec for YAML-Configurations allowing child-configurations
@@ -54,10 +53,10 @@ public class YamlCodec extends MultiConfigurationCodec
     }
 
     @Override
-    protected void saveIntoFile(Configuration config, MapNode node, Path path) throws IOException
+    protected void saveIntoFile(Configuration config, MapNode node, File file) throws IOException
     {
-        Files.createDirectories(path.getParent());
-        try (OutputStream os = new FileOutputStream(path.toFile()))
+        OutputStream os = new FileOutputStream(file);
+        try
         {
             OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
             if (config.head() != null)
@@ -71,6 +70,15 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             writer.flush();
             writer.close();
+        }
+        finally
+        {
+            try
+            {
+                os.close();
+            }
+            catch (IOException ignored)
+            {}
         }
     }
 
@@ -118,7 +126,6 @@ public class YamlCodec extends MultiConfigurationCodec
      *
      * @param value the value at given path
      * @param offset the current offset
-     * @return true if no free line is allowed after this value
      */
     private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
@@ -174,7 +181,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             StringBuilder sb = new StringBuilder();
             String comment = buildComment(entry.getValue().getComments(), offset);
-            if (!comment.isEmpty())
+            if (!isEmpty(comment))
             {
                 if (!hasLine && !first) // if not already one line free
                 {
@@ -286,7 +293,7 @@ public class YamlCodec extends MultiConfigurationCodec
         StringBuilder sb = new StringBuilder();
         for (String comment : comments)
         {
-            if (comment.isEmpty())
+            if (isEmpty(comment))
             {
                 continue;
             }
@@ -307,7 +314,7 @@ public class YamlCodec extends MultiConfigurationCodec
             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
             || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",")
             || s.contains("&")
-            || s.matches("[0-9]+:[0-9]+")) || s.isEmpty() || s.equals("*")
+            || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s.equals("*")
             || s.matches("[0][0-9]+");
     }
 }

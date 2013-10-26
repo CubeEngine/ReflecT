@@ -25,27 +25,25 @@ package de.cubeisland.engine.configuration;
 import junit.framework.TestCase;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class YamlConfigurationTest extends TestCase
 {
     private TestConfig config;
     private TestConfig loadConfig;
-    private Path path;
+    private File file;
 
     @Override
     public void setUp() throws Exception
     {
-        this.path = new File("../testconfig.yml").toPath();
+        this.file = new File("../testconfig.yml");
         config = Configuration.create(TestConfig.class);
     }
 
     public void testConfiguration() throws Exception
     {
-        config.save(path);
-        loadConfig = Configuration.load(TestConfig.class, path);
-        Files.delete(path);
+        config.save(file);
+        loadConfig = Configuration.load(TestConfig.class, file);
+        file.delete();
         assertEquals(config.getCodec().convertSection(config).toString(), config.getCodec().convertSection(loadConfig).toString());
     }
 }

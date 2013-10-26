@@ -24,12 +24,8 @@ package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.MultiConfigurationCodec;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.file.Path;
 import java.util.HashSet;
 
 /**
@@ -49,12 +45,12 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     /**
      * Saves this configuration as a child-configuration of the set parent-configuration
      */
-    private final void saveChild()
+    private void saveChild()
     {
-        this.saveChild(this.getPath());
+        this.saveChild(this.getFile());
     }
 
-    private final void saveChild(Path target)
+    private void saveChild(File target)
     {
         if (this.getCodec() == null)
         {
@@ -67,19 +63,19 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     /**
      * Loads and saves a child-configuration from given path
      *
-     * @param sourcePath the path to the file
+     * @param sourceFile the path to the file
      * @param <T> the ConfigurationType
      * @return the loaded child-configuration
      */
     @SuppressWarnings("unchecked")
-    public <T extends MultiConfiguration> T loadChild(Path sourcePath)
+    public <T extends MultiConfiguration> T loadChild(File sourceFile)
     {
         MultiConfiguration<ConfigCodec> childConfig;
         try
         {
             childConfig = Configuration.create(this.getClass());
-            childConfig.inheritedFields = new HashSet<>();
-            childConfig.setPath(sourcePath);
+            childConfig.inheritedFields = new HashSet<Field>();
+            childConfig.setFile(sourceFile);
             childConfig.setParentConfiguration(this);
             childConfig.reload(true);
             return (T)childConfig;
@@ -114,23 +110,36 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
         if (this.isChildConfiguration()) // This is a child-config!
         {
             boolean result = false;
-            try (InputStream is = new FileInputStream(this.getPath().toFile()))
+            try
             {
-                this.showLoadErrors(this.getCodec().loadChildConfig(this, is));
+                InputStream is = new FileInputStream(this.getFile());
+                try
+                {
+                    this.showLoadErrors(this.getCodec().loadChildConfig(this, is));
+                }
+                catch (RuntimeException e)
+                {
+                    throw new InvalidConfigurationException("Could not load configuration from file!", e);
+                }
+                finally
+                {
+                    try
+                    {
+                        is.close();
+                    }
+                    catch (IOException ignored)
+                    {}
+                }
+                this.onLoaded(this.getFile());
+                if (save)
+                {
+                    this.saveChild();
+                }
             }
-            catch (FileNotFoundException ex) // file not found load from parent & save child
+            catch (FileNotFoundException e) // file not found load from parent & save child
             {
                 result = true;
                 this.showLoadErrors(this.getCodec().loadChildConfig(this, null));
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidConfigurationException("Could not load configuration from file!", ex);
-            }
-            this.onLoaded(this.getPath());
-            if (save)
-            {
-                this.saveChild();
             }
             return result;
         }
@@ -141,7 +150,7 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     }
 
     @Override
-    public void save(Path target)
+    public void save(File target)
     {
         if (this.isChildConfiguration())
         {

@@ -29,7 +29,6 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class LongConverter extends BasicConverter<Long>
 {
-    @Override
     public Long fromNode(Node node) throws ConversionException
     {
         if (node instanceof LongNode)

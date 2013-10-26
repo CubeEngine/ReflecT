@@ -30,11 +30,10 @@ import de.cubeisland.engine.configuration.convert.converter.generic.CollectionCo
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
-import java.beans.Transient;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.*;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,7 +65,7 @@ public abstract class ConfigurationCodec
      * @param config the configuration to save
      * @param file the file to save into
      */
-    public void save(Configuration config, Path file)
+    public void save(Configuration config, File file)
     {
         try
         {
@@ -90,7 +89,7 @@ public abstract class ConfigurationCodec
      * @param file the file to save into
      * @throws IOException
      */
-    protected abstract void saveIntoFile(Configuration config, MapNode node, Path file) throws IOException;
+    protected abstract void saveIntoFile(Configuration config, MapNode node, File file) throws IOException;
 
     /**
      * Converts the inputStream into a readable Object
@@ -166,13 +165,16 @@ public abstract class ConfigurationCodec
      */
     protected static boolean isConfigField(Field field)
     {
-        int mask = field.getModifiers();
-        if ((((mask & Modifier.STATIC) == Modifier.STATIC))) // skip static fields
+        int modifiers = field.getModifiers();
+        if (Modifier.isStatic(modifiers)) // skip static fields
         {
             return false;
         }
-        // else disallow when Transient
-        return !(field.isAnnotationPresent(Transient.class) && field.getAnnotation(Transient.class).value());
+        if (Modifier.isTransient(modifiers)) // skip transient fields
+        {
+            return false;
+        }
+        return true;
     }
 
     protected ConfigPath getPathFor(Field field)
@@ -193,7 +195,7 @@ public abstract class ConfigurationCodec
      */
     protected Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
     {
-        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
             if (isConfigField(field))
@@ -246,7 +248,7 @@ public abstract class ConfigurationCodec
     @SuppressWarnings("unchecked")
     protected Collection<ErrorNode> dumpIntoField(Section section, Field field, Node fieldNode) throws ConversionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
     {
-        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
         FieldType fieldType = getFieldType(field);
         Object fieldValue = null;

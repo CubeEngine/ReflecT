@@ -33,13 +33,11 @@ import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
 public class DateConverter implements Converter<Date>
 {
-    @Override
     public Node toNode(Date object) throws ConversionException
     {
         return wrapIntoNode(object.toString());
     }
 
-    @Override
     public Date fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

@@ -32,13 +32,9 @@ import de.cubeisland.engine.configuration.convert.converter.generic.CollectionCo
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.file.Path;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.Iterator;
@@ -60,7 +56,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     }
 
     private final Codec codec;
-    private Path path;
+    private File file;
 
     public Configuration()
     {
@@ -103,7 +99,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 throw new IllegalStateException("Something went wrong!", e);
             }
         }
-        catch (ReflectiveOperationException ex)
+        catch (Exception ex)
         {
             throw new InvalidConfigurationException("Could not instantiate the Codec! " + codecClass, ex);
         }
@@ -115,7 +111,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param target the Path to the file to save into
      */
-    public void save(Path target)
+    public void save(File target)
     {
         if (target == null)
         {
@@ -146,14 +142,36 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public boolean reload(boolean save) throws InvalidConfigurationException
     {
-        if (this.path == null)
+        if (this.file == null)
         {
             throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
         }
         boolean result = false;
-        try (InputStream is = new FileInputStream(this.path.toFile()))
+        try
         {
-            this.loadFrom(is);
+            InputStream is = new FileInputStream(this.file);
+            try
+            {
+                this.loadFrom(is);
+            }
+            catch (RuntimeException e)
+            {
+                throw new InvalidConfigurationException("Could not load configuration from file!", e);
+            }
+            finally
+            {
+                try
+                {
+                    is.close();
+                }
+                catch (IOException ignored)
+                {}
+            }
+            if (save)
+            {
+                this.save();
+            }
+
         }
         catch (FileNotFoundException e)
         {
@@ -165,14 +183,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             {
                 throw new InvalidConfigurationException("Could not load configuration from file!", e);
             }
-        }
-        catch (Exception e)
-        {
-            throw new InvalidConfigurationException("Could not load configuration from file!", e);
-        }
-        if (save)
-        {
-            this.save();
         }
         return result;
     }
@@ -186,7 +196,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         assert is != null : "You hae to provide a InputStream to load from";
         this.showLoadErrors(this.codec.load(this, is));//load config in maps -> updates -> sets fields
-        this.onLoaded(path);
+        this.onLoaded(file);
     }
 
     protected void showLoadErrors(Collection<ErrorNode> errors)
@@ -206,7 +216,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void save()
     {
-        this.save(this.path);
+        this.save(this.file);
     }
 
     /**
@@ -222,12 +232,12 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     /**
      * Sets the path to load from
      *
-     * @param path the path the configuration will load from
+     * @param file the path the configuration will load from
      */
-    public final void setPath(Path path)
+    public final void setFile(File file)
     {
-        assert path != null: "The file must not be null!";
-        this.path = path;
+        assert file != null: "The file must not be null!";
+        this.file = file;
     }
 
     /**
@@ -235,21 +245,21 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @return the path of this config
      */
-    public final Path getPath()
+    public final File getFile()
     {
-        return this.path;
+        return this.file;
     }
 
     /**
      * This method gets called right after the configuration got loaded.
      */
-    public void onLoaded(Path loadedFrom)
+    public void onLoaded(File loadedFrom)
     {}
 
     /**
      * This method gets called right after the configuration get saved.
      */
-    public void onSaved(Path savedTo)
+    public void onSaved(File savedTo)
     {}
 
     /**
@@ -295,31 +305,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     }
 
     /**
-     * Loads the configuration from given path and optionally saves it afterwards
-     *
-     * @param clazz the configurations class
-     * @param path the path to load from and save to
-     * @param save whether to save the configuration or not
-     * @return the loaded Configuration
-     */
-    public static <T extends Configuration> T load(Class<T> clazz, Path path, boolean save)
-    {
-        return load(clazz, path.toFile(), save);
-    }
-
-    /**
-     * Loads the configuration from given path and saves it afterwards
-     *
-     * @param clazz the configurations class
-     * @param path the path to load from and save to
-     * @return the loaded Configuration
-     */
-    public static <T extends Configuration> T load(Class<T> clazz, Path path)
-    {
-        return load(clazz, path, true);
-    }
-
-    /**
      * Loads the configuration from given file and optionally saves it afterwards
      *
      * @param clazz the configurations class
@@ -330,7 +315,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public static <T extends Configuration> T load(Class<T> clazz, File file, boolean save)
     {
         T config = create(clazz); // loading
-        config.setPath(file.toPath()); // IMPORTANT TO SET BEFORE LOADING!
+        config.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
         config.reload(save);
         return config;
     }
@@ -371,7 +356,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
 
     static
     {
-        converters = new ConcurrentHashMap<>();
+        converters = new ConcurrentHashMap<Class, Converter>();
         mapConverter = new MapConverter();
         arrayConverter = new ArrayConverter();
         collectionConverter = new CollectionConverter();
@@ -496,35 +481,35 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         if (o instanceof Byte || o.getClass() == byte.class)
         {
-            return new ByteNode((byte)o);
+            return new ByteNode((Byte)o);
         }
         if (o instanceof Short || o.getClass() == short.class)
         {
-            return new ShortNode((short)o);
+            return new ShortNode((Short)o);
         }
         if (o instanceof Integer || o.getClass() == int.class)
         {
-            return new IntNode((int)o);
+            return new IntNode((Integer)o);
         }
         if (o instanceof Long || o.getClass() == long.class)
         {
-            return new LongNode((long)o);
+            return new LongNode((Long)o);
         }
         if (o instanceof Float || o.getClass() == float.class)
         {
-            return new FloatNode((float)o);
+            return new FloatNode((Float)o);
         }
         if (o instanceof Double || o.getClass() == double.class)
         {
-            return new DoubleNode((double)o);
+            return new DoubleNode((Double)o);
         }
         if (o instanceof Boolean || o.getClass() == boolean.class)
         {
-            return BooleanNode.of((boolean)o);
+            return BooleanNode.of((Boolean)o);
         }
         if (o instanceof Character || o.getClass() == char.class)
         {
-            return new CharNode((char)o);
+            return new CharNode((Character)o);
         }
         throw new IllegalArgumentException("Cannot wrap into Node: " + o.getClass());
 
@@ -599,19 +584,18 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 {
                     if (node instanceof ListNode)
                     {
-                        return (T)collectionConverter.fromNode(ptype, (ListNode)node);
+                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(ptype, (ListNode)node);
                     }
                     else
                     {
                         throw new ConversionException("Cannot convert to Collection! Node is not a ListNode!");
                     }
-
                 }
                 else if (Map.class.isAssignableFrom((Class)ptype.getRawType()))
                 {
                     if (node instanceof MapNode)
                     {
-                        return (T)mapConverter.fromNode(ptype, (MapNode)node);
+                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(ptype, (MapNode)node);
                     }
                     else
                     {

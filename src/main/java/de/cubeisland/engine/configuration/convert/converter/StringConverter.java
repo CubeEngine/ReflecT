@@ -29,7 +29,6 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class StringConverter extends BasicConverter<String>
 {
-    @Override
     public String fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

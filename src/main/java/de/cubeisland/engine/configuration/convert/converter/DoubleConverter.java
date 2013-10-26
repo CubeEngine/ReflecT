@@ -30,7 +30,6 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class DoubleConverter extends BasicConverter<Double>
 {
-    @Override
     public Double fromNode(Node node) throws ConversionException
     {
         if (node instanceof DoubleNode)

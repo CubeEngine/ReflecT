@@ -23,6 +23,7 @@
 package de.cubeisland.engine.configuration.node;
 
 import de.cubeisland.engine.configuration.ConfigPath;
+import de.cubeisland.engine.configuration.StringUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -31,9 +32,9 @@ import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
 public class MapNode extends ParentNode<Map<String,Node>>
 {
-    private LinkedHashMap<String, Node> mappedNodes = new LinkedHashMap<>();
-    private HashMap<String, String> keys = new HashMap<>(); // LowerCase trimmed -> Original
-    private LinkedHashMap<Node, String> reverseMappedNodes = new LinkedHashMap<>();
+    private LinkedHashMap<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
+    private HashMap<String, String> keys = new HashMap<String, String>(); // LowerCase trimmed -> Original
+    private LinkedHashMap<Node, String> reverseMappedNodes = new LinkedHashMap<Node, String>();
 
     /**
      * Creates a MapNode with given map as values.
@@ -90,7 +91,7 @@ public class MapNode extends ParentNode<Map<String,Node>>
     public Node setExactNode(String key, Node node)
     {
         String loweredKey = key.trim().toLowerCase();
-        if (loweredKey.isEmpty())
+        if (StringUtils.isEmpty(loweredKey))
         {
             throw new IllegalArgumentException("The key for the following node is empty!" + node.toString());
         }
@@ -172,7 +173,7 @@ public class MapNode extends ParentNode<Map<String,Node>>
     @Override
     public void cleanUpEmptyNodes()
     {
-        Set<String> nodesToRemove = new HashSet<>();
+        Set<String> nodesToRemove = new HashSet<String>();
         for (String key : this.mappedNodes.keySet())
         {
             if (this.mappedNodes.get(key) instanceof ParentNode)
@@ -204,7 +205,10 @@ public class MapNode extends ParentNode<Map<String,Node>>
 
     public String getFirstKey()
     {
-        if (this.mappedNodes.isEmpty()) return null;
+        if (this.mappedNodes.isEmpty())
+        {
+            return null;
+        }
         return this.mappedNodes.keySet().iterator().next();
     }
 }

@@ -79,9 +79,11 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
+                    <fork>true</fork>
+                    <compilerVersion>1.6</compilerVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                     <optimize>true</optimize>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
@@ -122,7 +124,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.1</version>
+                        <version>1.4</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

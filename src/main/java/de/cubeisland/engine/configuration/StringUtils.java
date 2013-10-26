@@ -86,4 +86,9 @@ public class StringUtils {
         }
         return path.toString();
     }
+
+    public static boolean isEmpty(String string)
+    {
+        return "".equals(string);
+    }
 }

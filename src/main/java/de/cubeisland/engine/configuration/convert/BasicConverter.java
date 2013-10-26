@@ -28,7 +28,6 @@ import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
 
 public abstract class BasicConverter<T> implements Converter<T>
 {
-    @Override
     @SuppressWarnings("unchecked")
     public Node toNode(T object) throws ConversionException
     {

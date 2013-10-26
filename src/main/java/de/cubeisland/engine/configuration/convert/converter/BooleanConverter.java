@@ -29,7 +29,6 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class BooleanConverter extends BasicConverter<Boolean>
 {
-    @Override
     public Boolean fromNode(Node node) throws ConversionException
     {
         if (node instanceof BooleanNode)

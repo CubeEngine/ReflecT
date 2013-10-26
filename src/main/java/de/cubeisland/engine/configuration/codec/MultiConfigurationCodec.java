@@ -30,9 +30,9 @@ import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.*;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,7 +52,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param config the configuration to save
      * @param file the file to save into
      */
-    public void saveChildConfig(MultiConfiguration parentConfig, MultiConfiguration config, Path file)
+    public void saveChildConfig(MultiConfiguration parentConfig, MultiConfiguration config, File file)
     {
         try
         {
@@ -107,7 +107,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         {
             throw new IllegalArgumentException("Parent and child-section have to be the same type of section!");
         }
-        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
             if (isConfigField(field))
@@ -174,7 +174,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
     @SuppressWarnings("unchecked")
     protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
     {
-        Collection<ErrorNode> errorNodes = new HashSet<>();
+        Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
         FieldType fieldType = getFieldType(field);
         Object fieldValue = null;

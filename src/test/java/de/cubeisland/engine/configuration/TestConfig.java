@@ -103,18 +103,17 @@ public class TestConfig extends YamlConfiguration
 
         @Comment("map in collection")
         public Collection<Map<String,String>> mapInCollection;
+
         {
-            {
-                Map<String,String> map = new HashMap<>();
-                map.put("abc", "123");
-                map.put("def", "456");
-                mapInCollection = new ArrayList<>();
-                mapInCollection.add(map);
-                map = new HashMap<>();
-                map.put("ghi", "789");
-                map.put("jkl", "012");
-                mapInCollection.add(map);
-            }
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("abc", "123");
+            map.put("def", "456");
+            mapInCollection = new ArrayList<Map<String,String>>();
+            mapInCollection.add(map);
+            map = new HashMap<String, String>();
+            map.put("ghi", "789");
+            map.put("jkl", "012");
+            mapInCollection.add(map);
         }
     }
 
@@ -133,8 +132,8 @@ public class TestConfig extends YamlConfiguration
         public LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> mapinmapinmap = new LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>>()
         {
             {
-                LinkedHashMap <String, LinkedHashMap<String, Integer>> map1 = new LinkedHashMap<>();
-                LinkedHashMap<String, Integer> map2 = new LinkedHashMap<>();
+                LinkedHashMap <String, LinkedHashMap<String, Integer>> map1 = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
+                LinkedHashMap<String, Integer> map2 = new LinkedHashMap<String, Integer>();
                 map2.put("oneTwoThree", 123);
                 map1.put("inmap", map2);
                 map1.put("inmap2", new LinkedHashMap<String, Integer>());
