@@ -22,23 +22,13 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.ConfigPath;
-import de.cubeisland.engine.configuration.Configuration;
-import de.cubeisland.engine.configuration.FieldType;
-import de.cubeisland.engine.configuration.InvalidConfigurationException;
-import de.cubeisland.engine.configuration.Section;
-import de.cubeisland.engine.configuration.StringUtils;
+import de.cubeisland.engine.configuration.*;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.ErrorNode;
-import de.cubeisland.engine.configuration.node.ListNode;
-import de.cubeisland.engine.configuration.node.MapNode;
-import de.cubeisland.engine.configuration.node.Node;
-import de.cubeisland.engine.configuration.node.NullNode;
-import de.cubeisland.engine.configuration.node.StringNode;
+import de.cubeisland.engine.configuration.node.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,10 +45,7 @@ import java.util.Map.Entry;
 
 import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
 import static de.cubeisland.engine.configuration.Configuration.convertToNode;
-import static de.cubeisland.engine.configuration.FieldType.NORMAL;
-import static de.cubeisland.engine.configuration.FieldType.SECTION;
-import static de.cubeisland.engine.configuration.FieldType.SECTION_COLLECTION;
-import static de.cubeisland.engine.configuration.FieldType.SECTION_MAP;
+import static de.cubeisland.engine.configuration.FieldType.*;
 
 /**
  * This abstract Codec can be implemented to read and write configurations.
@@ -214,6 +201,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
+    @SuppressWarnings("unchecked")
     protected Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
@@ -226,7 +214,21 @@ public abstract class ConfigurationCodec
                 {
                     errorNodes.add((ErrorNode)fieldNode);
                 }
-                else if (!(fieldNode instanceof NullNode)) // Empty Node => default value
+                else if (fieldNode instanceof NullNode) // Empty Node => default value
+                {
+                    try
+                    {
+                        if (field.get(section) == null && field.getType().isAssignableFrom(Section.class)) // if section is not yet set
+                        {
+                            field.set(section, newSectionInstance(section, (Class<? extends Section>) field.getType())); // create a new instance
+                        }
+                    }
+                    catch (ReflectiveOperationException e)
+                    {
+                        throw InvalidConfigurationException.of("Error while creating unset section!", this.getPathFor(field), section.getClass(), field, e);
+                    }
+                }
+                else
                 {
                     try
                     {
