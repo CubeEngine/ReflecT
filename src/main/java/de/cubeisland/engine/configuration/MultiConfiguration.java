@@ -188,6 +188,16 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     }
 
     /**
+     * Marks a field as not being inherited from the parent configuration and thus saved into file
+     *
+     * @param field the not inherited field
+     */
+    public void removeInheritedField(Field field)
+    {
+        this.inheritedFields.remove(field);
+    }
+
+    /**
      * Returns whether the given field-value was inherited from a parent-configuration
      *
      * @param field the field to check
