@@ -206,6 +206,6 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
      */
     public boolean isChildConfiguration()
     {
-        return this.parent == null;
+        return this.parent != null;
     }
 }
