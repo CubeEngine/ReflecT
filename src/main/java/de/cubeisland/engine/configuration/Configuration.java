@@ -173,10 +173,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 catch (IOException ignored)
                 {}
             }
-            if (save)
-            {
-                this.save();
-            }
         }
         catch (FileNotFoundException e)
         {
@@ -188,6 +184,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             {
                 throw new InvalidConfigurationException("Could not load configuration from file!", e);
             }
+        }
+        if (save)
+        {
+            this.save();
         }
         return result;
     }
@@ -544,7 +544,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         if (object == null)
         {
-            return null;
+            return NullNode.emptyNode();
         }
         if (object.getClass().isArray())
         {

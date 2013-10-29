@@ -54,7 +54,7 @@ public class CollectionConverter
     public ListNode toNode(Collection collection) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
-        if (collection.isEmpty())
+        if (collection == null || collection.isEmpty())
         {
             return result;
         }

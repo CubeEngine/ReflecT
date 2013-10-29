@@ -38,7 +38,7 @@ public class ArrayConverter
     public ListNode toNode(Object[] array) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
-        if (array.length == 0)
+        if (array == null || array.length == 0)
         {
             return result;
         }

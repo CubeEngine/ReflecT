@@ -50,7 +50,7 @@ public class MapConverter
     public MapNode toNode(Map<?, ?> map) throws ConversionException
     {
         MapNode result = MapNode.emptyMap();
-        if (map.isEmpty())
+        if (map == null || map.isEmpty())
         {
             return result;
         }
