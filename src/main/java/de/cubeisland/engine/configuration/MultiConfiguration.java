@@ -136,15 +136,15 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
                     {}
                 }
                 this.onLoaded(this.getFile());
-                if (save)
-                {
-                    this.saveChild();
-                }
             }
             catch (FileNotFoundException e) // file not found load from parent & save child
             {
                 result = true;
                 this.showLoadErrors(this.getCodec().loadChildConfig(this, null));
+            }
+            if (save)
+            {
+                this.saveChild();
             }
             return result;
         }
