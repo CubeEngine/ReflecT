@@ -261,7 +261,7 @@ public abstract class ConfigurationCodec
         }
         else
         {
-            return subSectionClass.getDeclaredConstructor(parentSection.getClass()).newInstance(parentSection);
+            return subSectionClass.getDeclaredConstructor(subSectionClass.getEnclosingClass()).newInstance(parentSection);
         }
     }
 
