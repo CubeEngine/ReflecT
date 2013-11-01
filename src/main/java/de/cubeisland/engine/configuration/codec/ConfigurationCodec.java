@@ -134,7 +134,7 @@ public abstract class ConfigurationCodec
     protected static FieldType getFieldType(Field field)
     {
         FieldType fieldType = NORMAL;
-        if (Section.class.isAssignableFrom(field.getType()))
+        if (isSectionClass(field.getType()))
         {
             return SECTION;
         }
@@ -145,7 +145,7 @@ public abstract class ConfigurationCodec
             if (Collection.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType1 = pType.getActualTypeArguments()[0];
-                if (subType1 instanceof Class && Section.class.isAssignableFrom((Class)subType1))
+                if (subType1 instanceof Class && isSectionClass((Class) subType1))
                 {
                     return SECTION_COLLECTION;
                 }
@@ -154,7 +154,7 @@ public abstract class ConfigurationCodec
             if (Map.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType2 = pType.getActualTypeArguments()[1];
-                if (subType2 instanceof Class && Section.class.isAssignableFrom((Class)subType2))
+                if (subType2 instanceof Class && isSectionClass((Class) subType2))
                 {
                     return SECTION_MAP;
                 }
@@ -218,7 +218,7 @@ public abstract class ConfigurationCodec
                 {
                     try
                     {
-                        if (field.get(section) == null && field.getType().isAssignableFrom(Section.class)) // if section is not yet set
+                        if (field.get(section) == null && isSectionClass(field.getType())) // if section is not yet set
                         {
                             field.set(section, newSectionInstance(section, (Class<? extends Section>) field.getType())); // create a new instance
                         }
@@ -242,6 +242,11 @@ public abstract class ConfigurationCodec
             }
         }
         return errorNodes;
+    }
+
+    protected static boolean isSectionClass(Class clazz)
+    {
+        return Section.class.isAssignableFrom(clazz);
     }
 
     protected static Section newSectionInstance(Section parentSection, Class<? extends Section> subSectionClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
@@ -412,6 +417,7 @@ public abstract class ConfigurationCodec
                 if (fieldValue == null)
                 {
                     fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType()); // You do not need to instantiate sections
+                    field.set(section, fieldValue);
                 }
                 node = this.convertSection((Section)fieldValue);
                 break;
