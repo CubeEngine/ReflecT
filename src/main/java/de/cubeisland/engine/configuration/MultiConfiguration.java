@@ -110,7 +110,7 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
     }
 
     @Override
-    public boolean reload(boolean save) throws InvalidConfigurationException
+    public boolean reload(boolean save)
     {
         if (this.isChildConfiguration()) // This is a child-config!
         {
@@ -121,6 +121,10 @@ public class MultiConfiguration<ConfigCodec extends MultiConfigurationCodec> ext
                 try
                 {
                     this.showLoadErrors(this.getCodec().loadChildConfig(this, is));
+                }
+                catch (InvalidConfigurationException e)
+                {
+                    throw e;
                 }
                 catch (RuntimeException e)
                 {
