@@ -103,7 +103,7 @@ public abstract class ConfigurationCodec
      * @param config the configuration
      * @throws IOException
      */
-    abstract void save(MapNode node, OutputStream os, Configuration config) throws IOException;
+    protected abstract void save(MapNode node, OutputStream os, Configuration config) throws IOException;
 
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
@@ -111,7 +111,7 @@ public abstract class ConfigurationCodec
      * @param is the InputStream to load from
      * @param config
      */
-    abstract MapNode load(InputStream is, Configuration config);
+    protected abstract MapNode load(InputStream is, Configuration config);
 
     // HELPER Methods
 
