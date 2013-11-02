@@ -25,16 +25,10 @@ package de.cubeisland.engine.configuration.codec;
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.StringUtils;
-import de.cubeisland.engine.configuration.node.ListNode;
-import de.cubeisland.engine.configuration.node.MapNode;
-import de.cubeisland.engine.configuration.node.Node;
-import de.cubeisland.engine.configuration.node.NullNode;
-import de.cubeisland.engine.configuration.node.StringNode;
+import de.cubeisland.engine.configuration.node.*;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.reader.ReaderException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,44 +50,16 @@ public class YamlCodec extends MultiConfigurationCodec
     private static final String QUOTE = "'";
 
     @Override
-    public String getExtension()
+    public final String getExtension()
     {
         return "yml";
     }
 
-    @Override
-    protected void saveIntoFile(Configuration config, MapNode node, File file) throws IOException
-    {
-        OutputStream os = new FileOutputStream(file);
-        try
-        {
-            OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
-            if (config.head() != null)
-            {
-                writer.append("# ").append(StringUtils.implode("\n# ", config.head())).append(LINE_BREAK).append(LINE_BREAK);
-            }
-            convertNode(writer, node);
-            if (config.tail() != null)
-            {
-                writer.append("# ").append(StringUtils.implode("\n# ", config.tail()));
-            }
-            writer.flush();
-            writer.close();
-        }
-        finally
-        {
-            try
-            {
-                os.close();
-            }
-            catch (IOException ignored)
-            {}
-        }
-    }
+    // Configuration loading Method
 
     @Override
     @SuppressWarnings("unchecked")
-    public MapNode loadFromInputStream(InputStream is)
+    protected final MapNode load(InputStream is, Configuration config)
     {
         MapNode values;
         try
@@ -120,21 +86,39 @@ public class YamlCodec extends MultiConfigurationCodec
         return values;
     }
 
-    /**
-     * Serializes the values in the map
-     *
-     * @param writer the Output to write into
-     */
-    private static void convertNode(OutputStreamWriter writer, MapNode baseNode) throws IOException
+    // Configuration saving Methods
+
+    @Override
+    protected final void save(MapNode node, OutputStream os, Configuration config) throws IOException
     {
-        convertMapNode(writer, baseNode, 0, false);
+        try
+        {
+            OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
+            if (config.head() != null)
+            {
+                writer.append("# ").append(StringUtils.implode("\n# ", config.head())).append(LINE_BREAK).append(LINE_BREAK);
+            }
+            convertMapNode(writer, node, 0, false);
+            if (config.tail() != null)
+            {
+                writer.append("# ").append(StringUtils.implode("\n# ", config.tail()));
+            }
+            writer.flush();
+            writer.close();
+        }
+        finally
+        {
+            os.close();
+        }
     }
 
     /**
-     * Serializes a single value
+     * Serializes a single <code>Node</code> that is NOT a <code>ParentNode</code>
      *
-     * @param value  the value at given path
+     * @param writer the OutputStreamWriter to serialize into
+     * @param value the Node to serialize
      * @param offset the current offset
+     * @throws IOException
      */
     private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
@@ -169,21 +153,23 @@ public class YamlCodec extends MultiConfigurationCodec
     }
 
     /**
-     * Serializes the values in the map
+     * Serializes the values in the <code>MapNode</code>
      *
-     * @param values       the values at given path
-     * @param offset       the current offset
-     * @param inCollection true if directly under a collection
+     * @param writer the OutputStreamWriter to serialize into
+     * @param value the MapNode to serialize
+     * @param offset the current offset
+     * @param inList true if currently directly under a ListNode
+     * @throws IOException
      */
-    private static void convertMapNode(OutputStreamWriter writer, MapNode values, int offset, boolean inCollection) throws IOException
+    private static void convertMapNode(OutputStreamWriter writer, MapNode value, int offset, boolean inList) throws IOException
     {
-        Map<String, Node> map = values.getMappedNodes();
+        Map<String, Node> map = value.getMappedNodes();
         boolean endOfMapOrList = false;
         boolean first = true;
         for (Entry<String, Node> entry : map.entrySet())
         {
             boolean hasLine = false;
-            if (endOfMapOrList && !inCollection)
+            if (endOfMapOrList && !inList)
             {
                 writer.append(LINE_BREAK);
                 hasLine = true;
@@ -199,11 +185,11 @@ public class YamlCodec extends MultiConfigurationCodec
                 sb.append(comment);
             }
 
-            if (!(first && inCollection))
+            if (!(first && inList))
             {
                 sb.append(getOffset(offset)); // Map in collection first does not get offset
             }
-            sb.append(values.getOriginalKey(entry.getKey())).append(": ");
+            sb.append(value.getOriginalKey(entry.getKey())).append(": ");
             writer.append(sb.toString());
             // Now convert the value
             if (entry.getValue() instanceof MapNode) // Map-Node?
@@ -240,6 +226,14 @@ public class YamlCodec extends MultiConfigurationCodec
         }
     }
 
+    /**
+     * Serializes the values in the <code>ListNode</code>
+     *
+     * @param writer the OutputStreamWriter to serialize into
+     * @param value the ListNode to serialize
+     * @param offset the current offset
+     * @throws IOException
+     */
     private static void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
     {
         writer.append(LINE_BREAK);
@@ -276,6 +270,8 @@ public class YamlCodec extends MultiConfigurationCodec
         }
     }
 
+    // HELPER Methods
+
     /**
      * Returns the offset as String
      *
@@ -293,6 +289,13 @@ public class YamlCodec extends MultiConfigurationCodec
         return off.toString();
     }
 
+    /**
+     * Builds the a comment
+     *
+     * @param comments the comment-lines
+     * @param offset the current offset
+     * @return the built comment
+     */
     private static String buildComment(String[] comments, int offset)
     {
         if (comments == null || comments.length == 0)
@@ -316,6 +319,12 @@ public class YamlCodec extends MultiConfigurationCodec
         return sb.toString();
     }
 
+    /**
+     * Returns whether a string needs to be quoted in YAML
+     *
+     * @param s the string to check
+     * @return true if the given string needs quoting
+     */
     private static boolean needsQuote(String s)
     {
         return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`") || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|") || s

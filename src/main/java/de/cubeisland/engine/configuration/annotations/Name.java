@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used declare a field to be loaded by the configuration.
+ * This annotation is used set manually the path of a field in a {@link de.cubeisland.engine.configuration.Section}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

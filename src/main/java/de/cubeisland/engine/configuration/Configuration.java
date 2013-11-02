@@ -439,7 +439,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * @return a matching converter or null if not found
      */
     @SuppressWarnings("unchecked")
-    public static <T> Converter<T> matchConverter(Class<? extends T> objectClass)
+    public static <T> Converter<T> matchConverter(Class<? extends T> objectClass) throws ConverterNotFoundException
     {
         if (objectClass == null)
         {

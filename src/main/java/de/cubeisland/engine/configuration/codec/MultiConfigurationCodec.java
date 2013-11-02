@@ -22,10 +22,7 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.FieldType;
-import de.cubeisland.engine.configuration.InvalidConfigurationException;
-import de.cubeisland.engine.configuration.MultiConfiguration;
-import de.cubeisland.engine.configuration.Section;
+import de.cubeisland.engine.configuration.*;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.ErrorNode;
@@ -35,6 +32,7 @@ import de.cubeisland.engine.configuration.node.NullNode;
 import de.cubeisland.engine.configuration.node.StringNode;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -52,6 +50,22 @@ import static de.cubeisland.engine.configuration.Configuration.convertToNode;
  */
 public abstract class MultiConfigurationCodec extends ConfigurationCodec
 {
+    // PUBLIC Methods
+
+    /**
+     * Loads in the given configuration using the InputStream
+     * <p>if the configuration has no parent set it will be saved normally!
+     *
+     * @param config the MultiConfiguration to load
+     * @param is     the InputStream to load from
+     *
+     * @return a collection of all erroneous Nodes
+     */
+    public final Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is)
+    {
+        return dumpIntoChildSection(config.getParent(), config, this.load(is, config), config);
+    }
+
     /**
      * Saves a configuration with another configuration as parent
      *
@@ -59,7 +73,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param config       the configuration to save
      * @param file         the file to save into
      */
-    public void saveChildConfig(MultiConfiguration parentConfig, MultiConfiguration config, File file)
+    public final void saveChildConfig(MultiConfiguration parentConfig, MultiConfiguration config, File file)
     {
         try
         {
@@ -67,7 +81,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             {
                 throw new IllegalStateException("Tried to save config without File.");
             }
-            this.saveIntoFile(config, this.convertSection(parentConfig, config, config), file);
+            this.save(convertChildSection(parentConfig, config, config), new FileOutputStream(file), config);
         }
         catch (Exception ex)
         {
@@ -75,25 +89,9 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         }
     }
 
-    /**
-     *
-     *
-     * @param config the config to load
-     * @param is the InputStream to load from
-     */
+    // PACKAGE-PRIVATE STATIC Methods
 
-    /**
-     * Loads in the given configuration using the InputStream
-     *
-     * @param config the MultiConfiguration to load
-     * @param is     the InputStream to load from
-     *
-     * @return a collection of all erroneous Nodes
-     */
-    public Collection<ErrorNode> loadChildConfig(MultiConfiguration config, InputStream is)
-    {
-        return this.dumpIntoSection(config.getParent(), config, this.loadFromInputStream(is), config);
-    }
+    // Configuration loading Methods
 
     /**
      * Dumps the contents of the MapNode into the fields of the section using the parentSection as backup if a node is not given
@@ -105,12 +103,11 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-
-    protected Collection<ErrorNode> dumpIntoSection(Section parentSection, Section section, MapNode currentNode, MultiConfiguration config)
+    final static Collection<ErrorNode> dumpIntoChildSection(Section parentSection, Section section, MapNode currentNode, MultiConfiguration config)
     {
         if (parentSection == null) // Not a child Config! Use default behaviour
         {
-            return this.dumpIntoSection(section, currentNode);
+            return dumpIntoSection(section, currentNode);
         }
         if (!parentSection.getClass().equals(section.getClass()))
         {
@@ -121,7 +118,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         {
             if (isConfigField(field))
             {
-                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
+                Node fieldNode = currentNode.getNodeAt(getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
                     errorNodes.add((ErrorNode)fieldNode);
@@ -132,17 +129,17 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     {
                         if (fieldNode instanceof NullNode)
                         {
-                            errorNodes.addAll(this.dumpParentIntoField(parentSection, section, field));
+                            errorNodes.addAll(dumpParentIntoField(parentSection, section, field));
                             config.addinheritedField(field);
                         }
                         else
                         {
-                            errorNodes.addAll(this.dumpIntoField(parentSection, section, field, fieldNode, config));
+                            errorNodes.addAll(dumpIntoChildField(parentSection, section, field, fieldNode, config));
                         }
                     }
                     catch (Exception e)
                     {
-                        throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", this.getPathFor(field), section.getClass(), field, e);
+                        throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", getPathFor(field), section.getClass(), field, e);
                     }
                 }
             }
@@ -159,13 +156,13 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    protected Collection<ErrorNode> dumpParentIntoField(Section parentSection, Section section, Field field) throws ConversionException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException
+    final static Collection<ErrorNode> dumpParentIntoField(Section parentSection, Section section, Field field) throws ConversionException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException
     {
         if (getFieldType(field) == FieldType.SECTION_COLLECTION)
         {
             throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
         }
-        return this.dumpIntoField(section, field, this.convertField(field, parentSection)); // convert parent in node and dump back in
+        return dumpIntoField(section, field, convertField(field, parentSection)); // convert parent in node and dump back in
     }
 
     /**
@@ -180,7 +177,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    protected Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
+    final static Collection<ErrorNode> dumpIntoChildField(Section parentSection, Section section, Field field, Node fieldNode, MultiConfiguration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -197,10 +194,10 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                 }
                 break;
             case SECTION:
-                fieldValue = newSectionInstance(section, (Class<? extends Section>)field.getType());
+                fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), section);
                 if (fieldNode instanceof MapNode)
                 {
-                    errorNodes.addAll(this.dumpIntoSection((Section)field.get(parentSection), (Section)fieldValue, (MapNode)fieldNode, config));
+                    errorNodes.addAll(dumpIntoChildSection((Section) field.get(parentSection), (Section) fieldValue, (MapNode) fieldNode, config));
                 }
                 else
                 {
@@ -222,14 +219,14 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
                         Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType)type).getActualTypeArguments()[0]);
-                        Section value = newSectionInstance(section, subSectionClass);
+                        Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(parentSection, section, MapNode.emptyMap(), config));
+                            errorNodes.addAll(dumpIntoChildSection(parentSection, section, MapNode.emptyMap(), config));
                         }
                         else if (entry.getValue() instanceof MapNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), config));
+                            errorNodes.addAll(dumpIntoChildSection(mappedParentSections.get(key), value, (MapNode) entry.getValue(), config));
                         }
                         else
                         {
@@ -247,6 +244,8 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
         return errorNodes;
     }
 
+    // Configuration saving Methods
+
     /**
      * Fills the map with values from the Fields to save
      *
@@ -254,12 +253,12 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
      * @param section       the config
      */
     @SuppressWarnings("unchecked")
-    public MapNode convertSection(Section parentSection, Section section, MultiConfiguration config)
+    private static MapNode convertChildSection(Section parentSection, Section section, MultiConfiguration config)
     {
         MapNode baseNode = MapNode.emptyMap();
         if (parentSection == null)
         {
-            return this.convertSection(section);
+            return convertSection(section);
         }
         if (!parentSection.getClass().equals(section.getClass()))
         {
@@ -274,7 +273,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
             }
             if (isConfigField(field))
             {
-                baseNode.setNodeAt(this.getPathFor(field), this.convertField(field, parentSection, section, config));
+                baseNode.setNodeAt(getPathFor(field), convertChildField(field, parentSection, section, config));
             }
         }
         baseNode.cleanUpEmptyNodes();
@@ -282,7 +281,7 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
     }
 
     @SuppressWarnings("unchecked")
-    protected Node convertField(Field field, Section parentSection, Section section, MultiConfiguration config)
+    private static Node convertChildField(Field field, Section parentSection, Section section, MultiConfiguration config)
     {
         try
         {
@@ -295,10 +294,10 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                     node = convertToNode(fieldValue);
                     break;
                 case SECTION:
-                    node = this.convertSection((Section)field.get(parentSection), (Section)fieldValue, config);
+                    node = convertChildSection((Section) field.get(parentSection), (Section) fieldValue, config);
                     break;
                 case SECTION_COLLECTION:
-                    throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", this.getPathFor(field), section.getClass(), field, null);
+                    throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null);
                 case SECTION_MAP:
                     node = MapNode.emptyMap();
                     Map<Object, Section> parentFieldMap = (Map<Object, Section>)field.get(parentSection);
@@ -308,21 +307,21 @@ public abstract class MultiConfigurationCodec extends ConfigurationCodec
                         Node keyNode = convertToNode(parentEntry.getKey());
                         if (keyNode instanceof StringNode)
                         {
-                            MapNode configNode = this.convertSection(parentEntry.getValue(), childFieldMap.get(parentEntry.getKey()), config);
+                            MapNode configNode = convertChildSection(parentEntry.getValue(), childFieldMap.get(parentEntry.getKey()), config);
                             ((MapNode)node).setNode((StringNode)keyNode, configNode);
                         }
                         else
                         {
-                            throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", this.getPathFor(field), section.getClass(), field, null);
+                            throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", getPathFor(field), section.getClass(), field, null);
                         }
                     }
             }
-            this.addComment(node, field);
+            addComment(node, field);
             return node;
         }
         catch (Exception e)
         {
-            throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", this.getPathFor(field), section.getClass(), field, e);
+            throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", getPathFor(field), section.getClass(), field, e);
         }
     }
 }

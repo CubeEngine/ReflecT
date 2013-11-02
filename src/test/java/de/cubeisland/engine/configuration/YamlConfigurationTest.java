@@ -44,6 +44,6 @@ public class YamlConfigurationTest extends TestCase
         config.save(file);
         loadConfig = Configuration.load(TestConfig.class, file);
         file.delete();
-        assertEquals(config.getCodec().convertSection(config).toString(), config.getCodec().convertSection(loadConfig).toString());
+        assertEquals(config.getCodec().convertConfiguration(config).toString(), config.getCodec().convertConfiguration(loadConfig).toString());
     }
 }

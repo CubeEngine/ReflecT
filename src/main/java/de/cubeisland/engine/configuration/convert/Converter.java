@@ -24,6 +24,9 @@ package de.cubeisland.engine.configuration.convert;
 
 import de.cubeisland.engine.configuration.node.Node;
 
+/**
+ * Provides Methods to convert a <code>T</code> into a <code>Node</code> and back
+ */
 public interface Converter<T extends Object>
 {
     /**

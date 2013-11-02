@@ -30,9 +30,7 @@ import de.cubeisland.engine.configuration.convert.converter.generic.CollectionCo
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.node.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -52,24 +50,26 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
+    // PUBLIC Methods
+
     /**
-     * Loads in the given configuration using the InputStream
+     * Loads in the given <code>Configuration</code> using the <code>InputStream</code>
      *
      * @param config the config to load
      * @param is     the InputStream to load from
      */
-    public Collection<ErrorNode> load(Configuration config, InputStream is)
+    public final Collection<ErrorNode> load(Configuration config, InputStream is)
     {
-        return this.dumpIntoSection(config, this.loadFromInputStream(is));
+        return dumpIntoSection(config, this.load(is, config));
     }
 
     /**
-     * Saves the configuration into given file
+     * Saves the <code>Configuration</code> into given <code>File</code>
      *
      * @param config the configuration to save
      * @param file   the file to save into
      */
-    public void save(Configuration config, File file)
+    public final void save(Configuration config, File file)
     {
         try
         {
@@ -77,7 +77,7 @@ public abstract class ConfigurationCodec
             {
                 throw new IllegalStateException("Tried to save config without File.");
             }
-            this.saveIntoFile(config, this.convertSection(config), file);
+            this.save(convertSection(config), new FileOutputStream(file), config);
         }
         catch (Exception ex)
         {
@@ -86,29 +86,34 @@ public abstract class ConfigurationCodec
     }
 
     /**
-     * Saves the configuration with the values contained in the Node into a file for given path
-     *
-     * @param config the configuration to save
-     * @param node   the Node containing all data to save
-     * @param file   the file to save into
-     *
-     * @throws IOException
-     */
-    protected abstract void saveIntoFile(Configuration config, MapNode node, File file) throws IOException;
-
-    /**
-     * Converts the inputStream into a readable Object
-     *
-     * @param is the InputStream
-     */
-    public abstract MapNode loadFromInputStream(InputStream is);
-
-    /**
      * Returns the FileExtension as String
      *
      * @return the fileExtension
      */
-    public abstract String getExtension();
+    abstract String getExtension();
+
+    // PROTECTED ABSTRACT Methods
+
+    /**
+     * Saves the values contained in the <code>MapNode</code> into a file
+     *
+     *
+     * @param node   the Node containing all data to save
+     * @param os   the file to save into
+     * @param config the configuration
+     * @throws IOException
+     */
+    abstract void save(MapNode node, OutputStream os, Configuration config) throws IOException;
+
+    /**
+     * Converts the <code>InputStream</code> into a <code>MapNode</code>
+     *
+     * @param is the InputStream to load from
+     * @param config
+     */
+    abstract MapNode load(InputStream is, Configuration config);
+
+    // HELPER Methods
 
     /**
      * Adds a comment to the given Node
@@ -116,7 +121,7 @@ public abstract class ConfigurationCodec
      * @param node  the Node to add the comment to
      * @param field the field possibly having a {@link Comment} annotation
      */
-    protected void addComment(Node node, Field field)
+    final static void addComment(Node node, Field field)
     {
         if (field.isAnnotationPresent(Comment.class))
         {
@@ -131,10 +136,10 @@ public abstract class ConfigurationCodec
      *
      * @return the Type of the field
      */
-    protected static FieldType getFieldType(Field field)
+    final static FieldType getFieldType(Field field)
     {
         FieldType fieldType = NORMAL;
-        if (isSectionClass(field.getType()))
+        if (SectionFactory.isSectionClass(field.getType()))
         {
             return SECTION;
         }
@@ -145,7 +150,7 @@ public abstract class ConfigurationCodec
             if (Collection.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType1 = pType.getActualTypeArguments()[0];
-                if (subType1 instanceof Class && isSectionClass((Class) subType1))
+                if (subType1 instanceof Class && SectionFactory.isSectionClass((Class) subType1))
                 {
                     return SECTION_COLLECTION;
                 }
@@ -154,7 +159,7 @@ public abstract class ConfigurationCodec
             if (Map.class.isAssignableFrom((Class)pType.getRawType()))
             {
                 Type subType2 = pType.getActualTypeArguments()[1];
-                if (subType2 instanceof Class && isSectionClass((Class) subType2))
+                if (subType2 instanceof Class && SectionFactory.isSectionClass((Class) subType2))
                 {
                     return SECTION_MAP;
                 }
@@ -170,21 +175,13 @@ public abstract class ConfigurationCodec
      *
      * @return whether the field is a field of the configuration that needs to be serialized
      */
-    protected static boolean isConfigField(Field field)
+    final static boolean isConfigField(Field field)
     {
         int modifiers = field.getModifiers();
-        if (Modifier.isStatic(modifiers)) // skip static fields
-        {
-            return false;
-        }
-        if (Modifier.isTransient(modifiers)) // skip transient fields
-        {
-            return false;
-        }
-        return true;
+        return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
-    protected ConfigPath getPathFor(Field field)
+    final static ConfigPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {
@@ -192,6 +189,8 @@ public abstract class ConfigurationCodec
         }
         return ConfigPath.forName(StringUtils.fieldNameToPath(field.getName()));
     }
+
+    // Configuration loading Methods
 
     /**
      * Dumps the contents of the MapNode into the fields of the section
@@ -202,14 +201,14 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    protected Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
+    final static Collection<ErrorNode> dumpIntoSection(Section section, MapNode currentNode)
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
             if (isConfigField(field))
             {
-                Node fieldNode = currentNode.getNodeAt(this.getPathFor(field));
+                Node fieldNode = currentNode.getNodeAt(getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
                 {
                     errorNodes.add((ErrorNode)fieldNode);
@@ -218,51 +217,30 @@ public abstract class ConfigurationCodec
                 {
                     try
                     {
-                        if (field.get(section) == null && isSectionClass(field.getType())) // if section is not yet set
+                        if (field.get(section) == null && SectionFactory.isSectionClass(field.getType())) // if section is not yet set
                         {
-                            field.set(section, newSectionInstance(section, (Class<? extends Section>) field.getType())); // create a new instance
+                            field.set(section, SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), section)); // create a new instance
                         }
                     }
                     catch (ReflectiveOperationException e)
                     {
-                        throw InvalidConfigurationException.of("Error while creating unset section!", this.getPathFor(field), section.getClass(), field, e);
+                        throw InvalidConfigurationException.of("Error while creating unset section!", getPathFor(field), section.getClass(), field, e);
                     }
                 }
                 else
                 {
                     try
                     {
-                        errorNodes.addAll(this.dumpIntoField(section, field, fieldNode));
+                        errorNodes.addAll(dumpIntoField(section, field, fieldNode));
                     }
                     catch (Exception e)
                     {
-                        throw InvalidConfigurationException.of("Error while dumping loaded section into fields!", this.getPathFor(field), section.getClass(), field, e);
+                        throw InvalidConfigurationException.of("Error while dumping loaded section into fields!", getPathFor(field), section.getClass(), field, e);
                     }
                 }
             }
         }
         return errorNodes;
-    }
-
-    protected static boolean isSectionClass(Class clazz)
-    {
-        return Section.class.isAssignableFrom(clazz);
-    }
-
-    protected static Section newSectionInstance(Section parentSection, Class<? extends Section> subSectionClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
-    {
-        if (subSectionClass.getEnclosingClass() == null)
-        {
-            return subSectionClass.newInstance();
-        }
-        else if (Modifier.isStatic(subSectionClass.getModifiers()))
-        {
-            return subSectionClass.newInstance();
-        }
-        else
-        {
-            return subSectionClass.getDeclaredConstructor(subSectionClass.getEnclosingClass()).newInstance(parentSection);
-        }
     }
 
     /**
@@ -275,7 +253,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    protected Collection<ErrorNode> dumpIntoField(Section section, Field field, Node fieldNode) throws ConversionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+    final static Collection<ErrorNode> dumpIntoField(Section section, Field field, Node fieldNode) throws ConversionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -289,8 +267,8 @@ public abstract class ConfigurationCodec
             case SECTION:
                 if (fieldNode instanceof MapNode)
                 {
-                    fieldValue = newSectionInstance(section, (Class<? extends Section>)field.getType());
-                    errorNodes.addAll(this.dumpIntoSection((Section)fieldValue, (MapNode)fieldNode));
+                    fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), section);
+                    errorNodes.addAll(dumpIntoSection((Section) fieldValue, (MapNode) fieldNode));
                 }
                 else
                 {
@@ -314,8 +292,8 @@ public abstract class ConfigurationCodec
                         }
                         if (listedNode instanceof MapNode)
                         {
-                            Section subSection = newSectionInstance(section, subSectionClass);
-                            errorNodes.addAll(this.dumpIntoSection(subSection, (MapNode)listedNode));
+                            Section subSection = SectionFactory.newSectionInstance(subSectionClass, section);
+                            errorNodes.addAll(dumpIntoSection(subSection, (MapNode) listedNode));
                             ((Collection<Section>)fieldValue).add(subSection);
                         }
                         else
@@ -341,14 +319,14 @@ public abstract class ConfigurationCodec
                     for (Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
                         Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType)type).getActualTypeArguments()[0]);
-                        Section value = newSectionInstance(section, subSectionClass);
+                        Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(value, MapNode.emptyMap()));
+                            errorNodes.addAll(dumpIntoSection(value, MapNode.emptyMap()));
                         }
                         else if (entry.getValue() instanceof MapNode)
                         {
-                            errorNodes.addAll(this.dumpIntoSection(value, (MapNode)entry.getValue()));
+                            errorNodes.addAll(dumpIntoSection(value, (MapNode) entry.getValue()));
                         }
                         else
                         {
@@ -370,12 +348,14 @@ public abstract class ConfigurationCodec
         return errorNodes;
     }
 
+    // Configuration saving Methods
+
     /**
      * Converts an entire Section into a MapNode
      *
      * @param section the section to convert
      */
-    public MapNode convertSection(Section section)
+    final static MapNode convertSection(Section section)
     {
         MapNode baseNode = MapNode.emptyMap();
         Class<? extends Section> configClass = section.getClass();
@@ -385,11 +365,11 @@ public abstract class ConfigurationCodec
             {
                 try
                 {
-                    baseNode.setNodeAt(this.getPathFor(field), this.convertField(field, section));
+                    baseNode.setNodeAt(getPathFor(field), convertField(field, section));
                 }
                 catch (Exception e)
                 {
-                    throw InvalidConfigurationException.of("Error while converting Section into a MapNode!", this.getPathFor(field), section.getClass(), field, e);
+                    throw InvalidConfigurationException.of("Error while converting Section into a MapNode!", getPathFor(field), section.getClass(), field, e);
                 }
             }
         }
@@ -403,7 +383,7 @@ public abstract class ConfigurationCodec
      * @param section the section containing the fields value
      */
     @SuppressWarnings("unchecked")
-    public Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException, NoSuchMethodException, InstantiationException, InvocationTargetException
+    final static Node convertField(Field field, Section section) throws IllegalAccessException, ConversionException, NoSuchMethodException, InstantiationException, InvocationTargetException
     {
         Object fieldValue = field.get(section);
         FieldType fieldType = getFieldType(field);
@@ -416,16 +396,16 @@ public abstract class ConfigurationCodec
             case SECTION:
                 if (fieldValue == null)
                 {
-                    fieldValue = newSectionInstance(section, (Class<? extends Section>) field.getType()); // You do not need to instantiate sections
+                    fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), section); // You do not need to instantiate sections
                     field.set(section, fieldValue);
                 }
-                node = this.convertSection((Section)fieldValue);
+                node = convertSection((Section)fieldValue);
                 break;
             case SECTION_COLLECTION:
                 node = ListNode.emptyList();
                 for (Section subSection : (Collection<Section>)fieldValue)
                 {
-                    MapNode listElemNode = this.convertSection(subSection);
+                    MapNode listElemNode = convertSection(subSection);
                     ((ListNode)node).addNode(listElemNode);
                 }
                 break;
@@ -437,16 +417,16 @@ public abstract class ConfigurationCodec
                     Node keyNode = convertToNode(entry.getKey());
                     if (keyNode instanceof StringNode)
                     {
-                        MapNode valueNode = this.convertSection(entry.getValue());
+                        MapNode valueNode = convertSection(entry.getValue());
                         ((MapNode)node).setNode((StringNode)keyNode, valueNode);
                     }
                     else
                     {
-                        throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", this.getPathFor(field), section.getClass(), field, null);
+                        throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", getPathFor(field), section.getClass(), field, null);
                     }
                 }
         }
-        this.addComment(node, field);
+        addComment(node, field);
         return node;
     }
 }

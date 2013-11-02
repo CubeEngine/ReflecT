@@ -24,16 +24,11 @@ package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
+import de.cubeisland.engine.configuration.codec.TestCodec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class TestConfig extends YamlConfiguration
+public class TestConfig extends MultiConfiguration<TestCodec>
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")

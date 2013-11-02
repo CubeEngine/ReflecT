@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert;
 
-public class ConverterNotFoundException extends RuntimeException
+public class ConverterNotFoundException extends ConversionException
 {
     public ConverterNotFoundException(String string)
     {

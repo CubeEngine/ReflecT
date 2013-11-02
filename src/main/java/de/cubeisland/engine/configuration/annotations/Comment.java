@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to add a comment to a value in a configuration
+ * This annotation is used to add a comment to a field in a {@link de.cubeisland.engine.configuration.Section}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -37,8 +37,7 @@ import java.lang.annotation.Target;
 public @interface Comment
 {
     /**
-     * Adds a Comment to this field This Annotation does nothing without the
-     * Option Annotation
+     * Adds a Comment to this field
      *
      * @return the comment
      */
