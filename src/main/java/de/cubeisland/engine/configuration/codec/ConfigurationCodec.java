@@ -90,7 +90,7 @@ public abstract class ConfigurationCodec
      *
      * @return the fileExtension
      */
-    abstract String getExtension();
+    public abstract String getExtension();
 
     // PROTECTED ABSTRACT Methods
 
