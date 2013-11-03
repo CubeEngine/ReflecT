@@ -116,6 +116,10 @@ public abstract class ConfigurationCodec
      */
     final static Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
     {
+        if (defaultSection == null) // Special case for Section in Maps
+        {
+            defaultSection = section;
+        }
         if (!defaultSection.getClass().equals(section.getClass()))
         {
             throw new IllegalArgumentException("defaultSection and section have to be the same type of section!");
@@ -270,6 +274,7 @@ public abstract class ConfigurationCodec
                 if (fieldNode instanceof MapNode)
                 {
                     fieldValue = MapConverter.getMapFor((ParameterizedType)type);
+                    if (((MapNode)fieldNode).isEmpty())
                     if (((MapNode)fieldNode).isEmpty())
                     {
                         break;
