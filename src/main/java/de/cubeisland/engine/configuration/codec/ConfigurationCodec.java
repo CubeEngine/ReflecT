@@ -300,10 +300,6 @@ public abstract class ConfigurationCodec
                     throw new InvalidConfigurationException("Node for mapped Sections is not a MapNode!\n" + fieldNode);
                 }
         }
-        if (fieldValue == null)
-        {
-            throw new IllegalStateException();
-        }
         field.set(section, fieldValue);
         return errorNodes;
     }
