@@ -137,7 +137,10 @@ public abstract class ConfigurationCodec
                         if (fieldNode instanceof NullNode)
                         {
                             errorNodes.addAll(dumpDefaultIntoField(defaultSection, section, field, config));
-                            config.addinheritedField(field);
+                            if (section != defaultSection)
+                            {
+                                config.addinheritedField(field);
+                            }
                         }
                         else
                         {

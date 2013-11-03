@@ -62,6 +62,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         if (config == null)
         {
             this.defaultConfig = this;
+            this.inheritedFields = null;
         }
         else
         {
@@ -70,6 +71,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 throw new IllegalArgumentException("Parent and child-configuration have to be the same type of configuration!");
             }
             this.defaultConfig = config;
+            this.inheritedFields = new HashSet<Field>();
         }
     }
 
@@ -89,6 +91,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public void addinheritedField(Field field)
     {
+        if (inheritedFields == null)
+        {
+            throw new IllegalStateException("This is not a child-configuration");
+        }
         this.inheritedFields.add(field);
     }
 
@@ -99,6 +105,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public void removeInheritedField(Field field)
     {
+        if (inheritedFields == null)
+        {
+            throw new IllegalStateException("This is not a child-configuration");
+        }
         this.inheritedFields.remove(field);
     }
 
@@ -111,6 +121,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public boolean isInheritedField(Field field)
     {
+        if (inheritedFields == null)
+        {
+            throw new IllegalStateException("This is not a child-configuration");
+        }
         return inheritedFields.contains(field);
     }
 
@@ -129,7 +143,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         try
         {
             childConfig = Configuration.create(this.getClass());
-            childConfig.inheritedFields = new HashSet<Field>();
+
             childConfig.setFile(sourceFile);
             childConfig.setDefault(this);
             childConfig.reload(true);
