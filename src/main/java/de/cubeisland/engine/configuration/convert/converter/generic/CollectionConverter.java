@@ -29,16 +29,9 @@ import de.cubeisland.engine.configuration.node.Node;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
-import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
+import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 
 public class CollectionConverter
 {
@@ -60,7 +53,7 @@ public class CollectionConverter
         }
         for (Object value : collection)
         {
-            result.addNode(convertToNode(value));
+            result.addNode(CONVERTERS.convertToNode(value));
         }
         return result;
     }
@@ -88,7 +81,7 @@ public class CollectionConverter
                 Type subType = pType.getActualTypeArguments()[0];
                 for (Node node : listNode.getListedNodes())
                 {
-                    V value = convertFromNode(node, subType);
+                    V value = CONVERTERS.convertFromNode(node, subType);
                     result.add(value);
                 }
                 return result;

@@ -29,13 +29,11 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 import java.sql.Date;
 
-import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
-
 public class DateConverter implements Converter<Date>
 {
     public Node toNode(Date object) throws ConversionException
     {
-        return wrapIntoNode(object.toString());
+        return StringNode.of(object.toString());
     }
 
     public Date fromNode(Node node) throws ConversionException

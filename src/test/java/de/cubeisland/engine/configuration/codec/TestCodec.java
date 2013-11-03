@@ -5,8 +5,8 @@ import de.cubeisland.engine.configuration.node.MapNode;
 
 public class TestCodec extends YamlCodec
 {
-    public MapNode convertConfiguration(Configuration configuration)
+    public MapNode convertConfiguration(Configuration config)
     {
-        return convertSection(configuration);
+        return convertSection(config, config, config);
     }
 }

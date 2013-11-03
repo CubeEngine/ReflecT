@@ -30,8 +30,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
+import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 
 public class ArrayConverter
 {
@@ -44,7 +43,7 @@ public class ArrayConverter
         }
         for (Object value : array)
         {
-            result.addNode(convertToNode(value));
+            result.addNode(CONVERTERS.convertToNode(value));
         }
         return result;
     }
@@ -58,7 +57,7 @@ public class ArrayConverter
             Collection<V> result = new LinkedList<V>();
             for (Node node : listNode.getListedNodes())
             {
-                V value = convertFromNode(node, valueType);
+                V value = CONVERTERS.convertFromNode(node, valueType);
                 result.add(value);
             }
             return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));

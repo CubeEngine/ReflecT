@@ -33,8 +33,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static de.cubeisland.engine.configuration.Configuration.convertFromNode;
-import static de.cubeisland.engine.configuration.Configuration.convertToNode;
+import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 
 public class MapConverter
 {
@@ -56,14 +55,14 @@ public class MapConverter
         }
         for (Object key : map.keySet())
         {
-            Node keyNode = convertToNode(key);
+            Node keyNode = CONVERTERS.convertToNode(key);
             if (keyNode instanceof StringNode)
             {
-                result.setNode((StringNode)keyNode, convertToNode(map.get(key)));
+                result.setNode((StringNode)keyNode, CONVERTERS.convertToNode(map.get(key)));
             }
             else
             {
-                result.setNode(StringNode.of(keyNode.asText()), convertToNode(map.get(key)));
+                result.setNode(StringNode.of(keyNode.asText()), CONVERTERS.convertToNode(map.get(key)));
             }
         }
         return result;
@@ -95,8 +94,8 @@ public class MapConverter
                 for (Map.Entry<String, Node> entry : mapNode.getMappedNodes().entrySet())
                 {
                     StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey())); // preserve Casing in Key
-                    K newKey = convertFromNode(keyNode, keyType);
-                    V newVal = convertFromNode(entry.getValue(), valType);
+                    K newKey = CONVERTERS.convertFromNode(keyNode, keyType);
+                    V newVal = CONVERTERS.convertFromNode(entry.getValue(), valType);
                     result.put(newKey, newVal);
                 }
                 return result;

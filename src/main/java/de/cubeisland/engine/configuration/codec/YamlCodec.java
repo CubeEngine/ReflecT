@@ -36,13 +36,13 @@ import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
+import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
 
 /**
  * A Codec for YAML-Configurations allowing child-configurations
  */
-public class YamlCodec extends MultiConfigurationCodec
+public class YamlCodec extends ConfigurationCodec
 {
     private static final String COMMENT_PREFIX = "# ";
     private static final String OFFSET = "  ";
@@ -76,7 +76,7 @@ public class YamlCodec extends MultiConfigurationCodec
             }
             else
             {
-                values = (MapNode)wrapIntoNode(map);
+                values = (MapNode)CONVERTERS.wrapIntoNode(map);
             }
         }
         catch (ReaderException ex)

@@ -27,11 +27,19 @@ package de.cubeisland.engine.configuration;
  */
 public class ConfigPath
 {
-    private static final String LIST = "[";
+    /**
+     * A basePath indicating a list will start with this String
+     */
+    public static final String LIST = "[";
 
     private final String basePath;
     private final ConfigPath subPath;
 
+    /**
+     * Create a new ConfigPath for given name
+     *
+     * @param name the name
+     */
     private ConfigPath(String name)
     {
         if (name.contains("."))
@@ -47,15 +55,26 @@ public class ConfigPath
     }
 
     /**
-     * Creates a new ConfigPath
+     * Creates a new ConfigPath as SubPath of given basePath
      *
      * @param basePath the basePath
      * @param path     the subPath
      */
-    public ConfigPath(String basePath, ConfigPath path)
+    private ConfigPath(String basePath, ConfigPath path)
     {
         this.basePath = basePath;
         this.subPath = path;
+    }
+
+    /**
+     * Create a new ConfigPath as SubPath of given basePath
+     *
+     * @param basePath
+     * @return
+     */
+    public final ConfigPath asSubPath(String basePath)
+    {
+        return new ConfigPath(basePath, this);
     }
 
     /**
@@ -65,7 +84,7 @@ public class ConfigPath
      *
      * @return the ConfigPath
      */
-    public static ConfigPath forName(String name)
+    public final static ConfigPath forName(String name)
     {
         return new ConfigPath(name);
     }
@@ -75,13 +94,13 @@ public class ConfigPath
      *
      * @return true if this ConfigPath is a basePath
      */
-    public boolean isBasePath()
+    public final boolean isBasePath()
     {
         return this.subPath == null;
     }
 
     @Override
-    public String toString()
+    public final String toString()
     {
         if (subPath == null)
         {
@@ -95,7 +114,7 @@ public class ConfigPath
      *
      * @return the basePath
      */
-    public String getBasePath()
+    public final String getBasePath()
     {
         return basePath;
     }
@@ -105,7 +124,7 @@ public class ConfigPath
      *
      * @return the subPath or null if {@link #isBasePath()}
      */
-    public ConfigPath getSubPath()
+    public final ConfigPath getSubPath()
     {
         return subPath;
     }
@@ -115,7 +134,7 @@ public class ConfigPath
      *
      * @return whether this path points to a list next
      */
-    public boolean isListPath()
+    public final boolean isListPath()
     {
         return this.basePath.startsWith(LIST);
     }
@@ -125,7 +144,7 @@ public class ConfigPath
      *
      * @return the last subPath or if {@link #isBasePath()} the basePath
      */
-    public String getLastSubPath()
+    public final String getLastSubPath()
     {
         if (this.isBasePath())
         {

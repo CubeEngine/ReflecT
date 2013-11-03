@@ -29,7 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static de.cubeisland.engine.configuration.Configuration.wrapIntoNode;
+import static de.cubeisland.engine.configuration.ConfigPath.LIST;
+import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 
 public class ListNode extends ParentNode
 {
@@ -42,7 +43,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : list)
             {
-                Node node = wrapIntoNode(object);
+                Node node = CONVERTERS.wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }
@@ -55,7 +56,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : array)
             {
-                Node node = wrapIntoNode(object);
+                Node node = CONVERTERS.wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }
@@ -90,7 +91,7 @@ public class ListNode extends ParentNode
     @Override
     protected Node setExactNode(String key, Node node)
     {
-        if (key.startsWith("["))
+        if (key.startsWith(LIST))
         {
             try
             {
@@ -116,7 +117,7 @@ public class ListNode extends ParentNode
     @Override
     public Node getExactNode(String key)
     {
-        if (key.startsWith("["))
+        if (key.startsWith(LIST))
         {
             try
             {
@@ -141,7 +142,7 @@ public class ListNode extends ParentNode
     @Override
     protected Node removeExactNode(String key)
     {
-        if (key.startsWith("["))
+        if (key.startsWith(LIST))
         {
             try
             {
@@ -165,7 +166,7 @@ public class ListNode extends ParentNode
 
     public Node setNode(IntNode keyNode, Node node)
     {
-        return this.setExactNode("[" + keyNode.getValue(), node);
+        return this.setExactNode(LIST + keyNode.getValue(), node);
     }
 
     @Override
@@ -208,11 +209,11 @@ public class ListNode extends ParentNode
         }
         if (path == null)
         {
-            path = ConfigPath.forName("[" + pos);
+            path = ConfigPath.forName(LIST + pos);
         }
         else
         {
-            path = new ConfigPath("[" + pos, path);
+            path = path.asSubPath(LIST + pos);
         }
         if (this.getParentNode() != null)
         {

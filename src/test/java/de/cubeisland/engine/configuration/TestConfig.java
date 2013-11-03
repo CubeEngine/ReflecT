@@ -28,7 +28,7 @@ import de.cubeisland.engine.configuration.codec.TestCodec;
 
 import java.util.*;
 
-public class TestConfig extends MultiConfiguration<TestCodec>
+public class TestConfig extends Configuration<TestCodec>
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
