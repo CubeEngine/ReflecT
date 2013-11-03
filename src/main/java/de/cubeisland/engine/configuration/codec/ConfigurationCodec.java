@@ -179,7 +179,7 @@ public abstract class ConfigurationCodec
     /**
      * Dumps the contents of the Node into a field of the section
      *
-     * @param parentSection the parent configuration-section
+     * @param defaultSection the parent configuration-section
      * @param section       the configuration-section
      * @param field         the Field to load into
      * @param fieldNode     the Node to load from
@@ -188,19 +188,20 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final static Collection<ErrorNode> dumpIntoField(Section parentSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
+    final static Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
         FieldType fieldType = getFieldType(field);
         Object fieldValue = null;
+        Object defaultValue = field.get(defaultSection);
         switch (fieldType)
         {
             case NORMAL:
                 fieldValue = CONVERTERS.convertFromNode(fieldNode, type); // Convert the value
-                if (fieldValue == null && !(section == parentSection))
+                if (fieldValue == null && !(section == defaultSection))
                 {
-                    fieldValue = field.get(parentSection);
+                    fieldValue = field.get(defaultSection);
                     config.addinheritedField(field);
                 }
                 break;
@@ -208,7 +209,18 @@ public abstract class ConfigurationCodec
                 if (fieldNode instanceof MapNode)
                 {
                     fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), section);
-                    errorNodes.addAll(dumpIntoSection((Section) field.get(parentSection), (Section) fieldValue, (MapNode) fieldNode, config));
+                    if (defaultValue == null)
+                    {
+                        if (section == defaultSection)
+                        {
+                            defaultValue = fieldValue;
+                        }
+                        else
+                        {
+                            defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), defaultSection);
+                        }
+                    }
+                    errorNodes.addAll(dumpIntoSection((Section) defaultValue, (Section) fieldValue, (MapNode) fieldNode, config));
                 }
                 else
                 {
@@ -216,7 +228,7 @@ public abstract class ConfigurationCodec
                 }
                 break;
             case SECTION_COLLECTION:
-                if (section != parentSection)
+                if (section != defaultSection)
                 {
                     throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
                 }
@@ -259,7 +271,7 @@ public abstract class ConfigurationCodec
                     {
                         break;
                     }
-                    Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(parentSection);
+                    Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(defaultSection);
                     Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
                     for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
@@ -267,7 +279,7 @@ public abstract class ConfigurationCodec
                         Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
-                            errorNodes.addAll(dumpIntoSection(parentSection, section, MapNode.emptyMap(), config));
+                            errorNodes.addAll(dumpIntoSection(defaultSection, section, MapNode.emptyMap(), config));
                         }
                         else if (entry.getValue() instanceof MapNode)
                         {
