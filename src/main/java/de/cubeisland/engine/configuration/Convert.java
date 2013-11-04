@@ -42,6 +42,7 @@ public class Convert
         registerConverter(String.class, new StringConverter());
         registerConverter(Date.class, new DateConverter());
         registerConverter(UUID.class, new UUIDConverter());
+        registerConverter(Locale.class, new LocaleConverter());
     }
 
     /**

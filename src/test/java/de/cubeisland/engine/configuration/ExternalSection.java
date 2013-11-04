@@ -22,7 +22,11 @@
  */
 package de.cubeisland.engine.configuration;
 
+import java.util.Locale;
+
 public class ExternalSection implements Section
 {
     public byte aByte = 8;
+
+    public Locale defaultLocale = Locale.US;
 }
