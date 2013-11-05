@@ -113,8 +113,10 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>add-license-headers</id>
-                        <phase>none</phase>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
