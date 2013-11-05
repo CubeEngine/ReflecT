@@ -1,11 +1,11 @@
 package de.cubeisland.engine.configuration.convert.converter;
 
-import java.util.Locale;
-
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
+
+import java.util.Locale;
 
 public class LocaleConverter implements Converter<Locale>
 {

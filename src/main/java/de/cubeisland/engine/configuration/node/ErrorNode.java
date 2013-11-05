@@ -25,10 +25,18 @@ package de.cubeisland.engine.configuration.node;
 public class ErrorNode extends Node<Void>
 {
     private final String message;
+    private final Exception ex;
 
     public ErrorNode(String message)
     {
         this.message = message;
+        this.ex = null;
+    }
+
+    public ErrorNode(Exception ex)
+    {
+        this.ex = ex;
+        this.message = ex.getMessage();
     }
 
     public String getErrorMessage()
@@ -52,5 +60,10 @@ public class ErrorNode extends Node<Void>
     public String toString()
     {
         return "ErrorNode=[" + message + "]";
+    }
+
+    public Exception getExeption()
+    {
+        return ex;
     }
 }

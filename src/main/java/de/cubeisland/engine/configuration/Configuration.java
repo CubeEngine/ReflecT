@@ -23,6 +23,9 @@
 package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
+import de.cubeisland.engine.configuration.exception.ConfigurationInstantiationException;
+import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.exception.MissingCodecException;
 import de.cubeisland.engine.configuration.node.ErrorNode;
 
 import java.io.*;
@@ -31,6 +34,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -38,14 +42,14 @@ import java.util.logging.Logger;
  */
 public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
 {
-    protected static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
+    protected transient static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
 
     public static void setLogger(Logger logger)
     {
         LOGGER = logger;
     }
 
-    private Configuration defaultConfig;
+    private transient Configuration defaultConfig;
 
     protected Configuration()
     {
@@ -75,21 +79,32 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
     }
 
-    public static final Convert CONVERTERS = new Convert();
+    /**
+     * Returns true if exceptions should be rethrown immediately
+     * <p>override to change
+     *
+     * @return whether to rethrow exceptions or log them instead
+     */
+    public boolean useStrictExceptionPolicy()
+    {
+        return true;
+    }
 
-    private final Codec codec = getCodec(this.getClass());
+    public transient static final Convert CONVERTERS = Convert.defaultConverter();
+
+    private transient final Codec codec = getCodec(this.getClass());
 
     /**
      * Saves the fields that got inherited from the parent-configuration
      */
-    private HashSet<Field> inheritedFields;
+    private transient HashSet<Field> inheritedFields;
 
     /**
      * Marks a field as being inherited from the parent configuration and thus not being saved
      *
      * @param field the inherited field
      */
-    public void addinheritedField(Field field)
+    public final void addinheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -103,7 +118,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param field the not inherited field
      */
-    public void removeInheritedField(Field field)
+    public final void removeInheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -119,7 +134,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @return true if the field got inherited
      */
-    public boolean isInheritedField(Field field)
+    public final boolean isInheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -139,19 +154,22 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     @SuppressWarnings("unchecked")
     public <T extends Configuration> T loadChild(File sourceFile)
     {
-        Configuration<Codec> childConfig;
+        Configuration<Codec> childConfig = Configuration.create(this.getClass()); // Can throw ConfigurationInstantiationException
+        childConfig.setFile(sourceFile);
+        childConfig.setDefault(this);
         try
         {
-            childConfig = Configuration.create(this.getClass());
-
-            childConfig.setFile(sourceFile);
-            childConfig.setDefault(this);
             childConfig.reload(true);
             return (T)childConfig;
         }
+        catch (InvalidConfigurationException ex)
+        {
+            //TODO policy
+            return (T) childConfig;
+        }
         catch (Exception ex)
         {
-            throw new IllegalStateException("Could not load ChildConfig!", ex);
+            throw new IllegalStateException("Unknown Exception while loading ChildConfig!", ex);
         }
     }
 
@@ -169,36 +187,49 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     private static <C extends ConfigurationCodec> C getCodec(Class clazz)
     {
         Type genericSuperclass = clazz.getGenericSuperclass(); // Get generic superclass
-        Class<C> codecClass = null;
         try
         {
             if (genericSuperclass.equals(Configuration.class))
             {
-                // superclass is this class -> No Codec set as GenericType
-                throw new InvalidConfigurationException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+                // superclass is this class -> No Codec set as GenericType Missing Codec!
+                throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
             }
-            else if (genericSuperclass instanceof ParameterizedType) // check if genericsuperclass is ParamereizedType
+            if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
             {
-                codecClass = (Class<C>)((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // Get Type
-                return codecClass.newInstance(); // Create Instance
+                Type gType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0]; // get First gType
+                if (gType instanceof Class && ConfigurationCodec.class.isAssignableFrom((Class<?>) gType)) // check if it is codec
+                {
+                    try
+                    {
+                        return ((Class<C>) gType).newInstance();
+                    }
+                    catch (ReflectiveOperationException ex)
+                    {
+                        throw new ConfigurationInstantiationException((Class) gType, ex);
+                    }
+                }
             }
-            // else lookup next superclass
+            if (genericSuperclass instanceof Class)
+            {
+                return getCodec((Class)genericSuperclass); // lookup next superclass
+            }
+            throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
         }
-        catch (ClassCastException e) // Somehow the configuration has a GenericType that is not a Codec
+        catch (InvalidConfigurationException ex)
         {
-            if (!(genericSuperclass instanceof Class))
-            {
-                throw new IllegalStateException("Something went wrong!", e);
-            }
+            throw ex;
+        }
+        catch (IllegalStateException ex)
+        {
+            throw ex;
         }
         catch (Exception ex)
         {
-            throw new InvalidConfigurationException("Could not instantiate the Codec! " + codecClass, ex);
+            throw new IllegalStateException("Something went wrong", ex);
         }
-        return getCodec((Class<? extends Configuration>)genericSuperclass); // Lookup next superclass
     }
 
-    protected File file;
+    protected transient File file;
 
     /**
      * Saves the configuration to the set file.
@@ -226,11 +257,19 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
+            if (useStrictExceptionPolicy())
+            {
+                throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
+            }
+            LOGGER.log(Level.SEVERE, "File to save into cannot be accessed!", ex);
         }
         catch (IOException ex)
         {
-            throw new InvalidConfigurationException("Error while saving Configuration!", ex);
+            if (useStrictExceptionPolicy())
+            {
+                throw new InvalidConfigurationException("Error while saving Configuration!", ex);
+            }
+            LOGGER.log(Level.SEVERE, "Error while saving Configuration!", ex);
         }
     }
 
@@ -265,24 +304,25 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final boolean reload(boolean save) throws InvalidConfigurationException
     {
-        if (this.file == null)
-        {
-            throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
-        }
         boolean result = false;
         try
         {
             this.loadFrom(this.file);
         }
-        catch (FileNotFoundException e)
+        catch (FileNotFoundException ex)
         {
             if (save)
             {
+                LOGGER.info("File to load from not found! Creating new File when saving...");
                 result = true;
             }
             else
             {
-
+                if (useStrictExceptionPolicy())
+                {
+                    throw new InvalidConfigurationException("Could not load configuration", ex);
+                }
+                LOGGER.log(Level.WARNING, "Could not load configuration", ex);
             }
         }
         if (save)
@@ -300,24 +340,12 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void loadFrom(File file) throws FileNotFoundException
     {
-        InputStream is = new FileInputStream(this.file);
-        try
+        if (this.file == null)
         {
-            this.loadFrom(is);
+            throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
         }
-        catch (RuntimeException e)
-        {
-            throw new InvalidConfigurationException("Could not load configuration from file!", e);
-        }
-        finally
-        {
-            try
-            {
-                is.close();
-            }
-            catch (IOException ignored)
-            {}
-        }
+        this.loadFrom(new FileInputStream(this.file));
+
         this.onLoaded(file);
     }
 
@@ -332,7 +360,30 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         {
             throw new IllegalArgumentException("The input stream must not be null!");
         }
-        this.showLoadErrors(this.codec.loadConfig(this, is));//load config in maps -> updates -> sets fields
+        try
+        {
+            this.showLoadErrors(this.codec.loadConfig(this, is));//load config in maps -> updates -> sets fields
+        }
+        catch (RuntimeException e)
+        {
+            if (!this.useStrictExceptionPolicy() && e instanceof InvalidConfigurationException)
+            {
+                LOGGER.log(Level.SEVERE, "Could not load configuration from file!", e);
+                return;
+            }
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                is.close();
+            }
+            catch (IOException e)
+            {
+                LOGGER.log(Level.WARNING, "Failed to close InputStream", e);
+            }
+        }
     }
 
     final void showLoadErrors(Collection<ErrorNode> errors)
@@ -342,7 +393,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
             for (ErrorNode error : errors)
             {
-                LOGGER.warning(error.getErrorMessage());
+                LOGGER.log(Level.WARNING, error.getErrorMessage(), error.getExeption());
             }
         }
     }
@@ -424,15 +475,15 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @return the created configuration
      */
-    public static <T extends Configuration> T create(Class<T> clazz)
+    public static <T extends Configuration> T create(Class<T> clazz) throws ConfigurationInstantiationException
     {
         try
         {
             return clazz.newInstance();
         }
-        catch (Exception e)
+        catch (ReflectiveOperationException e)
         {
-            throw new InvalidConfigurationException("Failed to create an instance of " + clazz.getName(), e);
+            throw new ConfigurationInstantiationException(clazz, e);
         }
     }
 

@@ -23,11 +23,11 @@
 package de.cubeisland.engine.configuration.codec;
 
 import de.cubeisland.engine.configuration.Configuration;
-import de.cubeisland.engine.configuration.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.StringUtils;
+import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.node.*;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.reader.ReaderException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +59,7 @@ public class YamlCodec extends ConfigurationCodec
 
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Configuration config)
+    protected final MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException
     {
         MapNode values;
         try
@@ -79,7 +79,7 @@ public class YamlCodec extends ConfigurationCodec
                 values = (MapNode)CONVERTERS.wrapIntoNode(map);
             }
         }
-        catch (ReaderException ex)
+        catch (ScannerException ex)
         {
             throw new InvalidConfigurationException("Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }

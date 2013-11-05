@@ -26,19 +26,23 @@ import de.cubeisland.engine.configuration.*;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
+import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.node.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 import static de.cubeisland.engine.configuration.FieldType.*;
 
 /**
@@ -46,6 +50,8 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
+    public static final Convert CODEC_CONVERTERS = Convert.emptyConverter();
+
     // PUBLIC Methods
 
     /**
@@ -57,7 +63,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    public final Collection<ErrorNode> loadConfig(Configuration config, InputStream is)
+    public final Collection<ErrorNode> loadConfig(Configuration config, InputStream is) throws InvalidConfigurationException
     {
         return dumpIntoSection(config.getDefault(), config, this.load(is, config), config);
     }
@@ -98,7 +104,7 @@ public abstract class ConfigurationCodec
      * @param is the InputStream to load from
      * @param config the Configuration
      */
-    protected abstract MapNode load(InputStream is, Configuration config);
+    protected abstract MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException;
 
     // PACKAGE-PRIVATE STATIC Methods
 
@@ -151,6 +157,19 @@ public abstract class ConfigurationCodec
                             errorNodes.addAll(dumpIntoField(defaultSection, section, field, fieldNode, config));
                         }
                     }
+                    catch (ReflectiveOperationException e)
+                    {
+                        throw new InvalidConfigurationException("Error while dumping loaded config into fields", e);
+                    }
+                    catch (ConversionException e)
+                    {
+                        InvalidConfigurationException ex = InvalidConfigurationException.of("Error while converting Node to dump into field!", getPathFor(field), section.getClass(), field, e);
+                        if (config.useStrictExceptionPolicy())
+                        {
+                            throw ex;
+                        }
+                        errorNodes.add(new ErrorNode(ex));
+                    }
                     catch (Exception e)
                     {
                         throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", getPathFor(field), section.getClass(), field, e);
@@ -171,7 +190,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final static Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException
+    final static Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         if (parentSection != section)
         {
@@ -195,7 +214,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final static Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException
+    final static Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -205,7 +224,7 @@ public abstract class ConfigurationCodec
         switch (fieldType)
         {
             case NORMAL:
-                fieldValue = CONVERTERS.convertFromNode(fieldNode, type); // Convert the value
+                fieldValue = convertFromNode(fieldNode, type); // Convert the value
                 if (fieldValue == null && !(section == defaultSection))
                 {
                     fieldValue = field.get(defaultSection);
@@ -283,7 +302,7 @@ public abstract class ConfigurationCodec
                     Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
                     for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
-                        Object key = CONVERTERS.convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
                         Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
@@ -307,6 +326,17 @@ public abstract class ConfigurationCodec
         }
         field.set(section, fieldValue);
         return errorNodes;
+    }
+
+    protected static Object convertFromNode(Node node, Type type) throws ConversionException
+    {
+        try
+        {
+            return CODEC_CONVERTERS.convertFromNode(node, type);
+        }
+        catch (ConverterNotFoundException ignored)
+        {}
+        return Configuration.CONVERTERS.convertFromNode(node, type);
     }
 
     // Configuration saving Methods
@@ -333,7 +363,22 @@ public abstract class ConfigurationCodec
             }
             if (isConfigField(field))
             {
-                baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
+                try
+                {
+                    baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
+                }
+                catch (ReflectiveOperationException e)
+                {
+                    throw new InvalidConfigurationException("Error while converting field into node", e);
+                }
+                catch (ConversionException e)
+                {
+                    throw InvalidConfigurationException.of("Error while converting Field into Node!", getPathFor(field), section.getClass(), field, e);
+                }
+                catch (Exception e)
+                {
+                    throw InvalidConfigurationException.of("Error while converting Section!", getPathFor(field), section.getClass(), field, e);
+                }
             }
         }
         if (section != defaultSection) // remove generated empty ParentNodes ONLY from child-configs
@@ -353,35 +398,27 @@ public abstract class ConfigurationCodec
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private static Node convertField(Field field, Section defaultSection, Section section, Configuration config)
+    private static Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConversionException
     {
-        try
+        Object fieldValue = field.get(section);
+        Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
+        FieldType fieldType = getFieldType(field);
+        Node node = null;
+        switch (fieldType)
         {
-            Object fieldValue = field.get(section);
-            Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
-            FieldType fieldType = getFieldType(field);
-            Node node = null;
-            switch (fieldType)
-            {
-                case NORMAL:
-                    node = CONVERTERS.convertToNode(fieldValue);
-                    break;
-                case SECTION:
-                    if (fieldValue == null)
+            case NORMAL:
+                node = convertToNode(fieldValue);
+                break;
+            case SECTION:
+                if (fieldValue == null)
+                {
+                    if (defaultValue == null)
                     {
-                        if (defaultValue == null)
+                        defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), defaultSection); // default section is not set -> generate new
+                        field.set(defaultSection, defaultValue);
+                        if (section == defaultSection)
                         {
-                            defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>) field.getType(), defaultSection); // default section is not set -> generate new
-                            field.set(defaultSection, defaultValue);
-                            if (section == defaultSection)
-                            {
-                                fieldValue = defaultValue;
-                            }
-                            else
-                            {
-                                dumpDefaultIntoField(defaultSection, section, field, config);
-                                fieldValue = field.get(section);
-                            }
+                            fieldValue = defaultValue;
                         }
                         else
                         {
@@ -389,45 +426,58 @@ public abstract class ConfigurationCodec
                             fieldValue = field.get(section);
                         }
                     }
-                    node = convertSection((Section) defaultValue, (Section) fieldValue, config);
-                    break;
-                case SECTION_COLLECTION:
-                    if (defaultSection != section)
+                    else
                     {
-                        throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null);
+                        dumpDefaultIntoField(defaultSection, section, field, config);
+                        fieldValue = field.get(section);
                     }
-                    node = ListNode.emptyList();
-                    for (Section subSection : (Collection<Section>)fieldValue)
+                }
+                node = convertSection((Section) defaultValue, (Section) fieldValue, config);
+                break;
+            case SECTION_COLLECTION:
+                if (defaultSection != section)
+                {
+                    throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null);
+                }
+                node = ListNode.emptyList();
+                for (Section subSection : (Collection<Section>)fieldValue)
+                {
+                    MapNode listElemNode = convertSection(subSection, subSection, config);
+                    ((ListNode)node).addNode(listElemNode);
+                }
+                break;
+            case SECTION_MAP:
+                node = MapNode.emptyMap();
+                Map<Object, Section> defaultFieldMap = (Map<Object, Section>)defaultValue;
+                Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
+                for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
+                {
+                    Node keyNode = convertToNode(defaultEntry.getKey());
+                    if (keyNode instanceof StringNode)
                     {
-                        MapNode listElemNode = convertSection(subSection, subSection, config);
-                        ((ListNode)node).addNode(listElemNode);
+                        MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);
+                        ((MapNode)node).setNode((StringNode)keyNode, configNode);
                     }
-                    break;
-                case SECTION_MAP:
-                    node = MapNode.emptyMap();
-                    Map<Object, Section> defaultFieldMap = (Map<Object, Section>)defaultValue;
-                    Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
-                    for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
+                    else
                     {
-                        Node keyNode = CONVERTERS.convertToNode(defaultEntry.getKey());
-                        if (keyNode instanceof StringNode)
-                        {
-                            MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);
-                            ((MapNode)node).setNode((StringNode)keyNode, configNode);
-                        }
-                        else
-                        {
-                            throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", getPathFor(field), section.getClass(), field, null);
-                        }
+                        throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", getPathFor(field), section.getClass(), field, null);
                     }
-            }
-            addComment(node, field);
-            return node;
+                }
         }
-        catch (Exception e)
+        addComment(node, field);
+        return node;
+
+    }
+
+    protected static Node convertToNode(Object o) throws ConversionException
+    {
+        try
         {
-            throw InvalidConfigurationException.of("Error while dumping loaded config into fields!", getPathFor(field), section.getClass(), field, e);
+            return CODEC_CONVERTERS.convertToNode(o);
         }
+        catch (ConverterNotFoundException ignored)
+        {}
+        return Configuration.CONVERTERS.convertToNode(o);
     }
 
     // HELPER Methods

@@ -15,34 +15,44 @@ import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Convert
+public final class Convert
 {
     private Map<Class, Converter> converters = new ConcurrentHashMap<Class, Converter>();
     private MapConverter mapConverter = new MapConverter();
     private ArrayConverter arrayConverter = new ArrayConverter();
     private CollectionConverter collectionConverter = new CollectionConverter();
 
-    Convert()  // Register Default Converters
+    private Convert(){}
+
+    static Convert defaultConverter()
     {
+        // Register Default Converters
+        Convert convert = new Convert();
         Converter<?> converter;
-        registerConverter(Integer.class, converter = new IntegerConverter());
-        registerConverter(int.class, converter);
-        registerConverter(Short.class, converter = new ShortConverter());
-        registerConverter(short.class, converter);
-        registerConverter(Byte.class, converter = new ByteConverter());
-        registerConverter(byte.class, converter);
-        registerConverter(Double.class, converter = new DoubleConverter());
-        registerConverter(double.class, converter);
-        registerConverter(Float.class, converter = new FloatConverter());
-        registerConverter(float.class, converter);
-        registerConverter(Long.class, converter = new LongConverter());
-        registerConverter(long.class, converter);
-        registerConverter(Boolean.class, converter = new BooleanConverter());
-        registerConverter(boolean.class, converter);
-        registerConverter(String.class, new StringConverter());
-        registerConverter(Date.class, new DateConverter());
-        registerConverter(UUID.class, new UUIDConverter());
-        registerConverter(Locale.class, new LocaleConverter());
+        convert.registerConverter(Integer.class, converter = new IntegerConverter());
+        convert.registerConverter(int.class, converter);
+        convert.registerConverter(Short.class, converter = new ShortConverter());
+        convert.registerConverter(short.class, converter);
+        convert.registerConverter(Byte.class, converter = new ByteConverter());
+        convert.registerConverter(byte.class, converter);
+        convert.registerConverter(Double.class, converter = new DoubleConverter());
+        convert.registerConverter(double.class, converter);
+        convert.registerConverter(Float.class, converter = new FloatConverter());
+        convert.registerConverter(float.class, converter);
+        convert.registerConverter(Long.class, converter = new LongConverter());
+        convert.registerConverter(long.class, converter);
+        convert.registerConverter(Boolean.class, converter = new BooleanConverter());
+        convert.registerConverter(boolean.class, converter);
+        convert.registerConverter(String.class, new StringConverter());
+        convert.registerConverter(Date.class, new DateConverter());
+        convert.registerConverter(UUID.class, new UUIDConverter());
+        convert.registerConverter(Locale.class, new LocaleConverter());
+        return convert;
+    }
+
+    public static final Convert emptyConverter()
+    {
+        return new Convert();
     }
 
     /**
@@ -51,7 +61,7 @@ public class Convert
      * @param clazz     the class
      * @param converter the converter
      */
-    public void registerConverter(Class clazz, Converter converter)
+    public final void registerConverter(Class clazz, Converter converter)
     {
         if (clazz == null || converter == null)
         {
@@ -60,7 +70,7 @@ public class Convert
         converters.put(clazz, converter);
     }
 
-    public void removeConverter(Class clazz)
+    public final void removeConverter(Class clazz)
     {
         Iterator<Map.Entry<Class, Converter>> iter = converters.entrySet().iterator();
         Map.Entry<Class, Converter> entry;
@@ -74,7 +84,7 @@ public class Convert
         }
     }
 
-    public void removeConverters()
+    public final void removeConverters()
     {
         converters.clear();
     }
@@ -87,7 +97,7 @@ public class Convert
      * @return a matching converter or null if not found
      */
     @SuppressWarnings("unchecked")
-    public <T> Converter<T> matchConverter(Class<? extends T> objectClass) throws ConverterNotFoundException
+    public final <T> Converter<T> matchConverter(Class<? extends T> objectClass) throws ConverterNotFoundException
     {
         if (objectClass == null)
         {
@@ -123,7 +133,7 @@ public class Convert
      *
      * @return the Node
      */
-    public Node wrapIntoNode(Object o)
+    public final Node wrapIntoNode(Object o)
     {
         if (o == null)
         {
@@ -188,7 +198,7 @@ public class Convert
      * @return the serialized Node
      */
     @SuppressWarnings("unchecked")
-    public <T> Node convertToNode(T object) throws ConversionException
+    public final <T> Node convertToNode(T object) throws ConversionException
     {
         if (object == null)
         {
@@ -219,7 +229,7 @@ public class Convert
      * @return the original object
      */
     @SuppressWarnings("unchecked")
-    public <T> T convertFromNode(Node node, Type type) throws ConversionException
+    public final <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
         { return null; }

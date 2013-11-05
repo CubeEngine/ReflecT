@@ -20,7 +20,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration;
+package de.cubeisland.engine.configuration.exception;
+
+import de.cubeisland.engine.configuration.ConfigPath;
+import de.cubeisland.engine.configuration.Section;
 
 import java.lang.reflect.Field;
 
