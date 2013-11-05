@@ -50,11 +50,17 @@
             <id>Faithcaio</id>
             <name>Anselm Brehme</name>
             <email>faithcaio@cubeisland.de</email>
+            <roles>
+                <role>Project Lead</role>
+            </roles>
         </developer>
         <developer>
             <id>quick_wango</id>
             <name>Phillip Schichtel</name>
             <email>quick_wango@code-infection.de</email>
+            <roles>
+                <role>Contributor</role>
+            </roles>
         </developer>
     </developers>
 
