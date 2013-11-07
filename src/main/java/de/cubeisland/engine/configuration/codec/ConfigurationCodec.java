@@ -40,6 +40,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -50,7 +51,18 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
-    public static final Convert CODEC_CONVERTERS = Convert.emptyConverter();
+    private static final Map<Class, Convert> CODEC_CONVERTERS = new HashMap<Class, Convert>();
+
+    public static Convert getConverters(Class<? extends ConfigurationCodec> codecClass)
+    {
+        Convert convert = CODEC_CONVERTERS.get(codecClass);
+        if (convert == null)
+        {
+            convert = Convert.emptyConverter();
+            CODEC_CONVERTERS.put(codecClass, convert);
+        }
+        return convert;
+    }
 
     // PUBLIC Methods
 
@@ -120,7 +132,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    final static Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
+    final Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
     {
         if (defaultSection == null) // Special case for Section in Maps
         {
@@ -190,7 +202,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final static Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
+    final Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         if (parentSection != section)
         {
@@ -214,7 +226,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final static Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
+    final Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -328,11 +340,11 @@ public abstract class ConfigurationCodec
         return errorNodes;
     }
 
-    protected static Object convertFromNode(Node node, Type type) throws ConversionException
+    final protected Object convertFromNode(Node node, Type type) throws ConversionException
     {
         try
         {
-            return CODEC_CONVERTERS.convertFromNode(node, type);
+            return getConverters(this.getClass()).convertFromNode(node, type);
         }
         catch (ConverterNotFoundException ignored)
         {}
@@ -347,7 +359,7 @@ public abstract class ConfigurationCodec
      * @param defaultSection the parent config
      * @param section       the config
      */
-    static MapNode convertSection(Section defaultSection, Section section, Configuration config)
+    final MapNode convertSection(Section defaultSection, Section section, Configuration config)
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
@@ -398,7 +410,7 @@ public abstract class ConfigurationCodec
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private static Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConversionException
+    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConversionException
     {
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
@@ -469,11 +481,11 @@ public abstract class ConfigurationCodec
 
     }
 
-    protected static Node convertToNode(Object o) throws ConversionException
+    final protected Node convertToNode(Object o) throws ConversionException
     {
         try
         {
-            return CODEC_CONVERTERS.convertToNode(o);
+            return getConverters(this.getClass()).convertToNode(o);
         }
         catch (ConverterNotFoundException ignored)
         {}
@@ -488,7 +500,7 @@ public abstract class ConfigurationCodec
      * @param node  the Node to add the comment to
      * @param field the field possibly having a {@link de.cubeisland.engine.configuration.annotations.Comment} annotation
      */
-    final static void addComment(Node node, Field field)
+    final void addComment(Node node, Field field)
     {
         if (field.isAnnotationPresent(Comment.class))
         {
@@ -503,7 +515,7 @@ public abstract class ConfigurationCodec
      *
      * @return the Type of the field
      */
-    final static FieldType getFieldType(Field field)
+    final FieldType getFieldType(Field field)
     {
         FieldType fieldType = NORMAL;
         if (SectionFactory.isSectionClass(field.getType()))
@@ -542,13 +554,13 @@ public abstract class ConfigurationCodec
      *
      * @return whether the field is a field of the configuration that needs to be serialized
      */
-    final static boolean isConfigField(Field field)
+    final boolean isConfigField(Field field)
     {
         int modifiers = field.getModifiers();
         return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
-    final static ConfigPath getPathFor(Field field)
+    final ConfigPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {

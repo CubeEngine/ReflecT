@@ -120,7 +120,7 @@ public class YamlCodec extends ConfigurationCodec
      * @param offset the current offset
      * @throws IOException
      */
-    private static void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
+    private void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
         StringBuilder sb = new StringBuilder();
         if (!(value instanceof NullNode)) // null-Node ?
@@ -161,7 +161,7 @@ public class YamlCodec extends ConfigurationCodec
      * @param inList true if currently directly under a ListNode
      * @throws IOException
      */
-    private static void convertMapNode(OutputStreamWriter writer, MapNode value, int offset, boolean inList) throws IOException
+    private void convertMapNode(OutputStreamWriter writer, MapNode value, int offset, boolean inList) throws IOException
     {
         Map<String, Node> map = value.getMappedNodes();
         boolean endOfMapOrList = false;
@@ -234,7 +234,7 @@ public class YamlCodec extends ConfigurationCodec
      * @param offset the current offset
      * @throws IOException
      */
-    private static void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
+    private void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
     {
         writer.append(LINE_BREAK);
         boolean endOfMapOrList = false;
@@ -279,7 +279,7 @@ public class YamlCodec extends ConfigurationCodec
      *
      * @return the offset
      */
-    private static String getOffset(int offset)
+    private String getOffset(int offset)
     {
         StringBuilder off = new StringBuilder("");
         for (int i = 0; i < offset; ++i)
@@ -296,7 +296,7 @@ public class YamlCodec extends ConfigurationCodec
      * @param offset the current offset
      * @return the built comment
      */
-    private static String buildComment(String[] comments, int offset)
+    private String buildComment(String[] comments, int offset)
     {
         if (comments == null || comments.length == 0)
         {
@@ -325,7 +325,7 @@ public class YamlCodec extends ConfigurationCodec
      * @param s the string to check
      * @return true if the given string needs quoting
      */
-    private static boolean needsQuote(String s)
+    private boolean needsQuote(String s)
     {
         return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`") || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|") || s
                 .startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s
