@@ -20,11 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration;
+package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.convert.Converter;
-import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
+import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.convert.converter.*;
 import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
@@ -37,53 +37,56 @@ import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class Convert
+public final class ConverterManager
 {
     private Map<Class, Converter> converters = new ConcurrentHashMap<Class, Converter>();
     private MapConverter mapConverter;
     private ArrayConverter arrayConverter;
     private CollectionConverter collectionConverter;
-    private ConfigurationFactory factory;
-    private boolean isDefault = false;
+    private ConverterManager defaultConverters;
 
-    private Convert(ConfigurationFactory factory, boolean isDefault)
+    private ConverterManager(ConverterManager defaultConverters)
     {
-        this.factory = factory;
-        this.isDefault = isDefault;
+        this.defaultConverters = defaultConverters;
         this.mapConverter = new MapConverter(this);
         this.arrayConverter = new ArrayConverter(this);
         this.collectionConverter = new CollectionConverter(this);
     }
 
-    static Convert defaultConverter(ConfigurationFactory factory)
+    static ConverterManager defaultManager()
     {
         // Register Default Converters
-        Convert convert = new Convert(factory, true);
-        Converter <?> converter;
-        convert.registerConverter(Integer.class, converter = new IntegerConverter());
-        convert.registerConverter(int.class, converter);
-        convert.registerConverter(Short.class, converter = new ShortConverter());
-        convert.registerConverter(short.class, converter);
-        convert.registerConverter(Byte.class, converter = new ByteConverter());
-        convert.registerConverter(byte.class, converter);
-        convert.registerConverter(Double.class, converter = new DoubleConverter());
-        convert.registerConverter(double.class, converter);
-        convert.registerConverter(Float.class, converter = new FloatConverter());
-        convert.registerConverter(float.class, converter);
-        convert.registerConverter(Long.class, converter = new LongConverter());
-        convert.registerConverter(long.class, converter);
-        convert.registerConverter(Boolean.class, converter = new BooleanConverter());
-        convert.registerConverter(boolean.class, converter);
-        convert.registerConverter(String.class, new StringConverter());
-        convert.registerConverter(Date.class, new DateConverter());
-        convert.registerConverter(UUID.class, new UUIDConverter());
-        convert.registerConverter(Locale.class, new LocaleConverter());
+        ConverterManager convert = new ConverterManager(null);
+        convert.registerDefaultConverters();
         return convert;
     }
 
-    static Convert emptyConverter(ConfigurationFactory factory)
+    static ConverterManager emptyManager(ConverterManager defaultConverters)
     {
-        return new Convert(factory, false);
+        return new ConverterManager(defaultConverters);
+    }
+
+    private void registerDefaultConverters()
+    {
+        Converter <?> converter;
+        this.registerConverter(Integer.class, converter = new IntegerConverter());
+        this.registerConverter(int.class, converter);
+        this.registerConverter(Short.class, converter = new ShortConverter());
+        this.registerConverter(short.class, converter);
+        this.registerConverter(Byte.class, converter = new ByteConverter());
+        this.registerConverter(byte.class, converter);
+        this.registerConverter(Double.class, converter = new DoubleConverter());
+        this.registerConverter(double.class, converter);
+        this.registerConverter(Float.class, converter = new FloatConverter());
+        this.registerConverter(float.class, converter);
+        this.registerConverter(Long.class, converter = new LongConverter());
+        this.registerConverter(long.class, converter);
+        this.registerConverter(Boolean.class, converter = new BooleanConverter());
+        this.registerConverter(boolean.class, converter);
+        this.registerConverter(String.class, new StringConverter());
+        this.registerConverter(Date.class, new DateConverter());
+        this.registerConverter(UUID.class, new UUIDConverter());
+        this.registerConverter(Locale.class, new LocaleConverter());
     }
 
     /**
@@ -101,6 +104,11 @@ public final class Convert
         converters.put(clazz, converter);
     }
 
+    /**
+     * Removes a converter from this manager
+     *
+     * @param clazz the class of the converter to remove
+     */
     public final void removeConverter(Class clazz)
     {
         Iterator<Map.Entry<Class, Converter>> iter = converters.entrySet().iterator();
@@ -115,6 +123,9 @@ public final class Convert
         }
     }
 
+    /**
+     * Removes all registered converters
+     */
     public final void removeConverters()
     {
         converters.clear();
@@ -157,69 +168,6 @@ public final class Convert
         throw new ConverterNotFoundException("Converter not found for: " + objectClass.getName());
     }
 
-    /**
-     * Wraps a serialized Object into a Node
-     *
-     * @param o a serialized Object
-     *
-     * @return the Node
-     */
-    public static final Node wrapIntoNode(Object o)
-    {
-        if (o == null)
-        {
-            return NullNode.emptyNode();
-        }
-        if (o instanceof Map)
-        {
-            return new MapNode((Map)o);
-        }
-        if (o instanceof Collection)
-        {
-            return new ListNode((List)o);
-        }
-        if (o.getClass().isArray())
-        {
-            return new ListNode((Object[])o);
-        }
-        if (o instanceof String)
-        {
-            return new StringNode((String)o);
-        }
-        if (o instanceof Byte || o.getClass() == byte.class)
-        {
-            return new ByteNode((Byte)o);
-        }
-        if (o instanceof Short || o.getClass() == short.class)
-        {
-            return new ShortNode((Short)o);
-        }
-        if (o instanceof Integer || o.getClass() == int.class)
-        {
-            return new IntNode((Integer)o);
-        }
-        if (o instanceof Long || o.getClass() == long.class)
-        {
-            return new LongNode((Long)o);
-        }
-        if (o instanceof Float || o.getClass() == float.class)
-        {
-            return new FloatNode((Float)o);
-        }
-        if (o instanceof Double || o.getClass() == double.class)
-        {
-            return new DoubleNode((Double)o);
-        }
-        if (o instanceof Boolean || o.getClass() == boolean.class)
-        {
-            return BooleanNode.of((Boolean)o);
-        }
-        if (o instanceof Character || o.getClass() == char.class)
-        {
-            return new CharNode((Character)o);
-        }
-        throw new IllegalArgumentException("Cannot wrap into Node: " + o.getClass());
-    }
 
     /**
      * Converts a convertible Object into a Node
@@ -228,7 +176,6 @@ public final class Convert
      *
      * @return the serialized Node
      */
-
     public final <T> Node convertToNode(T object) throws ConversionException
     {
         try
@@ -237,11 +184,11 @@ public final class Convert
         }
         catch (ConverterNotFoundException e)
         {
-            if (this.isDefault)
+            if (this.defaultConverters == null)
             {
                 throw e;
             }
-            return this.factory.getDefaultConverters().convertToNode(object);
+            return this.defaultConverters.convertToNode(object);
         }
     }
 
@@ -284,11 +231,11 @@ public final class Convert
         }
         catch (ConverterNotFoundException e)
         {
-            if (this.isDefault)
+            if (this.defaultConverters == null)
             {
                 throw e;
             } // else ignore
-            return this.factory.getDefaultConverters().convertFromNode0(node, type);
+            return this.defaultConverters.convertFromNode0(node, type);
         }
     }
 

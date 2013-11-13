@@ -23,7 +23,7 @@
 package de.cubeisland.engine.configuration.convert.converter;
 
 import de.cubeisland.engine.configuration.convert.BasicConverter;
-import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.BooleanNode;
 import de.cubeisland.engine.configuration.node.Node;
 

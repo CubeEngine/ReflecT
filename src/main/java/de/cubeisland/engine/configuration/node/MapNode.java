@@ -22,13 +22,10 @@
  */
 package de.cubeisland.engine.configuration.node;
 
-import de.cubeisland.engine.configuration.ConfigPath;
 import de.cubeisland.engine.configuration.StringUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
-
-import static de.cubeisland.engine.configuration.Convert.wrapIntoNode;
 
 public class MapNode extends ParentNode<Map<String, Node>>
 {

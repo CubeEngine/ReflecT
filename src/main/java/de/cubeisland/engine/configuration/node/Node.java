@@ -22,7 +22,9 @@
  */
 package de.cubeisland.engine.configuration.node;
 
-import de.cubeisland.engine.configuration.ConfigPath;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A config Node
@@ -92,4 +94,68 @@ public abstract class Node<V>
     }
 
     public abstract String toString();
+
+    /**
+     * Wraps a serialized Object into a Node
+     *
+     * @param o a serialized Object
+     *
+     * @return the wrapped object
+     */
+    public static final Node wrapIntoNode(Object o)
+    {
+        if (o == null)
+        {
+            return NullNode.emptyNode();
+        }
+        if (o instanceof Map)
+        {
+            return new MapNode((Map)o);
+        }
+        if (o instanceof Collection)
+        {
+            return new ListNode((List)o);
+        }
+        if (o.getClass().isArray())
+        {
+            return new ListNode((Object[])o);
+        }
+        if (o instanceof String)
+        {
+            return new StringNode((String)o);
+        }
+        if (o instanceof Byte || o.getClass() == byte.class)
+        {
+            return new ByteNode((Byte)o);
+        }
+        if (o instanceof Short || o.getClass() == short.class)
+        {
+            return new ShortNode((Short)o);
+        }
+        if (o instanceof Integer || o.getClass() == int.class)
+        {
+            return new IntNode((Integer)o);
+        }
+        if (o instanceof Long || o.getClass() == long.class)
+        {
+            return new LongNode((Long)o);
+        }
+        if (o instanceof Float || o.getClass() == float.class)
+        {
+            return new FloatNode((Float)o);
+        }
+        if (o instanceof Double || o.getClass() == double.class)
+        {
+            return new DoubleNode((Double)o);
+        }
+        if (o instanceof Boolean || o.getClass() == boolean.class)
+        {
+            return BooleanNode.of((Boolean)o);
+        }
+        if (o instanceof Character || o.getClass() == char.class)
+        {
+            return new CharNode((Character)o);
+        }
+        throw new IllegalArgumentException("Cannot wrap into Node: " + o.getClass());
+    }
 }

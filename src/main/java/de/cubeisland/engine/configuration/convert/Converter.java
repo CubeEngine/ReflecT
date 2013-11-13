@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert;
 
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
 
 /**
@@ -30,20 +31,20 @@ import de.cubeisland.engine.configuration.node.Node;
 public interface Converter<T extends Object>
 {
     /**
-     * Converts this class to an serializable object
+     * Converts the object into a serializable Node
      *
-     * @param object the field value
+     * @param object the object to convert
      *
-     * @return the field value as node
+     * @return the converted object
      */
     public Node toNode(T object) throws ConversionException;
 
     /**
-     * Converts the given object to this class
+     * Converts the node back into the original object
      *
-     * @param node the node to deserialize
+     * @param node the node to convert
      *
-     * @return the deserialized field value
+     * @return the converted node
      */
     public T fromNode(Node node) throws ConversionException;
 }

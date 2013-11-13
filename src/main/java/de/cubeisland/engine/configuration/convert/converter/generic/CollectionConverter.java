@@ -22,8 +22,8 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.Convert;
-import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.codec.ConverterManager;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -34,9 +34,9 @@ import java.util.*;
 
 public class CollectionConverter
 {
-    private Convert converters;
+    private ConverterManager converters;
 
-    public CollectionConverter(Convert converters)
+    public CollectionConverter(ConverterManager converters)
     {
         this.converters = converters;
     }

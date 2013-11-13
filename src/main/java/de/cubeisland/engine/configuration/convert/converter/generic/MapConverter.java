@@ -22,8 +22,8 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.Convert;
-import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.codec.ConverterManager;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.MapNode;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
@@ -36,9 +36,9 @@ import java.util.Map;
 
 public class MapConverter
 {
-    private Convert converters;
+    private ConverterManager converters;
 
-    public MapConverter(Convert converters)
+    public MapConverter(ConverterManager converters)
     {
         this.converters = converters;
     }

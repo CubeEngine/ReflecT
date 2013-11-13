@@ -22,8 +22,6 @@
  */
 package de.cubeisland.engine.configuration.node;
 
-import de.cubeisland.engine.configuration.ConfigPath;
-
 /**
  * A Node that can be a parent of another Node
  */

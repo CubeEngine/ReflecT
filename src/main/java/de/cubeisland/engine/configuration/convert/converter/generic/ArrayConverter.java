@@ -22,8 +22,8 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.Convert;
-import de.cubeisland.engine.configuration.convert.ConversionException;
+import de.cubeisland.engine.configuration.codec.ConverterManager;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -33,9 +33,9 @@ import java.util.LinkedList;
 
 public class ArrayConverter
 {
-    private Convert converters;
+    private ConverterManager converters;
 
-    public ArrayConverter(Convert converters)
+    public ArrayConverter(ConverterManager converters)
     {
         this.converters = converters;
     }

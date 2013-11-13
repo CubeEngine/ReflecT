@@ -22,18 +22,15 @@
  */
 package de.cubeisland.engine.configuration;
 
-import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
+import de.cubeisland.engine.configuration.codec.CodecManager;
 import de.cubeisland.engine.configuration.exception.ConfigurationInstantiationException;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ConfigurationFactory
 {
-    private final Convert DEFAULT_CONVERTERS = Convert.defaultConverter(this);
-    private final Map<Class<? extends ConfigurationCodec>, ConfigurationCodec> CODECS = new HashMap<Class<? extends ConfigurationCodec>, ConfigurationCodec>();
+    private CodecManager codecManager = new CodecManager();
 
     /**
      * Loads the configuration from given file and optionally saves it afterwards
@@ -103,36 +100,8 @@ public class ConfigurationFactory
         }
     }
 
-    /**
-     * Gets the instance of given <code>codecClass</code>
-     *
-     * @param codecClass the class of the codec
-     * @param <Codec> the type of the returned codec
-     *
-     * @return the codec instance
-     */
-    @SuppressWarnings("unchecked")
-    public <Codec extends ConfigurationCodec> Codec getCodec(Class<Codec> codecClass)
+    public CodecManager getCodecManager()
     {
-        Codec codec = (Codec) this.CODECS.get(codecClass);
-        if (codec == null)
-        {
-            try
-            {
-                codec = codecClass.newInstance();
-                codec.init(Convert.emptyConverter(this));
-            }
-            catch (ReflectiveOperationException e)
-            {
-                throw new ConfigurationInstantiationException(codecClass, e);
-            }
-            this.CODECS.put(codecClass, codec);
-        }
-        return codec;
-    }
-
-    public final Convert getDefaultConverters()
-    {
-        return DEFAULT_CONVERTERS;
+        return this.codecManager;
     }
 }

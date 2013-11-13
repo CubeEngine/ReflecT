@@ -22,6 +22,9 @@
  */
 package de.cubeisland.engine.configuration.exception;
 
+/**
+ * This Exception is thrown when a configuration has no codec set, but tries to use it anyways
+ */
 public class MissingCodecException extends InvalidConfigurationException
 {
     public MissingCodecException(String message)

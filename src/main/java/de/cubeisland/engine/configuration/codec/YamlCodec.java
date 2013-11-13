@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
+import static de.cubeisland.engine.configuration.node.Node.wrapIntoNode;
 
 /**
  * A Codec for YAML-Configurations allowing child-configurations
@@ -55,7 +56,6 @@ public class YamlCodec extends ConfigurationCodec
     }
 
     // Configuration loading Method
-
     @Override
     @SuppressWarnings("unchecked")
     protected final MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException
@@ -75,7 +75,7 @@ public class YamlCodec extends ConfigurationCodec
             }
             else
             {
-                values = (MapNode) CONVERTERS.wrapIntoNode(map);
+                values = (MapNode) wrapIntoNode(map);
             }
         }
         catch (ScannerException ex)
@@ -86,7 +86,6 @@ public class YamlCodec extends ConfigurationCodec
     }
 
     // Configuration saving Methods
-
     @Override
     protected final void save(MapNode node, OutputStream os, Configuration config) throws IOException
     {
@@ -270,7 +269,6 @@ public class YamlCodec extends ConfigurationCodec
     }
 
     // HELPER Methods
-
     /**
      * Returns the offset as String
      *

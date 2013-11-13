@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration;
+package de.cubeisland.engine.configuration.node;
 
 /**
  * The Path to a value inside a Node
@@ -30,7 +30,7 @@ public class ConfigPath
     /**
      * A basePath indicating a list will start with this String
      */
-    public static final String LIST = "[";
+    static final String LIST = "[";
 
     private final String basePath;
     private final ConfigPath subPath;

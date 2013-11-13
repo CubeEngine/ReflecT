@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.configuration.exception;
 
-import de.cubeisland.engine.configuration.ConfigPath;
+import de.cubeisland.engine.configuration.node.ConfigPath;
 import de.cubeisland.engine.configuration.Section;
 
 import java.lang.reflect.Field;

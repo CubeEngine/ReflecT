@@ -42,27 +42,24 @@ import java.util.logging.Logger;
 public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
 {
     protected transient static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
+    private transient ConfigurationFactory factory;
+    private transient Configuration defaultConfig = this;
+    private transient final Class<Codec> defaultCodec = getCodecClass(this.getClass());
+    protected transient File file;
+
+    /**
+     * Saves the fields that got inherited from the parent-configuration
+     */
+    private transient HashSet<Field> inheritedFields;
 
     public static void setLogger(Logger logger)
     {
         LOGGER = logger;
     }
 
-    private ConfigurationFactory factory;
-
     public final void init(ConfigurationFactory factory)
     {
         this.factory = factory;
-    }
-
-    private transient Configuration defaultConfig;
-
-    /**
-     * After creating a configuration do not forget to initialize it with the ConfigurationFactory
-     */
-    protected Configuration()
-    {
-        this.defaultConfig = this;
     }
 
     public final Configuration getDefault()
@@ -98,13 +95,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         return true;
     }
-
-    private transient final Class<Codec> defaultCodec = getCodecClass(this.getClass());
-
-    /**
-     * Saves the fields that got inherited from the parent-configuration
-     */
-    private transient HashSet<Field> inheritedFields;
 
     /**
      * Marks a field as being inherited from the parent configuration and thus not being saved
@@ -198,7 +188,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             if (genericSuperclass.equals(Configuration.class))
             {
                 // superclass is this class -> No Codec set as GenericType Missing Codec!
-                throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+                return null;
             }
             if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
             {
@@ -227,8 +217,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             throw new IllegalStateException("Something went wrong", ex);
         }
     }
-
-    protected transient File file;
 
     /**
      * Saves the configuration to the set file.
@@ -401,10 +389,16 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Returns the Codec
      *
      * @return the ConfigurationCodec defined in the GenericType of the Configuration
+     *
+     * @throws MissingCodecException when no codec was set via genericType
      */
-    public final Codec getCodec()
+    public final Codec getCodec() throws MissingCodecException
     {
-        return this.factory.getCodec(this.defaultCodec);
+        if (defaultCodec == null)
+        {
+            throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+        }
+        return this.factory.getCodecManager().getCodec(this.defaultCodec);
     }
 
     /**

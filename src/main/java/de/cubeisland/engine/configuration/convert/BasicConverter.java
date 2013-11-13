@@ -22,9 +22,10 @@
  */
 package de.cubeisland.engine.configuration.convert;
 
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
 
-import static de.cubeisland.engine.configuration.Convert.wrapIntoNode;
+import static de.cubeisland.engine.configuration.node.Node.wrapIntoNode;
 
 public abstract class BasicConverter<T> implements Converter<T>
 {
