@@ -57,6 +57,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
 
     private transient Configuration defaultConfig;
 
+    /**
+     * After creating a configuration do not forget to initialize it with the ConfigurationFactory
+     */
     protected Configuration()
     {
         this.defaultConfig = this;

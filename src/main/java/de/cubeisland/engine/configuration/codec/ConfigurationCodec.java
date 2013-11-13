@@ -26,7 +26,6 @@ import de.cubeisland.engine.configuration.*;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.ConversionException;
-import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
@@ -52,12 +51,9 @@ public abstract class ConfigurationCodec
 {
     public Convert CONVERTERS;
 
-    private ConfigurationFactory factory;
-
-    public final void init(ConfigurationFactory factory)
+    public final void init(Convert converters)
     {
-        this.factory = factory;
-        CONVERTERS = Convert.emptyConverter(factory);
+        CONVERTERS = converters;
     }
 
     // PUBLIC Methods
@@ -232,7 +228,7 @@ public abstract class ConfigurationCodec
         switch (fieldType)
         {
             case NORMAL:
-                fieldValue = convertFromNode(fieldNode, type); // Convert the value
+                fieldValue = CONVERTERS.convertFromNode(fieldNode, type); // Convert the value
                 if (fieldValue == null && !(section == defaultSection))
                 {
                     fieldValue = field.get(defaultSection);
@@ -310,7 +306,7 @@ public abstract class ConfigurationCodec
                     Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
                     for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
-                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Object key = CONVERTERS.convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
                         Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
@@ -334,28 +330,6 @@ public abstract class ConfigurationCodec
         }
         field.set(section, fieldValue);
         return errorNodes;
-    }
-
-    final protected Object convertFromNode(Node node, Type type) throws ConversionException
-    {
-        try
-        {
-            return this.CONVERTERS.convertFromNode(node, type);
-        }
-        catch (ConverterNotFoundException ignored)
-        {}
-        return factory.DEFAULT_CONVERTERS.convertFromNode(node, type);
-    }
-
-    final protected Node convertToNode(Object o) throws ConversionException
-    {
-        try
-        {
-            return this.CONVERTERS.convertToNode(o);
-        }
-        catch (ConverterNotFoundException ignored)
-        {}
-        return factory.DEFAULT_CONVERTERS.convertToNode(o);
     }
 
     // Configuration saving Methods
@@ -426,7 +400,7 @@ public abstract class ConfigurationCodec
         switch (fieldType)
         {
             case NORMAL:
-                node = convertToNode(fieldValue);
+                node = CONVERTERS.convertToNode(fieldValue);
                 break;
             case SECTION:
                 if (fieldValue == null)
@@ -471,7 +445,7 @@ public abstract class ConfigurationCodec
                 Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
                 for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
                 {
-                    Node keyNode = convertToNode(defaultEntry.getKey());
+                    Node keyNode = CONVERTERS.convertToNode(defaultEntry.getKey());
                     if (keyNode instanceof StringNode)
                     {
                         MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);

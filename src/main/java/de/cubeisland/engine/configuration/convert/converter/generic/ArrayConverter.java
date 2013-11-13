@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.ConfigurationFactory;
+import de.cubeisland.engine.configuration.Convert;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
@@ -33,11 +33,11 @@ import java.util.LinkedList;
 
 public class ArrayConverter
 {
-    private ConfigurationFactory factory;
+    private Convert converters;
 
-    public ArrayConverter(ConfigurationFactory factory)
+    public ArrayConverter(Convert converters)
     {
-        this.factory = factory;
+        this.converters = converters;
     }
 
     public ListNode toNode(Object[] array) throws ConversionException
@@ -49,7 +49,7 @@ public class ArrayConverter
         }
         for (Object value : array)
         {
-            result.addNode(factory.DEFAULT_CONVERTERS.convertToNode(value));
+            result.addNode(converters.convertToNode(value));
         }
         return result;
     }
@@ -63,7 +63,7 @@ public class ArrayConverter
             Collection<V> result = new LinkedList<V>();
             for (Node node : listNode.getListedNodes())
             {
-                V value = factory.DEFAULT_CONVERTERS.convertFromNode(node, valueType);
+                V value = converters.convertFromNode(node, valueType);
                 result.add(value);
             }
             return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));

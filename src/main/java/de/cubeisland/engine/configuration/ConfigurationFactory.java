@@ -32,8 +32,7 @@ import java.util.Map;
 
 public class ConfigurationFactory
 {
-    public final Convert DEFAULT_CONVERTERS = Convert.defaultConverter(this);
-
+    private final Convert DEFAULT_CONVERTERS = Convert.defaultConverter(this);
     private final Map<Class<? extends ConfigurationCodec>, ConfigurationCodec> CODECS = new HashMap<Class<? extends ConfigurationCodec>, ConfigurationCodec>();
 
     /**
@@ -82,11 +81,11 @@ public class ConfigurationFactory
     }
 
     /**
-     * Creates an instance of this given configuration-class.
+     * Creates an instance of given configuration-class.
      * <p>The configuration has to have the default Constructor for this to work!
      *
      * @param clazz the configurations class
-     * @param <T>   The Type of the returned configuration
+     * @param <T>   The type of the returned configuration
      *
      * @return the created configuration
      */
@@ -104,6 +103,14 @@ public class ConfigurationFactory
         }
     }
 
+    /**
+     * Gets the instance of given <code>codecClass</code>
+     *
+     * @param codecClass the class of the codec
+     * @param <Codec> the type of the returned codec
+     *
+     * @return the codec instance
+     */
     @SuppressWarnings("unchecked")
     public <Codec extends ConfigurationCodec> Codec getCodec(Class<Codec> codecClass)
     {
@@ -113,7 +120,7 @@ public class ConfigurationFactory
             try
             {
                 codec = codecClass.newInstance();
-                codec.init(this);
+                codec.init(Convert.emptyConverter(this));
             }
             catch (ReflectiveOperationException e)
             {
@@ -122,5 +129,10 @@ public class ConfigurationFactory
             this.CODECS.put(codecClass, codec);
         }
         return codec;
+    }
+
+    public final Convert getDefaultConverters()
+    {
+        return DEFAULT_CONVERTERS;
     }
 }

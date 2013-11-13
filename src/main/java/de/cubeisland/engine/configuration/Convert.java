@@ -43,19 +43,23 @@ public final class Convert
     private MapConverter mapConverter;
     private ArrayConverter arrayConverter;
     private CollectionConverter collectionConverter;
+    private ConfigurationFactory factory;
+    private boolean isDefault = false;
 
-    private Convert(ConfigurationFactory factory)
+    private Convert(ConfigurationFactory factory, boolean isDefault)
     {
-        mapConverter = new MapConverter(factory);
-        arrayConverter = new ArrayConverter(factory);
-        collectionConverter = new CollectionConverter(factory);
+        this.factory = factory;
+        this.isDefault = isDefault;
+        this.mapConverter = new MapConverter(this);
+        this.arrayConverter = new ArrayConverter(this);
+        this.collectionConverter = new CollectionConverter(this);
     }
 
     static Convert defaultConverter(ConfigurationFactory factory)
     {
         // Register Default Converters
-        Convert convert = new Convert(factory);
-        Converter<?> converter;
+        Convert convert = new Convert(factory, true);
+        Converter <?> converter;
         convert.registerConverter(Integer.class, converter = new IntegerConverter());
         convert.registerConverter(int.class, converter);
         convert.registerConverter(Short.class, converter = new ShortConverter());
@@ -77,9 +81,9 @@ public final class Convert
         return convert;
     }
 
-    public static final Convert emptyConverter(ConfigurationFactory factory)
+    static Convert emptyConverter(ConfigurationFactory factory)
     {
-        return new Convert(factory);
+        return new Convert(factory, false);
     }
 
     /**
@@ -224,8 +228,25 @@ public final class Convert
      *
      * @return the serialized Node
      */
-    @SuppressWarnings("unchecked")
+
     public final <T> Node convertToNode(T object) throws ConversionException
+    {
+        try
+        {
+            return this.convertToNode0(object);
+        }
+        catch (ConverterNotFoundException e)
+        {
+            if (this.isDefault)
+            {
+                throw e;
+            }
+            return this.factory.getDefaultConverters().convertToNode(object);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Node convertToNode0(T object) throws ConversionException
     {
         if (object == null)
         {
@@ -255,8 +276,24 @@ public final class Convert
      *
      * @return the original object
      */
-    @SuppressWarnings("unchecked")
     public final <T> T convertFromNode(Node node, Type type) throws ConversionException
+    {
+        try
+        {
+            return this.convertFromNode0(node, type);
+        }
+        catch (ConverterNotFoundException e)
+        {
+            if (this.isDefault)
+            {
+                throw e;
+            } // else ignore
+            return this.factory.getDefaultConverters().convertFromNode0(node, type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T convertFromNode0(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
         { return null; }
