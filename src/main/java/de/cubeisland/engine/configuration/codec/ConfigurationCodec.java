@@ -51,9 +51,14 @@ public abstract class ConfigurationCodec
 {
     private ConverterManager converterManager = null;
 
-    final void setConverterManager(ConverterManager converters)
+    /**
+     * Called via registering with the CodecManager
+     *
+     * @param converterManager
+     */
+    final void setConverterManager(ConverterManager converterManager)
     {
-        converterManager = converters;
+        this.converterManager = converterManager;
     }
 
     // PUBLIC FINAL API Methods
@@ -69,7 +74,7 @@ public abstract class ConfigurationCodec
     {
         if (converterManager == null)
         {
-            throw new IllegalStateException("To instantiate your Codec use the getCodec(...) Method from the ConfigurationFactory if you want to use codec-specific converters");
+            throw new UnsupportedOperationException("This codec is not registered in the CodecManager and therefor has no ConverterManager for its own converters");
         }
         return converterManager;
     }
