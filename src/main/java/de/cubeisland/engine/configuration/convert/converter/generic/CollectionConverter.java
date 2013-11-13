@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
+import de.cubeisland.engine.configuration.ConfigurationFactory;
 import de.cubeisland.engine.configuration.convert.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
@@ -29,12 +30,23 @@ import de.cubeisland.engine.configuration.node.Node;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
-
-import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class CollectionConverter
 {
+    private ConfigurationFactory factory;
+
+    public CollectionConverter(ConfigurationFactory factory)
+    {
+        this.factory = factory;
+    }
+
     /**
      * Returns the converted collection
      *
@@ -53,7 +65,7 @@ public class CollectionConverter
         }
         for (Object value : collection)
         {
-            result.addNode(CONVERTERS.convertToNode(value));
+            result.addNode(factory.DEFAULT_CONVERTERS.convertToNode(value));
         }
         return result;
     }
@@ -81,7 +93,7 @@ public class CollectionConverter
                 Type subType = pType.getActualTypeArguments()[0];
                 for (Node node : listNode.getListedNodes())
                 {
-                    V value = CONVERTERS.convertFromNode(node, subType);
+                    V value = factory.DEFAULT_CONVERTERS.convertFromNode(node, subType);
                     result.add(value);
                 }
                 return result;

@@ -40,16 +40,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Convert
 {
     private Map<Class, Converter> converters = new ConcurrentHashMap<Class, Converter>();
-    private MapConverter mapConverter = new MapConverter();
-    private ArrayConverter arrayConverter = new ArrayConverter();
-    private CollectionConverter collectionConverter = new CollectionConverter();
+    private MapConverter mapConverter;
+    private ArrayConverter arrayConverter;
+    private CollectionConverter collectionConverter;
 
-    private Convert(){}
+    private Convert(ConfigurationFactory factory)
+    {
+        mapConverter = new MapConverter(factory);
+        arrayConverter = new ArrayConverter(factory);
+        collectionConverter = new CollectionConverter(factory);
+    }
 
-    static Convert defaultConverter()
+    static Convert defaultConverter(ConfigurationFactory factory)
     {
         // Register Default Converters
-        Convert convert = new Convert();
+        Convert convert = new Convert(factory);
         Converter<?> converter;
         convert.registerConverter(Integer.class, converter = new IntegerConverter());
         convert.registerConverter(int.class, converter);
@@ -72,9 +77,9 @@ public final class Convert
         return convert;
     }
 
-    public static final Convert emptyConverter()
+    public static final Convert emptyConverter(ConfigurationFactory factory)
     {
-        return new Convert();
+        return new Convert(factory);
     }
 
     /**
@@ -155,7 +160,7 @@ public final class Convert
      *
      * @return the Node
      */
-    public final Node wrapIntoNode(Object o)
+    public static final Node wrapIntoNode(Object o)
     {
         if (o == null)
         {

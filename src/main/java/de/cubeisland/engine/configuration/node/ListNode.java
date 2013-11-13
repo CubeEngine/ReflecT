@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import static de.cubeisland.engine.configuration.ConfigPath.LIST;
-import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
+import static de.cubeisland.engine.configuration.Convert.wrapIntoNode;
 
 public class ListNode extends ParentNode
 {
@@ -43,7 +43,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : list)
             {
-                Node node = CONVERTERS.wrapIntoNode(object);
+                Node node = wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }
@@ -56,7 +56,7 @@ public class ListNode extends ParentNode
         {
             for (Object object : array)
             {
-                Node node = CONVERTERS.wrapIntoNode(object);
+                Node node = wrapIntoNode(object);
                 node.setParentNode(this);
                 listedNodes.add(node);
             }

@@ -40,7 +40,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -51,17 +50,14 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
-    private static final Map<Class, Convert> CODEC_CONVERTERS = new HashMap<Class, Convert>();
+    public Convert CONVERTERS;
 
-    public static Convert getConverters(Class<? extends ConfigurationCodec> codecClass)
+    private ConfigurationFactory factory;
+
+    public final void init(ConfigurationFactory factory)
     {
-        Convert convert = CODEC_CONVERTERS.get(codecClass);
-        if (convert == null)
-        {
-            convert = Convert.emptyConverter();
-            CODEC_CONVERTERS.put(codecClass, convert);
-        }
-        return convert;
+        this.factory = factory;
+        CONVERTERS = Convert.emptyConverter(factory);
     }
 
     // PUBLIC Methods
@@ -344,11 +340,22 @@ public abstract class ConfigurationCodec
     {
         try
         {
-            return getConverters(this.getClass()).convertFromNode(node, type);
+            return this.CONVERTERS.convertFromNode(node, type);
         }
         catch (ConverterNotFoundException ignored)
         {}
-        return Configuration.CONVERTERS.convertFromNode(node, type);
+        return factory.DEFAULT_CONVERTERS.convertFromNode(node, type);
+    }
+
+    final protected Node convertToNode(Object o) throws ConversionException
+    {
+        try
+        {
+            return this.CONVERTERS.convertToNode(o);
+        }
+        catch (ConverterNotFoundException ignored)
+        {}
+        return factory.DEFAULT_CONVERTERS.convertToNode(o);
     }
 
     // Configuration saving Methods
@@ -479,17 +486,6 @@ public abstract class ConfigurationCodec
         addComment(node, field);
         return node;
 
-    }
-
-    final protected Node convertToNode(Object o) throws ConversionException
-    {
-        try
-        {
-            return getConverters(this.getClass()).convertToNode(o);
-        }
-        catch (ConverterNotFoundException ignored)
-        {}
-        return Configuration.CONVERTERS.convertToNode(o);
     }
 
     // HELPER Methods

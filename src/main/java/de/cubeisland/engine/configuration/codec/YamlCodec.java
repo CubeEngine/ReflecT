@@ -36,7 +36,6 @@ import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
 
 /**
@@ -76,7 +75,7 @@ public class YamlCodec extends ConfigurationCodec
             }
             else
             {
-                values = (MapNode)CONVERTERS.wrapIntoNode(map);
+                values = (MapNode) CONVERTERS.wrapIntoNode(map);
             }
         }
         catch (ScannerException ex)
