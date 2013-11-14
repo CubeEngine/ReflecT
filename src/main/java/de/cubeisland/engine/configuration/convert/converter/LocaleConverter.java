@@ -63,6 +63,6 @@ public class LocaleConverter implements Converter<Locale>
             }
             return new Locale(language, country);
         }
-        throw new ConversionException("Locales can only be loaded from a string node!");
+        throw ConversionException.of(this, node, "Locales can only be loaded from a string node!");
     }
 }

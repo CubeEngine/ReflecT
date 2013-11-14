@@ -20,29 +20,20 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration.convert.converter;
+package de.cubeisland.engine.configuration.exception;
 
-import de.cubeisland.engine.configuration.convert.BasicConverter;
-import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.node.FloatNode;
-import de.cubeisland.engine.configuration.node.Node;
-
-public class FloatConverter extends BasicConverter<Float>
+/**
+ * This exception is thrown when a configuration could not be instantiated
+ */
+public class ConfigInstantiationException extends InvalidConfigurationException
 {
-    public Float fromNode(Node node) throws ConversionException
+    public ConfigInstantiationException(Class clazz, Throwable t)
     {
-        if (node instanceof FloatNode)
-        {
-            return ((FloatNode)node).getValue();
-        }
-        String s = node.asText();
-        try
-        {
-            return Float.parseFloat(s);
-        }
-        catch (NumberFormatException e)
-        {
-            throw ConversionException.of(this, node, "Node Incompatible with Float", e);
-        }
+        super("Failed to create an instance of " + clazz.getName(), t);
+    }
+
+    public ConfigInstantiationException(String message, Throwable t)
+    {
+        super(message, t);
     }
 }

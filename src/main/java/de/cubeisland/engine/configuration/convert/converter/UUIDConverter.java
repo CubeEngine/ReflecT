@@ -22,12 +22,12 @@
  */
 package de.cubeisland.engine.configuration.convert.converter;
 
-import de.cubeisland.engine.configuration.exception.ConversionException;
+import java.util.UUID;
+
 import de.cubeisland.engine.configuration.convert.Converter;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
-
-import java.util.UUID;
 
 public class UUIDConverter implements Converter<UUID>
 {
@@ -42,6 +42,6 @@ public class UUIDConverter implements Converter<UUID>
         {
             UUID.fromString(node.asText());
         }
-        throw new ConversionException("Cannot convert " + node + " into UUID!");
+        throw ConversionException.of(this, node, "Node incompatible with UUID!");
     }
 }

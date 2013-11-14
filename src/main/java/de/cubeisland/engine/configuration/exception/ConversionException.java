@@ -25,19 +25,28 @@ package de.cubeisland.engine.configuration.exception;
 /**
  * This Exception is thrown when a conversion was not successful
  */
-public class ConversionException extends Exception
+public class ConversionException extends ConverterException
 {
-    public ConversionException(String message)
+    public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
+    {
+        message += "\nConverter: " + converter.getClass().getName();
+        message += "\nConverting: " + toConvert.toString();
+        return new ConversionException(message, cause);
+    }
+
+    public static ConversionException of(Object converter, Object toConvert, String message)
+    {
+        message += "\nConverter: " + converter.getClass().getName();
+        message += "\nConverting: " + toConvert.toString();
+        return new ConversionException(message);
+    }
+
+    private ConversionException(String message)
     {
         super(message);
     }
 
-    public ConversionException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public ConversionException(String message, Throwable cause)
+    private ConversionException(String message, Throwable cause)
     {
         super(message, cause);
     }

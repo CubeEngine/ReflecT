@@ -48,6 +48,7 @@ import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConvert
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConverterException;
 import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.MapNode;
@@ -194,7 +195,7 @@ public final class ConverterManager
      *
      * @return the serialized Node
      */
-    public final <T> Node convertToNode(T object) throws ConversionException
+    public final <T> Node convertToNode(T object) throws ConverterException
     {
         try
         {
@@ -211,7 +212,7 @@ public final class ConverterManager
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Node convertToNode0(T object) throws ConversionException
+    private <T> Node convertToNode0(T object) throws ConverterException
     {
         if (object == null)
         {
@@ -241,7 +242,7 @@ public final class ConverterManager
      *
      * @return the original object
      */
-    public final <T> T convertFromNode(Node node, Type type) throws ConversionException
+    public final <T> T convertFromNode(Node node, Type type) throws ConverterException
     {
         try
         {
@@ -258,7 +259,7 @@ public final class ConverterManager
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T convertFromNode0(Node node, Type type) throws ConversionException
+    private <T> T convertFromNode0(Node node, Type type) throws ConverterException
     {
         if (node == null || node instanceof NullNode || type == null)
         {
@@ -274,7 +275,7 @@ public final class ConverterManager
                 }
                 else
                 {
-                    throw new ConversionException("Cannot convert to Array! Node is not a ListNode!");
+                    throw ConversionException.of(arrayConverter, node, "Cannot convert to Array! Node is not a ListNode!");
                 }
             }
             else
@@ -296,7 +297,7 @@ public final class ConverterManager
                     }
                     else
                     {
-                        throw new ConversionException("Cannot convert to Collection! Node is not a ListNode!");
+                        throw ConversionException.of(collectionConverter, node, "Cannot convert to Collection! Node is not a ListNode!");
                     }
                 }
                 else if (Map.class.isAssignableFrom((Class)ptype.getRawType()))
@@ -307,7 +308,7 @@ public final class ConverterManager
                     }
                     else
                     {
-                        throw new ConversionException("Cannot convert to Map! Node is not a MapNode!");
+                        throw ConversionException.of(mapConverter, node, "Cannot convert to Map! Node is not a MapNode!");
                     }
                 }
             }

@@ -38,6 +38,6 @@ public abstract class BasicConverter<T> implements Converter<T>
         {
             return wrapIntoNode(object);
         }
-        throw new ConversionException("Illegal object type");
+        throw ConversionException.of(this, object, "Object is not a primitive, Number, CharSequence or Boolean");
     }
 }

@@ -93,17 +93,20 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
 
     /**
      * Returns true if ConversionExceptions should be rethrown immediately
+     * <p>this only affects ConversionException occuring while loading the configuration
+     *
      * <p>override to change
      *
-     * @return whether to rethrow exceptions or log them instead
+     * @return whether to rethrow ConversionExceptions or log them instead
      */
-    public boolean useStrictExceptionPolicy()
+    public boolean useStrictLoadingExceptionPolicy()
     {
         return true;
     }
 
     /**
      * Marks a field as being inherited from the parent configuration and thus not being saved
+     * <p>if this configuration is not a child-configuration nothing happens
      *
      * @param field the inherited field
      */
@@ -111,13 +114,14 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         if (inheritedFields == null)
         {
-            throw new IllegalStateException("This is not a child-configuration");
+            return;
         }
         this.inheritedFields.add(field);
     }
 
     /**
      * Marks a field as not being inherited from the parent configuration and thus saved into file
+     * <p>if this configuration is not a child-configuration nothing happens
      *
      * @param field the not inherited field
      */
@@ -125,13 +129,14 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         if (inheritedFields == null)
         {
-            throw new IllegalStateException("This is not a child-configuration");
+            return;
         }
         this.inheritedFields.remove(field);
     }
 
     /**
      * Returns whether the given field-value was inherited from a parent-configuration
+     * <p>Returns always false when this is not a child-configuration
      *
      * @param field the field to check
      *
@@ -139,11 +144,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final boolean isInheritedField(Field field)
     {
-        if (inheritedFields == null)
-        {
-            throw new IllegalStateException("This is not a child-configuration");
-        }
-        return inheritedFields.contains(field);
+        return inheritedFields != null && inheritedFields.contains(field);
     }
 
     /**
@@ -157,8 +158,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     @SuppressWarnings("unchecked")
     public <T extends Configuration> T loadChild(File sourceFile)
     {
-        // Can throw ConfigurationInstantiationException
-        Configuration<Codec> childConfig = factory.create(this.getClass());
+        Configuration<Codec> childConfig = factory.create(this.getClass()); // throws ConfigInstantiationException
         childConfig.setFile(sourceFile);
         childConfig.setDefault(this);
         try
@@ -168,8 +168,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (InvalidConfigurationException ex)
         {
-            //TODO policy
-            return (T)childConfig;
+            throw ex;
         }
         catch (Exception ex)
         {
@@ -183,8 +182,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * @param clazz the clazz of the configuration
      *
      * @return the Codec
-     *
-     * @throws InvalidConfigurationException if no Codec was defined through the GenericType
      */
     @SuppressWarnings("unchecked")
     private Class<Codec> getCodecClass(Class clazz)
@@ -211,10 +208,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 return getCodecClass((Class)genericSuperclass); // lookup next superclass
             }
             throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
-        }
-        catch (InvalidConfigurationException ex)
-        {
-            throw ex;
         }
         catch (IllegalStateException ex)
         {
@@ -252,19 +245,13 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            if (useStrictExceptionPolicy())
-            {
-                throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
-            }
-            LOGGER.log(Level.SEVERE, "File to save into cannot be accessed!", ex);
+            // TODO
+            throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
         }
         catch (IOException ex)
         {
-            if (useStrictExceptionPolicy())
-            {
-                throw new InvalidConfigurationException("Error while saving Configuration!", ex);
-            }
-            LOGGER.log(Level.SEVERE, "Error while saving Configuration!", ex);
+            // TODO
+            throw new InvalidConfigurationException("Error while saving Configuration!", ex);
         }
     }
 
@@ -313,11 +300,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             }
             else
             {
-                if (useStrictExceptionPolicy())
-                {
-                    throw new InvalidConfigurationException("Could not load configuration", ex);
-                }
-                LOGGER.log(Level.WARNING, "Could not load configuration", ex);
+                LOGGER.log(Level.WARNING, "Could not load configuration from file! Using default...", ex);
             }
         }
         if (save)
@@ -357,16 +340,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         try
         {
-            this.showLoadErrors(this.getCodec().loadConfig(this, is));//load config in maps -> updates -> sets fields
-        }
-        catch (RuntimeException e)
-        {
-            if (!this.useStrictExceptionPolicy() && e instanceof InvalidConfigurationException)
-            {
-                LOGGER.log(Level.SEVERE, "Could not load configuration from file!", e);
-                return;
-            }
-            throw e;
+            this.showLoadErrors(this.getCodec().loadConfig(this, is));
         }
         finally
         {

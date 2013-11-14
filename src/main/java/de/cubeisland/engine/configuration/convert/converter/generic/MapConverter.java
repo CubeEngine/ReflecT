@@ -29,7 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.cubeisland.engine.configuration.codec.ConverterManager;
-import de.cubeisland.engine.configuration.exception.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
+import de.cubeisland.engine.configuration.exception.ConverterException;
 import de.cubeisland.engine.configuration.node.MapNode;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
@@ -50,7 +51,7 @@ public class MapConverter
      *
      * @return the serializable map
      */
-    public MapNode toNode(Map<?, ?> map) throws ConversionException
+    public MapNode toNode(Map<?, ?> map) throws ConverterException
     {
         MapNode result = MapNode.emptyMap();
         if (map == null || map.isEmpty())
@@ -84,31 +85,24 @@ public class MapConverter
      * @return the converted map
      */
     @SuppressWarnings("unchecked")
-    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConversionException
+    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConverterException
     {
-        try
+        if (ptype.getRawType() instanceof Class)
         {
-            if (ptype.getRawType() instanceof Class)
+            Type keyType = ptype.getActualTypeArguments()[0];
+            Type valType = ptype.getActualTypeArguments()[1];
+            S result = getMapFor(ptype);
+            for (Map.Entry<String, Node> entry : mapNode.getMappedNodes().entrySet())
             {
-                Type keyType = ptype.getActualTypeArguments()[0];
-                Type valType = ptype.getActualTypeArguments()[1];
-                S result = getMapFor(ptype);
-                for (Map.Entry<String, Node> entry : mapNode.getMappedNodes().entrySet())
-                {
-                    // preserve Casing in Key
-                    StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey()));
-                    K newKey = converters.convertFromNode(keyNode, keyType);
-                    V newVal = converters.convertFromNode(entry.getValue(), valType);
-                    result.put(newKey, newVal);
-                }
-                return result;
+                // preserve Casing in Key
+                StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey()));
+                K newKey = converters.convertFromNode(keyNode, keyType);
+                V newVal = converters.convertFromNode(entry.getValue(), valType);
+                result.put(newKey, newVal);
             }
-            throw new IllegalArgumentException("Unknown Map-Type: " + ptype);
+            return result;
         }
-        catch (ConversionException ex)
-        {
-            throw new IllegalStateException("Map-conversion failed: Error while converting the values in the map.", ex);
-        }
+        throw new IllegalArgumentException("Unknown Map-Type: " + ptype);
     }
 
     @SuppressWarnings("unchecked")
@@ -126,13 +120,9 @@ public class MapConverter
                 return mapType.newInstance();
             }
         }
-        catch (IllegalAccessException ex)
+        catch (ReflectiveOperationException ex)
         {
-            throw new IllegalArgumentException("Map-conversion failed: Could not access the default constructor of: " + ptype.getRawType(), ex);
-        }
-        catch (InstantiationException ex)
-        {
-            throw new IllegalArgumentException("Map-conversion failed: Could not create an instance of: " + ptype.getRawType(), ex);
+            throw new ConfigInstantiationException((Class)ptype.getRawType(), ex);
         }
     }
 }

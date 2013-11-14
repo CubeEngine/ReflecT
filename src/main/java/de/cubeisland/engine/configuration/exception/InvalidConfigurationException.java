@@ -22,10 +22,10 @@
  */
 package de.cubeisland.engine.configuration.exception;
 
-import de.cubeisland.engine.configuration.node.ConfigPath;
-import de.cubeisland.engine.configuration.Section;
-
 import java.lang.reflect.Field;
+
+import de.cubeisland.engine.configuration.Section;
+import de.cubeisland.engine.configuration.node.ConfigPath;
 
 /**
  * This exception is thrown when a configuration is invalid.
@@ -46,9 +46,9 @@ public class InvalidConfigurationException extends RuntimeException
 
     public static InvalidConfigurationException of(String msg, ConfigPath path, Class<? extends Section> clazz, Field field, Throwable t)
     {
-        msg += "\nPath: " + path;
-        msg += "\nSection: " + clazz.toString();
         msg += "\nField: " + field.getName();
+        msg += "\nSection: " + clazz.toString();
+        msg += "\nPath: " + path;
         if (t == null)
         {
             return new InvalidConfigurationException(msg);

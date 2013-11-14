@@ -22,10 +22,10 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.exception.ConfigurationInstantiationException;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
 
 public class CodecManager
 {
@@ -53,7 +53,7 @@ public class CodecManager
             }
             catch (ReflectiveOperationException e)
             {
-                throw new ConfigurationInstantiationException(codecClass, e);
+                throw new ConfigInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
             }
         }
         return codec;

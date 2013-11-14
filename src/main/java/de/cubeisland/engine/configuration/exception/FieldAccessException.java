@@ -22,13 +22,33 @@
  */
 package de.cubeisland.engine.configuration.exception;
 
-/**
- * This exception is thrown when a configuration could not be instantiated
- */
-public class ConfigurationInstantiationException extends InvalidConfigurationException
+import java.lang.reflect.Field;
+
+import de.cubeisland.engine.configuration.Section;
+import de.cubeisland.engine.configuration.node.ConfigPath;
+
+public class FieldAccessException extends InvalidConfigurationException
 {
-    public ConfigurationInstantiationException(Class clazz, Throwable t)
+    private FieldAccessException(String message)
     {
-        super("Failed to create an instance of " + clazz.getName(), t);
+        super(message);
+    }
+
+    private FieldAccessException(String msg, Throwable t)
+    {
+        super(msg, t);
+    }
+
+    public static FieldAccessException of(ConfigPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    {
+        String msg = "Could not access a field to get or set a value";
+        msg += "\nField: " + field.getName();
+        msg += "\nSection: " + clazz.toString();
+        msg += "\nPath: " + path;
+        if (t == null)
+        {
+            return new FieldAccessException(msg);
+        }
+        return new FieldAccessException(msg, t);
     }
 }

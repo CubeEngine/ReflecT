@@ -20,29 +20,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration.convert.converter;
+package de.cubeisland.engine.configuration.exception;
 
-import de.cubeisland.engine.configuration.convert.BasicConverter;
-import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.node.FloatNode;
-import de.cubeisland.engine.configuration.node.Node;
-
-public class FloatConverter extends BasicConverter<Float>
+public class ConverterException extends Exception
 {
-    public Float fromNode(Node node) throws ConversionException
+    public ConverterException(String string)
     {
-        if (node instanceof FloatNode)
-        {
-            return ((FloatNode)node).getValue();
-        }
-        String s = node.asText();
-        try
-        {
-            return Float.parseFloat(s);
-        }
-        catch (NumberFormatException e)
-        {
-            throw ConversionException.of(this, node, "Node Incompatible with Float", e);
-        }
+        super(string);
+    }
+
+    public ConverterException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

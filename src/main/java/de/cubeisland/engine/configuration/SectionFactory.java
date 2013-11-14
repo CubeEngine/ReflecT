@@ -22,8 +22,9 @@
  */
 package de.cubeisland.engine.configuration;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+
+import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
 
 /**
  * This factory provides a Method to create a new Instance of a Section
@@ -51,31 +52,26 @@ public class SectionFactory
      *
      * @return the instantiated Section
      */
-    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws ConfigInstantiationException
     {
-        if (sectionClass.getEnclosingClass() == null)
+        try
         {
-            return newSectionInstance(sectionClass);
+            if (sectionClass.getEnclosingClass() == null)
+            {
+                return sectionClass.newInstance();
+            }
+            else if (Modifier.isStatic(sectionClass.getModifiers()))
+            {
+                return sectionClass.newInstance();
+            }
+            else
+            {
+                return sectionClass.getDeclaredConstructor(sectionClass.getEnclosingClass()).newInstance(parent);
+            }
         }
-        else if (Modifier.isStatic(sectionClass.getModifiers()))
+        catch (ReflectiveOperationException e)
         {
-            return newSectionInstance(sectionClass);
+            throw new ConfigInstantiationException(sectionClass, e);
         }
-        else
-        {
-            return sectionClass.getDeclaredConstructor(sectionClass.getEnclosingClass()).newInstance(parent);
-        }
-    }
-
-    /**
-     * Creates a new Instance of the <code>sectionClass</code> using its default-constructor
-     *
-     * @param sectionClass the class of the Section to instantiate
-     *
-     * @return the instantiated Section
-     */
-    public static Section newSectionInstance(Class<? extends Section> sectionClass) throws IllegalAccessException, InstantiationException
-    {
-        return sectionClass.newInstance();
     }
 }

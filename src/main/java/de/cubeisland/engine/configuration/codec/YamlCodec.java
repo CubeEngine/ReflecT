@@ -84,6 +84,7 @@ public class YamlCodec extends ConfigurationCodec
         }
         catch (ScannerException ex)
         {
+            // TODO what to do here?
             throw new InvalidConfigurationException("Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         return values;
@@ -91,7 +92,7 @@ public class YamlCodec extends ConfigurationCodec
 
     // Configuration saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Configuration config) throws IOException
+    protected final void save(MapNode node, OutputStream os, Configuration config) throws IOException // TODO remove IOException
     {
         try
         {

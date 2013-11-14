@@ -22,11 +22,11 @@
  */
 package de.cubeisland.engine.configuration;
 
-import de.cubeisland.engine.configuration.codec.CodecManager;
-import de.cubeisland.engine.configuration.exception.ConfigurationInstantiationException;
-
 import java.io.File;
 import java.io.InputStream;
+
+import de.cubeisland.engine.configuration.codec.CodecManager;
+import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
 
 public class ConfigurationFactory
 {
@@ -86,7 +86,7 @@ public class ConfigurationFactory
      *
      * @return the created configuration
      */
-    public <T extends Configuration> T create(Class<T> clazz) throws ConfigurationInstantiationException
+    public <T extends Configuration> T create(Class<T> clazz) throws ConfigInstantiationException
     {
         try
         {
@@ -96,7 +96,7 @@ public class ConfigurationFactory
         }
         catch (ReflectiveOperationException e)
         {
-            throw new ConfigurationInstantiationException(clazz, e);
+            throw new ConfigInstantiationException(clazz, e);
         }
     }
 

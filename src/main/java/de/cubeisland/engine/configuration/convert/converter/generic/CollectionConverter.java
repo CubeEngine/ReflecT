@@ -34,7 +34,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.cubeisland.engine.configuration.codec.ConverterManager;
-import de.cubeisland.engine.configuration.exception.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
+import de.cubeisland.engine.configuration.exception.ConverterException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -55,7 +56,7 @@ public class CollectionConverter
      *
      * @return the converted collection
      */
-    public ListNode toNode(Collection collection) throws ConversionException
+    public ListNode toNode(Collection collection) throws ConverterException
     {
         ListNode result = ListNode.emptyList();
         if (collection == null || collection.isEmpty())
@@ -80,27 +81,20 @@ public class CollectionConverter
      * @return the converted collection
      */
     @SuppressWarnings("unchecked")
-    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConversionException
+    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConverterException
     {
-        try
+        if (pType.getRawType() instanceof Class)
         {
-            if (pType.getRawType() instanceof Class)
+            S result = getCollectionFor(pType);
+            Type subType = pType.getActualTypeArguments()[0];
+            for (Node node : listNode.getListedNodes())
             {
-                S result = getCollectionFor(pType);
-                Type subType = pType.getActualTypeArguments()[0];
-                for (Node node : listNode.getListedNodes())
-                {
-                    V value = converters.convertFromNode(node, subType);
-                    result.add(value);
-                }
-                return result;
+                V value = converters.convertFromNode(node, subType);
+                result.add(value);
             }
-            throw new IllegalArgumentException("Unknown Collection-Type: " + pType);
+            return result;
         }
-        catch (ConversionException ex)
-        {
-            throw new IllegalStateException("Collection-conversion failed: Error while converting the values in the collection.", ex);
-        }
+        throw new IllegalArgumentException("Unknown Collection-Type: " + pType);
     }
 
     @SuppressWarnings("unchecked")
@@ -138,15 +132,9 @@ public class CollectionConverter
             }
             return result;
         }
-        catch (IllegalAccessException ex)
+        catch (ReflectiveOperationException ex)
         {
-            throw new IllegalArgumentException("Collection-conversion failed: Could not access the default constructor of: " +
-                                                   ptype.getRawType(), ex);
-        }
-        catch (InstantiationException ex)
-        {
-            throw new IllegalArgumentException("Collection-conversion failed: Could not create an instance of: " +
-                                                   ptype.getRawType(), ex);
+            throw new ConfigInstantiationException((Class)ptype.getRawType(), ex);
         }
     }
 }

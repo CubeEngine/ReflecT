@@ -22,14 +22,14 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.codec.ConverterManager;
-import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.node.ListNode;
-import de.cubeisland.engine.configuration.node.Node;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.LinkedList;
+
+import de.cubeisland.engine.configuration.codec.ConverterManager;
+import de.cubeisland.engine.configuration.exception.ConverterException;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.Node;
 
 public class ArrayConverter
 {
@@ -40,7 +40,7 @@ public class ArrayConverter
         this.converters = converters;
     }
 
-    public ListNode toNode(Object[] array) throws ConversionException
+    public ListNode toNode(Object[] array) throws ConverterException
     {
         ListNode result = ListNode.emptyList();
         if (array == null || array.length == 0)
@@ -55,22 +55,15 @@ public class ArrayConverter
     }
 
     @SuppressWarnings("unchecked")
-    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode) throws ConversionException
+    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode) throws ConverterException
     {
         Class<V> valueType = (Class<V>)arrayType.getComponentType();
-        try
+        Collection<V> result = new LinkedList<V>();
+        for (Node node : listNode.getListedNodes())
         {
-            Collection<V> result = new LinkedList<V>();
-            for (Node node : listNode.getListedNodes())
-            {
-                V value = converters.convertFromNode(node, valueType);
-                result.add(value);
-            }
-            return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));
+            V value = converters.convertFromNode(node, valueType);
+            result.add(value);
         }
-        catch (ConversionException ex)
-        {
-            throw new IllegalStateException("Array-conversion failed: Error while converting the values in the array.");
-        }
+        return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));
     }
 }

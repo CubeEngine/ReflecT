@@ -36,27 +36,21 @@ public class BooleanConverter extends BasicConverter<Boolean>
             return ((BooleanNode)node).getValue();
         }
         String s = node.asText();
-        try
+        if (s == null)
         {
-            if (s == null)
-            {
-                return null;
-            }
-            if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("on")
-             || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("1"))
-            {
-                return true;
-            }
-            if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("off")
-             || s.equalsIgnoreCase("no") || s.equalsIgnoreCase("0"))
-            {
-                return false;
-            }
             return null;
         }
-        catch (NumberFormatException e)
+        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("on")
+            || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("1"))
         {
-            throw new ConversionException("Invalid Node!" + node.getClass(), e);
+            return true;
         }
+        if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("off")
+            || s.equalsIgnoreCase("no") || s.equalsIgnoreCase("0"))
+        {
+            return false;
+        }
+
+        throw ConversionException.of(this, node, "Node incompatible with Boolean!");
     }
 }

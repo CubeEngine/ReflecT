@@ -42,7 +42,7 @@ public class LongConverter extends BasicConverter<Long>
         }
         catch (NumberFormatException e)
         {
-            throw new ConversionException("Invalid Node!" + node.getClass(), e);
+            throw ConversionException.of(this, node, "Node incompatible with Long!", e);
         }
     }
 }

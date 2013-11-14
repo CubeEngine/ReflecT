@@ -42,7 +42,7 @@ public class IntegerConverter extends BasicConverter<Integer>
         }
         catch (NumberFormatException e)
         {
-            throw new ConversionException("Invalid Node!" + node.getClass(), e);
+            throw ConversionException.of(this, node, "Node incompatible with Integer!", e);
         }
     }
 }
