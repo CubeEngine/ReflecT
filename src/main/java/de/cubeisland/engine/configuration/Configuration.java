@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -158,7 +157,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     @SuppressWarnings("unchecked")
     public <T extends Configuration> T loadChild(File sourceFile)
     {
-        Configuration<Codec> childConfig = factory.create(this.getClass()); // throws ConfigInstantiationException
+        Configuration<Codec> childConfig = factory.create(this.getClass());
         childConfig.setFile(sourceFile);
         childConfig.setDefault(this);
         try
@@ -248,11 +247,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             // TODO
             throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
         }
-        catch (IOException ex)
-        {
-            // TODO
-            throw new InvalidConfigurationException("Error while saving Configuration!", ex);
-        }
     }
 
     /**
@@ -260,7 +254,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param os the OutputStream to write into
      */
-    public final void save(OutputStream os) throws IOException
+    public final void save(OutputStream os)
     {
         this.getCodec().saveConfig(this, os);
     }
@@ -287,21 +281,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public final boolean reload(boolean save) throws InvalidConfigurationException
     {
         boolean result = false;
-        try
+        if (!this.loadFrom(this.file) && save)
         {
-            this.loadFrom(this.file);
-        }
-        catch (FileNotFoundException ex)
-        {
-            if (save)
-            {
-                LOGGER.info("File to load from not found! Creating new File when saving...");
-                result = true;
-            }
-            else
-            {
-                LOGGER.log(Level.WARNING, "Could not load configuration from file! Using default...", ex);
-            }
+            LOGGER.info("Saved configuration in new file: " + file.getAbsolutePath());
+            result = true;
         }
         if (save)
         {
@@ -315,16 +298,26 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * <p>This will NOT set the file of this configuration
      *
      * @param file the file to load from
+     *
+     * @return true if the configuration was loaded from file
      */
-    public final void loadFrom(File file) throws FileNotFoundException
+    public final boolean loadFrom(File file)
     {
         if (this.file == null)
         {
             throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
         }
-        this.loadFrom(new FileInputStream(this.file));
-
-        this.onLoaded(file);
+        try
+        {
+            this.loadFrom(new FileInputStream(this.file));
+            this.onLoaded(file);
+        }
+        catch (FileNotFoundException ex)
+        {
+            LOGGER.log(Level.INFO, "Could not load configuration from file! Using default...", ex);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -338,21 +331,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         {
             throw new IllegalArgumentException("The input stream must not be null!");
         }
-        try
-        {
-            this.showLoadErrors(this.getCodec().loadConfig(this, is));
-        }
-        finally
-        {
-            try
-            {
-                is.close();
-            }
-            catch (IOException e)
-            {
-                LOGGER.log(Level.WARNING, "Failed to close InputStream", e);
-            }
-        }
+        this.showLoadErrors(this.getCodec().loadConfig(this, is));
     }
 
     final void showLoadErrors(Collection<ErrorNode> errors)
@@ -362,7 +341,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
             for (ErrorNode error : errors)
             {
-                LOGGER.log(Level.WARNING, error.getErrorMessage(), error.getExeption());
+                LOGGER.log(Level.WARNING, error.getErrorMessage());
             }
         }
     }
@@ -441,5 +420,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public String[] tail()
     {
         return null;
+    }
+
+    public Logger getLogger()
+    {
+        return LOGGER;
     }
 }

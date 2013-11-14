@@ -62,7 +62,7 @@ public class YamlCodec extends ConfigurationCodec
     // Configuration loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException
+    protected final MapNode load(InputStream is, Configuration config)
     {
         MapNode values;
         try
@@ -92,7 +92,7 @@ public class YamlCodec extends ConfigurationCodec
 
     // Configuration saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Configuration config) throws IOException // TODO remove IOException
+    protected final void save(MapNode node, OutputStream os, Configuration config)
     {
         try
         {
@@ -110,9 +110,9 @@ public class YamlCodec extends ConfigurationCodec
             writer.flush();
             writer.close();
         }
-        finally
+        catch (IOException ex)
         {
-            os.close();
+            // TODO what to do here?
         }
     }
 

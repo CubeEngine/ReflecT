@@ -25,7 +25,7 @@ package de.cubeisland.engine.configuration.exception;
 /**
  * This Exception is thrown when there is no converter registered for a certain class
  */
-public class ConverterNotFoundException extends ConverterException
+public class ConverterNotFoundException extends InvalidConfigurationException
 {
     public ConverterNotFoundException(String string)
     {

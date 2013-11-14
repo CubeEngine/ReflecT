@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import de.cubeisland.engine.configuration.codec.ConverterManager;
-import de.cubeisland.engine.configuration.exception.ConverterException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -40,7 +40,7 @@ public class ArrayConverter
         this.converters = converters;
     }
 
-    public ListNode toNode(Object[] array) throws ConverterException
+    public ListNode toNode(Object[] array) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
         if (array == null || array.length == 0)
@@ -55,7 +55,7 @@ public class ArrayConverter
     }
 
     @SuppressWarnings("unchecked")
-    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode) throws ConverterException
+    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode) throws ConversionException
     {
         Class<V> valueType = (Class<V>)arrayType.getComponentType();
         Collection<V> result = new LinkedList<V>();

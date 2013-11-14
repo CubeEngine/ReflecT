@@ -35,7 +35,7 @@ import java.util.TreeSet;
 
 import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
-import de.cubeisland.engine.configuration.exception.ConverterException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
 
@@ -56,7 +56,7 @@ public class CollectionConverter
      *
      * @return the converted collection
      */
-    public ListNode toNode(Collection collection) throws ConverterException
+    public ListNode toNode(Collection collection) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
         if (collection == null || collection.isEmpty())
@@ -81,7 +81,7 @@ public class CollectionConverter
      * @return the converted collection
      */
     @SuppressWarnings("unchecked")
-    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConverterException
+    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConversionException
     {
         if (pType.getRawType() instanceof Class)
         {

@@ -25,7 +25,7 @@ package de.cubeisland.engine.configuration.exception;
 /**
  * This Exception is thrown when a conversion was not successful
  */
-public class ConversionException extends ConverterException
+public class ConversionException extends Exception
 {
     public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
     {

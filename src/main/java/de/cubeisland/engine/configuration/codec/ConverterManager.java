@@ -48,7 +48,6 @@ import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConvert
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.exception.ConverterException;
 import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.MapNode;
@@ -195,7 +194,7 @@ public final class ConverterManager
      *
      * @return the serialized Node
      */
-    public final <T> Node convertToNode(T object) throws ConverterException
+    public final <T> Node convertToNode(T object) throws ConversionException
     {
         try
         {
@@ -212,7 +211,7 @@ public final class ConverterManager
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Node convertToNode0(T object) throws ConverterException
+    private <T> Node convertToNode0(T object) throws ConversionException
     {
         if (object == null)
         {
@@ -242,7 +241,7 @@ public final class ConverterManager
      *
      * @return the original object
      */
-    public final <T> T convertFromNode(Node node, Type type) throws ConverterException
+    public final <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         try
         {
@@ -259,7 +258,7 @@ public final class ConverterManager
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T convertFromNode0(Node node, Type type) throws ConverterException
+    private <T> T convertFromNode0(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
         {

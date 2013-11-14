@@ -30,7 +30,7 @@ import java.util.Map;
 
 import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
-import de.cubeisland.engine.configuration.exception.ConverterException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.MapNode;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
@@ -51,7 +51,7 @@ public class MapConverter
      *
      * @return the serializable map
      */
-    public MapNode toNode(Map<?, ?> map) throws ConverterException
+    public MapNode toNode(Map<?, ?> map) throws ConversionException
     {
         MapNode result = MapNode.emptyMap();
         if (map == null || map.isEmpty())
@@ -85,7 +85,7 @@ public class MapConverter
      * @return the converted map
      */
     @SuppressWarnings("unchecked")
-    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConverterException
+    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConversionException
     {
         if (ptype.getRawType() instanceof Class)
         {

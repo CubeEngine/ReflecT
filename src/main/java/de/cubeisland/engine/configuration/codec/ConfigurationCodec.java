@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
 
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.FieldType;
@@ -42,10 +43,7 @@ import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
 import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.exception.ConverterException;
-import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
 import de.cubeisland.engine.configuration.exception.FieldAccessException;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.node.ConfigPath;
@@ -102,7 +100,21 @@ public abstract class ConfigurationCodec
      */
     public final Collection<ErrorNode> loadConfig(Configuration config, InputStream is)
     {
-        return dumpIntoSection(config.getDefault(), config, this.load(is, config), config);
+        try
+        {
+            return dumpIntoSection(config.getDefault(), config, this.load(is, config), config);
+        }
+        finally
+        {
+            try
+            {
+                is.close();
+            }
+            catch (IOException e)
+            {
+                config.getLogger().log(Level.WARNING, "Failed to close InputStream", e);
+            }
+        }
     }
 
     /**
@@ -111,9 +123,23 @@ public abstract class ConfigurationCodec
      * @param config the Configuration to save
      * @param os     the OutputStream to save into
      */
-    public final void saveConfig(Configuration config, OutputStream os) throws IOException
+    public final void saveConfig(Configuration config, OutputStream os)
     {
-        this.save(convertSection(config.getDefault(), config, config), os, config);
+        try
+        {
+            this.save(convertSection(config.getDefault(), config, config), os, config);
+        }
+        finally
+        {
+            try
+            {
+                os.close();
+            }
+            catch (IOException e)
+            {
+                config.getLogger().log(Level.WARNING, "Failed to close OutputStream", e);
+            }
+        }
     }
 
     /**
@@ -132,7 +158,7 @@ public abstract class ConfigurationCodec
      * @param os     the File to save into
      * @param config the Configuration
      */
-    protected abstract void save(MapNode node, OutputStream os, Configuration config) throws IOException;
+    protected abstract void save(MapNode node, OutputStream os, Configuration config);
 
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
@@ -140,7 +166,7 @@ public abstract class ConfigurationCodec
      * @param is     the InputStream to load from
      * @param config the Configuration
      */
-    protected abstract MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException;
+    protected abstract MapNode load(InputStream is, Configuration config);
 
     // Configuration loading Methods
 
@@ -206,11 +232,7 @@ public abstract class ConfigurationCodec
                         {
                             throw ex;
                         }
-                        errorNodes.add(new ErrorNode(ex)); // ignore field, add ErrorNode to show in log later
-                    }
-                    catch (ConverterNotFoundException e)
-                    {
-                        throw InvalidConfigurationException.of("Could not convert Node into FieldValue!", getPathFor(field), section.getClass(), field, e);
+                        config.getLogger().log(Level.WARNING, "CoulnConversion failed", ex); // TODO
                     }
                     catch (Exception e)
                     {
@@ -232,7 +254,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConverterException, ReflectiveOperationException, ConfigInstantiationException
+    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         if (parentSection != section)
         {
@@ -257,7 +279,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConverterException, ReflectiveOperationException, ConfigInstantiationException
+    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -418,7 +440,7 @@ public abstract class ConfigurationCodec
                 {
                     throw FieldAccessException.of(getPathFor(field), sectionClass, field, e);
                 }
-                catch (ConverterException e) // fatal ConversionException OR ConverterNotFoundException
+                catch (ConversionException e) // fatal ConversionException
                 {
                     throw InvalidConfigurationException.of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
                 }
@@ -446,7 +468,7 @@ public abstract class ConfigurationCodec
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConverterException, ConfigInstantiationException
+    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConversionException
     {
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
@@ -486,7 +508,7 @@ public abstract class ConfigurationCodec
             if (defaultSection != section)
             {
                 // TODO
-                throw new UnsupportedOperationException(InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null));
+                throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null);
             }
             node = ListNode.emptyList();
             for (Section subSection : (Collection<Section>)fieldValue)
