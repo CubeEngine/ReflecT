@@ -53,7 +53,8 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     private MapNode()
-    {}
+    {
+    }
 
     @Override
     public Map<String, Node> getValue()

@@ -34,6 +34,7 @@ public class SectionFactory
      * Returns true if the {@link Section} class <code>isAssignableFrom</code> the given class
      *
      * @param clazz the class to check
+     *
      * @return true if the given class implements {@link Section}
      */
     public static boolean isSectionClass(Class clazz)
@@ -46,12 +47,9 @@ public class SectionFactory
      * <p>the <code>parent</code> is needed when trying to instantiating a non-static inner-class Section
      *
      * @param sectionClass the class of the Section to instantiate
-     * @param parent an instance of the enclosing class of the <code>sectionClass</code>
+     * @param parent       an instance of the enclosing class of the <code>sectionClass</code>
+     *
      * @return the instantiated Section
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
      */
     public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
     {
@@ -73,9 +71,8 @@ public class SectionFactory
      * Creates a new Instance of the <code>sectionClass</code> using its default-constructor
      *
      * @param sectionClass the class of the Section to instantiate
+     *
      * @return the instantiated Section
-     * @throws IllegalAccessException
-     * @throws InstantiationException
      */
     public static Section newSectionInstance(Class<? extends Section> sectionClass) throws IllegalAccessException, InstantiationException
     {

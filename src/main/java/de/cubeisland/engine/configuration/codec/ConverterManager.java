@@ -22,20 +22,37 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.convert.Converter;
-import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
-import de.cubeisland.engine.configuration.convert.converter.*;
-import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConverter;
-import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
-import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
-import de.cubeisland.engine.configuration.node.*;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Date;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import de.cubeisland.engine.configuration.convert.Converter;
+import de.cubeisland.engine.configuration.convert.converter.BooleanConverter;
+import de.cubeisland.engine.configuration.convert.converter.ByteConverter;
+import de.cubeisland.engine.configuration.convert.converter.DateConverter;
+import de.cubeisland.engine.configuration.convert.converter.DoubleConverter;
+import de.cubeisland.engine.configuration.convert.converter.FloatConverter;
+import de.cubeisland.engine.configuration.convert.converter.IntegerConverter;
+import de.cubeisland.engine.configuration.convert.converter.LocaleConverter;
+import de.cubeisland.engine.configuration.convert.converter.LongConverter;
+import de.cubeisland.engine.configuration.convert.converter.ShortConverter;
+import de.cubeisland.engine.configuration.convert.converter.StringConverter;
+import de.cubeisland.engine.configuration.convert.converter.UUIDConverter;
+import de.cubeisland.engine.configuration.convert.converter.generic.ArrayConverter;
+import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
+import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
+import de.cubeisland.engine.configuration.exception.ConversionException;
+import de.cubeisland.engine.configuration.exception.ConverterNotFoundException;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
 
 public final class ConverterManager
 {
@@ -68,7 +85,7 @@ public final class ConverterManager
 
     private void registerDefaultConverters()
     {
-        Converter <?> converter;
+        Converter<?> converter;
         this.registerConverter(Integer.class, converter = new IntegerConverter());
         this.registerConverter(int.class, converter);
         this.registerConverter(Short.class, converter = new ShortConverter());
@@ -161,7 +178,8 @@ public final class ConverterManager
         {
             return (Converter<T>)converter;
         }
-        if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass) || Map.class.isAssignableFrom(objectClass))
+        if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass)
+         || Map.class.isAssignableFrom(objectClass))
         {
             return null;
         }
@@ -243,7 +261,9 @@ public final class ConverterManager
     private <T> T convertFromNode0(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
-        { return null; }
+        {
+            return null;
+        }
         if (type instanceof Class)
         {
             if (((Class)type).isArray())

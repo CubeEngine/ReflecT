@@ -60,7 +60,8 @@ public class ListNode extends ParentNode
     }
 
     private ListNode()
-    {}
+    {
+    }
 
     public ArrayList<Node> getListedNodes()
     {

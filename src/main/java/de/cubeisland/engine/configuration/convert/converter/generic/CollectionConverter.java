@@ -22,15 +22,21 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.Node;
-
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
 
 public class CollectionConverter
 {
@@ -48,8 +54,6 @@ public class CollectionConverter
      * @param collection the collection to convert
      *
      * @return the converted collection
-     *
-     * @throws ConversionException
      */
     public ListNode toNode(Collection collection) throws ConversionException
     {
@@ -74,8 +78,6 @@ public class CollectionConverter
      * @param listNode the Node to convert
      *
      * @return the converted collection
-     *
-     * @throws ConversionException
      */
     @SuppressWarnings("unchecked")
     public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConversionException
@@ -138,11 +140,13 @@ public class CollectionConverter
         }
         catch (IllegalAccessException ex)
         {
-            throw new IllegalArgumentException("Collection-conversion failed: Could not access the default constructor of: " + ptype.getRawType(), ex);
+            throw new IllegalArgumentException("Collection-conversion failed: Could not access the default constructor of: " +
+                                                   ptype.getRawType(), ex);
         }
         catch (InstantiationException ex)
         {
-            throw new IllegalArgumentException("Collection-conversion failed: Could not create an instance of: " + ptype.getRawType(), ex);
+            throw new IllegalArgumentException("Collection-conversion failed: Could not create an instance of: " +
+                                                   ptype.getRawType(), ex);
         }
     }
 }

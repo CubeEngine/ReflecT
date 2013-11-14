@@ -22,17 +22,17 @@
  */
 package de.cubeisland.engine.configuration.convert.converter.generic;
 
-import de.cubeisland.engine.configuration.codec.ConverterManager;
-import de.cubeisland.engine.configuration.exception.ConversionException;
-import de.cubeisland.engine.configuration.node.MapNode;
-import de.cubeisland.engine.configuration.node.Node;
-import de.cubeisland.engine.configuration.node.StringNode;
-
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import de.cubeisland.engine.configuration.codec.ConverterManager;
+import de.cubeisland.engine.configuration.exception.ConversionException;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.StringNode;
 
 public class MapConverter
 {
@@ -49,8 +49,6 @@ public class MapConverter
      * @param map the map to convert
      *
      * @return the serializable map
-     *
-     * @throws ConversionException
      */
     public MapNode toNode(Map<?, ?> map) throws ConversionException
     {
@@ -84,8 +82,6 @@ public class MapConverter
      * @param mapNode the object to convert
      *
      * @return the converted map
-     *
-     * @throws ConversionException
      */
     @SuppressWarnings("unchecked")
     public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConversionException
@@ -99,7 +95,8 @@ public class MapConverter
                 S result = getMapFor(ptype);
                 for (Map.Entry<String, Node> entry : mapNode.getMappedNodes().entrySet())
                 {
-                    StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey())); // preserve Casing in Key
+                    // preserve Casing in Key
+                    StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey()));
                     K newKey = converters.convertFromNode(keyNode, keyType);
                     V newVal = converters.convertFromNode(entry.getValue(), valType);
                     result.put(newKey, newVal);

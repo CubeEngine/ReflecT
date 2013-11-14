@@ -26,4 +26,5 @@ package de.cubeisland.engine.configuration;
  * A ConfigurationSection containing fields to serialize
  */
 public interface Section
-{}
+{
+}

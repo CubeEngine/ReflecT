@@ -68,9 +68,6 @@ public class ConfigPath
 
     /**
      * Create a new ConfigPath as SubPath of given basePath
-     *
-     * @param basePath
-     * @return
      */
     public final ConfigPath asSubPath(String basePath)
     {

@@ -33,7 +33,8 @@ public abstract class BasicConverter<T> implements Converter<T>
     public Node toNode(T object) throws ConversionException
     {
         Class<T> clazz = (Class<T>)object.getClass();
-        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || CharSequence.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz))
+        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) ||
+            CharSequence.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz))
         {
             return wrapIntoNode(object);
         }

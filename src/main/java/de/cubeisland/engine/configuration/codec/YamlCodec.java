@@ -22,19 +22,23 @@
  */
 package de.cubeisland.engine.configuration.codec;
 
-import de.cubeisland.engine.configuration.Configuration;
-import de.cubeisland.engine.configuration.StringUtils;
-import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
-import de.cubeisland.engine.configuration.node.*;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.scanner.ScannerException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import de.cubeisland.engine.configuration.Configuration;
+import de.cubeisland.engine.configuration.StringUtils;
+import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.node.ListNode;
+import de.cubeisland.engine.configuration.node.MapNode;
+import de.cubeisland.engine.configuration.node.Node;
+import de.cubeisland.engine.configuration.node.NullNode;
+import de.cubeisland.engine.configuration.node.StringNode;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
 import static de.cubeisland.engine.configuration.node.Node.wrapIntoNode;
@@ -75,7 +79,7 @@ public class YamlCodec extends ConfigurationCodec
             }
             else
             {
-                values = (MapNode) wrapIntoNode(map);
+                values = (MapNode)wrapIntoNode(map);
             }
         }
         catch (ScannerException ex)
@@ -94,7 +98,8 @@ public class YamlCodec extends ConfigurationCodec
             OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
             if (config.head() != null)
             {
-                writer.append("# ").append(StringUtils.implode("\n# ", config.head())).append(LINE_BREAK).append(LINE_BREAK);
+                writer.append("# ").append(StringUtils.implode("\n# ", config.head())).append(LINE_BREAK)
+                      .append(LINE_BREAK);
             }
             convertMapNode(writer, node, 0, false);
             if (config.tail() != null)
@@ -114,9 +119,8 @@ public class YamlCodec extends ConfigurationCodec
      * Serializes a single <code>Node</code> that is NOT a <code>ParentNode</code>
      *
      * @param writer the OutputStreamWriter to serialize into
-     * @param value the Node to serialize
+     * @param value  the Node to serialize
      * @param offset the current offset
-     * @throws IOException
      */
     private void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
@@ -154,10 +158,9 @@ public class YamlCodec extends ConfigurationCodec
      * Serializes the values in the <code>MapNode</code>
      *
      * @param writer the OutputStreamWriter to serialize into
-     * @param value the MapNode to serialize
+     * @param value  the MapNode to serialize
      * @param offset the current offset
      * @param inList true if currently directly under a ListNode
-     * @throws IOException
      */
     private void convertMapNode(OutputStreamWriter writer, MapNode value, int offset, boolean inList) throws IOException
     {
@@ -228,9 +231,8 @@ public class YamlCodec extends ConfigurationCodec
      * Serializes the values in the <code>ListNode</code>
      *
      * @param writer the OutputStreamWriter to serialize into
-     * @param value the ListNode to serialize
+     * @param value  the ListNode to serialize
      * @param offset the current offset
-     * @throws IOException
      */
     private void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
     {
@@ -269,6 +271,7 @@ public class YamlCodec extends ConfigurationCodec
     }
 
     // HELPER Methods
+
     /**
      * Returns the offset as String
      *
@@ -290,7 +293,8 @@ public class YamlCodec extends ConfigurationCodec
      * Builds the a comment
      *
      * @param comments the comment-lines
-     * @param offset the current offset
+     * @param offset   the current offset
+     *
      * @return the built comment
      */
     private String buildComment(String[] comments, int offset)
@@ -320,12 +324,15 @@ public class YamlCodec extends ConfigurationCodec
      * Returns whether a string needs to be quoted in YAML
      *
      * @param s the string to check
+     *
      * @return true if the given string needs quoting
      */
     private boolean needsQuote(String s)
     {
-        return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`") || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|") || s
-                .startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s
-                .equals("*") || s.matches("[0][0-9]+");
+        return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`")
+             || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|")
+             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.startsWith("- ")
+             || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s.equals("*")
+             || s.matches("[0][0-9]+");
     }
 }

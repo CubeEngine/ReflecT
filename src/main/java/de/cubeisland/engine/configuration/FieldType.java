@@ -24,5 +24,8 @@ package de.cubeisland.engine.configuration;
 
 public enum FieldType
 {
-    NORMAL, SECTION, SECTION_COLLECTION, SECTION_MAP
+    NORMAL,
+    SECTION,
+    SECTION_COLLECTION,
+    SECTION_MAP
 }

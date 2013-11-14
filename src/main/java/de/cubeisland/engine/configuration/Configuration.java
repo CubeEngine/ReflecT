@@ -22,12 +22,13 @@
  */
 package de.cubeisland.engine.configuration;
 
-import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
-import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
-import de.cubeisland.engine.configuration.exception.MissingCodecException;
-import de.cubeisland.engine.configuration.node.ErrorNode;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -35,6 +36,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
+import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.exception.MissingCodecException;
+import de.cubeisland.engine.configuration.node.ErrorNode;
 
 /**
  * This abstract class represents a configuration.
@@ -86,7 +92,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     }
 
     /**
-     * Returns true if exceptions should be rethrown immediately
+     * Returns true if ConversionExceptions should be rethrown immediately
      * <p>override to change
      *
      * @return whether to rethrow exceptions or log them instead
@@ -101,7 +107,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @param field the inherited field
      */
-    public final void addinheritedField(Field field)
+    public final void addInheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -151,7 +157,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     @SuppressWarnings("unchecked")
     public <T extends Configuration> T loadChild(File sourceFile)
     {
-        Configuration<Codec> childConfig = factory.create(this.getClass()); // Can throw ConfigurationInstantiationException
+        // Can throw ConfigurationInstantiationException
+        Configuration<Codec> childConfig = factory.create(this.getClass());
         childConfig.setFile(sourceFile);
         childConfig.setDefault(this);
         try
@@ -162,7 +169,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         catch (InvalidConfigurationException ex)
         {
             //TODO policy
-            return (T) childConfig;
+            return (T)childConfig;
         }
         catch (Exception ex)
         {
@@ -173,7 +180,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     /**
      * Tries to get the CodecClazz of a configuration implementation.
      *
-     * @param clazz    the clazz of the configuration
+     * @param clazz the clazz of the configuration
      *
      * @return the Codec
      *
@@ -192,15 +199,16 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             }
             if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
             {
-                Type gType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0]; // get First gType
-                if (gType instanceof Class && ConfigurationCodec.class.isAssignableFrom((Class<?>) gType)) // check if it is codec
+                Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // get First gType
+                // check if it is codec
+                if (gType instanceof Class && ConfigurationCodec.class.isAssignableFrom((Class<?>)gType))
                 {
-                    return (Class<Codec>) gType;
+                    return (Class<Codec>)gType;
                 }
             }
             if (genericSuperclass instanceof Class)
             {
-                return getCodecClass((Class) genericSuperclass); // lookup next superclass
+                return getCodecClass((Class)genericSuperclass); // lookup next superclass
             }
             throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
         }
@@ -429,13 +437,15 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * This method gets called right after the configuration got loaded.
      */
     public void onLoaded(File loadedFrom)
-    {}
+    {
+    }
 
     /**
      * This method gets called right after the configuration get saved.
      */
     public void onSaved(File savedTo)
-    {}
+    {
+    }
 
     /**
      * Returns the lines to be added in front of the Configuration.

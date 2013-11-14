@@ -36,14 +36,14 @@ public class CodecManager
      * Gets the instance of given <code>codecClass</code>
      *
      * @param codecClass the class of the codec
-     * @param <Codec> the type of the returned codec
+     * @param <Codec>    the type of the returned codec
      *
      * @return the codec instance
      */
     @SuppressWarnings("unchecked")
     public <Codec extends ConfigurationCodec> Codec getCodec(Class<Codec> codecClass)
     {
-        Codec codec = (Codec) this.codecs.get(codecClass);
+        Codec codec = (Codec)this.codecs.get(codecClass);
         if (codec == null) // Codec not registered yet! Try to auto-register...
         {
             try

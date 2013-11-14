@@ -22,18 +22,19 @@
  */
 package de.cubeisland.engine.configuration.convert.converter;
 
-import de.cubeisland.engine.configuration.exception.ConversionException;
+import java.util.Locale;
+
 import de.cubeisland.engine.configuration.convert.Converter;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.StringNode;
-
-import java.util.Locale;
 
 public class LocaleConverter implements Converter<Locale>
 {
     public Node toNode(Locale locale) throws ConversionException
     {
-        return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' + locale.getCountry().toUpperCase(Locale.ENGLISH));
+        return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
+                             locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
     public Locale fromNode(Node node) throws ConversionException
