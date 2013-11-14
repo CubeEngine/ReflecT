@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
@@ -43,9 +44,11 @@ import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
+import de.cubeisland.engine.configuration.exception.CodecIOException;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.exception.FieldAccessException;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.exception.UnsupportedConfigurationException;
 import de.cubeisland.engine.configuration.node.ConfigPath;
 import de.cubeisland.engine.configuration.node.ErrorNode;
 import de.cubeisland.engine.configuration.node.ListNode;
@@ -104,6 +107,15 @@ public abstract class ConfigurationCodec
         {
             return dumpIntoSection(config.getDefault(), config, this.load(is, config), config);
         }
+        catch (ConversionException ex)
+        {
+            if (config.useStrictExceptionPolicy())
+            {
+                throw new CodecIOException("Could not load configuration", ex);
+            }
+            config.getLogger().warning("Could not load configuration" + ex);
+            return Collections.emptyList();
+        }
         finally
         {
             try
@@ -128,6 +140,14 @@ public abstract class ConfigurationCodec
         try
         {
             this.save(convertSection(config.getDefault(), config, config), os, config);
+        }
+        catch (ConversionException ex)
+        {
+            if (config.useStrictExceptionPolicy())
+            {
+                throw new CodecIOException("Could not save configuration", ex);
+            }
+            config.getLogger().warning("Could not save configuration" + ex);
         }
         finally
         {
@@ -158,7 +178,7 @@ public abstract class ConfigurationCodec
      * @param os     the File to save into
      * @param config the Configuration
      */
-    protected abstract void save(MapNode node, OutputStream os, Configuration config);
+    protected abstract void save(MapNode node, OutputStream os, Configuration config) throws ConversionException;
 
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
@@ -166,7 +186,7 @@ public abstract class ConfigurationCodec
      * @param is     the InputStream to load from
      * @param config the Configuration
      */
-    protected abstract MapNode load(InputStream is, Configuration config);
+    protected abstract MapNode load(InputStream is, Configuration config) throws ConversionException;
 
     // Configuration loading Methods
 
@@ -228,11 +248,11 @@ public abstract class ConfigurationCodec
                     catch (ConversionException e) // non-fatal ConversionException
                     {
                         InvalidConfigurationException ex = InvalidConfigurationException.of("Error while converting Node to dump into field!", getPathFor(field), section.getClass(), field, e);
-                        if (config.useStrictLoadingExceptionPolicy())
+                        if (config.useStrictExceptionPolicy())
                         {
                             throw ex;
                         }
-                        config.getLogger().log(Level.WARNING, "CoulnConversion failed", ex); // TODO
+                        config.getLogger().log(Level.WARNING, ex.getMessage(), ex);
                     }
                     catch (Exception e)
                     {
@@ -260,8 +280,7 @@ public abstract class ConfigurationCodec
         {
             if (getFieldType(field) == FieldType.SECTION_COLLECTION)
             {
-                // TODO
-                throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
             }
         }
         return dumpIntoField(parentSection, section, field, convertField(field, parentSection, parentSection, config), config); // convert parent in node and dump back in
@@ -316,15 +335,13 @@ public abstract class ConfigurationCodec
             }
             else
             {
-                // TODO
-                throw new InvalidConfigurationException("Node for Section is not a MapNode!\n" + fieldNode);
+                throw ConversionException.of(this, fieldNode, "Node for Section is not a MapNode!");
             }
             break;
         case SECTION_COLLECTION:
             if (section != defaultSection)
             {
-                // TODO
-                throw new InvalidConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
             }
             if (fieldNode instanceof ListNode)
             {
@@ -348,15 +365,13 @@ public abstract class ConfigurationCodec
                     }
                     else
                     {
-                        // TODO
-                        throw new InvalidConfigurationException("Node for listed Section is not a MapNode!\n" + listedNode);
+                        throw ConversionException.of(this, listedNode, "Node for listed Section is not a MapNode!");
                     }
                 }
             }
             else
             {
-                // TODO
-                throw new InvalidConfigurationException("Node for listed Sections is not a ListNode!\n" + fieldNode);
+                throw ConversionException.of(this, fieldNode, "\"Node for listed Sections is not a ListNode!");
             }
             break;
         case SECTION_MAP:
@@ -388,16 +403,14 @@ public abstract class ConfigurationCodec
                     }
                     else
                     {
-                        // TODO
-                        throw new InvalidConfigurationException("Value-Node for mapped Section is not a MapNode!\n" + entry.getValue());
+                        throw ConversionException.of(this, entry.getValue(), "Value-Node for mapped Section is not a MapNode!");
                     }
                     ((Map<Object, Section>)fieldValue).put(key, value);
                 }
             }
             else
             {
-                // TODO
-                throw new InvalidConfigurationException("Node for mapped Sections is not a MapNode!\n" + fieldNode);
+                throw ConversionException.of(this, fieldNode, "Node for mapped Sections is not a MapNode!");
             }
         }
         field.set(section, fieldValue);
@@ -507,8 +520,7 @@ public abstract class ConfigurationCodec
         case SECTION_COLLECTION:
             if (defaultSection != section)
             {
-                // TODO
-                throw InvalidConfigurationException.of("Child-Configurations are not allowed for Sections in Collections", getPathFor(field), section.getClass(), field, null);
+                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
             }
             node = ListNode.emptyList();
             for (Section subSection : (Collection<Section>)fieldValue)
@@ -529,10 +541,9 @@ public abstract class ConfigurationCodec
                     MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);
                     ((MapNode)node).setNode((StringNode)keyNode, configNode);
                 }
-                else
+                else // TODO allow Numbers
                 {
-                    // TODO
-                    throw InvalidConfigurationException.of("Invalid Key-Node for mapped Section at", getPathFor(field), section.getClass(), field, null);
+                    throw new UnsupportedConfigurationException("Key-Node is not supported for mapped Sections: " + keyNode);
                 }
             }
         }

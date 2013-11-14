@@ -92,13 +92,13 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
 
     /**
      * Returns true if ConversionExceptions should be rethrown immediately
-     * <p>this only affects ConversionException occuring while loading the configuration
+     * <p>this does not affect ConversionException thrown when converting fields into nodes
      *
      * <p>override to change
      *
      * @return whether to rethrow ConversionExceptions or log them instead
      */
-    public boolean useStrictLoadingExceptionPolicy()
+    public boolean useStrictExceptionPolicy()
     {
         return true;
     }
@@ -244,7 +244,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            // TODO
             throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
         }
     }

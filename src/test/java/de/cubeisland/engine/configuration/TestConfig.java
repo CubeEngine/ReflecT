@@ -22,11 +22,17 @@
  */
 package de.cubeisland.engine.configuration;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
 import de.cubeisland.engine.configuration.codec.TestCodec;
-
-import java.util.*;
 
 public class TestConfig extends Configuration<TestCodec>
 {

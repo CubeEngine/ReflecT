@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 
 import de.cubeisland.engine.configuration.Configuration;
 import de.cubeisland.engine.configuration.StringUtils;
-import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.ListNode;
 import de.cubeisland.engine.configuration.node.MapNode;
 import de.cubeisland.engine.configuration.node.Node;
@@ -62,7 +62,7 @@ public class YamlCodec extends ConfigurationCodec
     // Configuration loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Configuration config)
+    protected final MapNode load(InputStream is, Configuration config) throws ConversionException
     {
         MapNode values;
         try
@@ -84,15 +84,14 @@ public class YamlCodec extends ConfigurationCodec
         }
         catch (ScannerException ex)
         {
-            // TODO what to do here?
-            throw new InvalidConfigurationException("Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+            throw ConversionException.of(this, is, "Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         return values;
     }
 
     // Configuration saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Configuration config)
+    protected final void save(MapNode node, OutputStream os, Configuration config) throws ConversionException
     {
         try
         {
@@ -112,7 +111,7 @@ public class YamlCodec extends ConfigurationCodec
         }
         catch (IOException ex)
         {
-            // TODO what to do here?
+            throw ConversionException.of(this, null, "Could not write into OutputStream", ex);
         }
     }
 

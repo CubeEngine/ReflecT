@@ -27,6 +27,9 @@ import java.lang.reflect.Field;
 import de.cubeisland.engine.configuration.Section;
 import de.cubeisland.engine.configuration.node.ConfigPath;
 
+/**
+ * This exception is thrown when field.get(...) or field.set(...) caused a ReflectiveOperationException
+ */
 public class FieldAccessException extends InvalidConfigurationException
 {
     private FieldAccessException(String message)

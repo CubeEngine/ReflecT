@@ -23,37 +23,13 @@
 package de.cubeisland.engine.configuration.exception;
 
 /**
- * This Exception is thrown when a conversion was not successful
+ * This exception is only thrown if {@link de.cubeisland.engine.configuration.Configuration#useStrictExceptionPolicy()} is true
+ * <p>when loading from an InputStream or saving into an OutputStream caused a ConversionException
  */
-public class ConversionException extends Exception
+public class CodecIOException extends InvalidConfigurationException
 {
-    public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
+    public CodecIOException(String s, ConversionException ex)
     {
-        message += "\nConverter: " + converter.getClass().getName();
-        if (toConvert != null)
-        {
-            message += "\nConverting: " + toConvert.toString();
-        }
-        return new ConversionException(message, cause);
-    }
-
-    public static ConversionException of(Object converter, Object toConvert, String message)
-    {
-        message += "\nConverter: " + converter.getClass().getName();
-        if (toConvert != null)
-        {
-            message += "\nConverting: " + toConvert.toString();
-        }
-        return new ConversionException(message);
-    }
-
-    private ConversionException(String message)
-    {
-        super(message);
-    }
-
-    private ConversionException(String message, Throwable cause)
-    {
-        super(message, cause);
+        super(s, ex);
     }
 }

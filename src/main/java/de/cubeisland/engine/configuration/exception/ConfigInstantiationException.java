@@ -23,7 +23,7 @@
 package de.cubeisland.engine.configuration.exception;
 
 /**
- * This exception is thrown when a configuration could not be instantiated
+ * This exception is thrown when a class needed for the configuration could not be instantiated
  */
 public class ConfigInstantiationException extends InvalidConfigurationException
 {
