@@ -32,17 +32,20 @@ public class YamlConfigurationTest extends TestCase
     private TestConfig loadConfig;
     private File file;
 
+    private ConfigurationFactory factory;
+
     @Override
     public void setUp() throws Exception
     {
         this.file = new File("../testconfig.yml");
-        config = Configuration.create(TestConfig.class);
+        factory = new ConfigurationFactory();
+        config = factory.create(TestConfig.class);
     }
 
     public void testConfiguration() throws Exception
     {
         config.save(file);
-        loadConfig = Configuration.load(TestConfig.class, file);
+        loadConfig = factory.load(TestConfig.class, file);
         file.delete();
         assertEquals(config.getCodec().convertConfiguration(config).toString(), config.getCodec().convertConfiguration(loadConfig).toString());
     }

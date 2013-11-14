@@ -24,7 +24,6 @@ package de.cubeisland.engine.configuration.node;
 
 public class IntNode extends Node<Integer>
 {
-
     private int value;
 
     public IntNode(int value)

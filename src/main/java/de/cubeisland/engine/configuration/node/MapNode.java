@@ -22,13 +22,10 @@
  */
 package de.cubeisland.engine.configuration.node;
 
-import de.cubeisland.engine.configuration.ConfigPath;
 import de.cubeisland.engine.configuration.StringUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
-
-import static de.cubeisland.engine.configuration.Configuration.CONVERTERS;
 
 public class MapNode extends ParentNode<Map<String, Node>>
 {
@@ -48,8 +45,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
         {
             for (Map.Entry<?, ?> entry : map.entrySet())
             {
-
-                Node node = CONVERTERS.wrapIntoNode(entry.getValue());
+                Node node = wrapIntoNode(entry.getValue());
                 node.setParentNode(this);
                 this.setExactNode(entry.getKey().toString(), node);
             }

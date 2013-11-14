@@ -23,7 +23,6 @@
 package de.cubeisland.engine.configuration;
 
 import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
-import de.cubeisland.engine.configuration.exception.ConfigurationInstantiationException;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.exception.MissingCodecException;
 import de.cubeisland.engine.configuration.node.ErrorNode;
@@ -43,17 +42,24 @@ import java.util.logging.Logger;
 public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
 {
     protected transient static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
+    private transient ConfigurationFactory factory;
+    private transient Configuration defaultConfig = this;
+    private transient final Class<Codec> defaultCodec = getCodecClass(this.getClass());
+    protected transient File file;
+
+    /**
+     * Saves the fields that got inherited from the parent-configuration
+     */
+    private transient HashSet<Field> inheritedFields;
 
     public static void setLogger(Logger logger)
     {
         LOGGER = logger;
     }
 
-    private transient Configuration defaultConfig;
-
-    protected Configuration()
+    public final void init(ConfigurationFactory factory)
     {
-        this.defaultConfig = this;
+        this.factory = factory;
     }
 
     public final Configuration getDefault()
@@ -89,15 +95,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         return true;
     }
-
-    public transient static final Convert CONVERTERS = Convert.defaultConverter();
-
-    private transient final Codec codec = getCodec(this.getClass());
-
-    /**
-     * Saves the fields that got inherited from the parent-configuration
-     */
-    private transient HashSet<Field> inheritedFields;
 
     /**
      * Marks a field as being inherited from the parent configuration and thus not being saved
@@ -154,7 +151,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     @SuppressWarnings("unchecked")
     public <T extends Configuration> T loadChild(File sourceFile)
     {
-        Configuration<Codec> childConfig = Configuration.create(this.getClass()); // Can throw ConfigurationInstantiationException
+        Configuration<Codec> childConfig = factory.create(this.getClass()); // Can throw ConfigurationInstantiationException
         childConfig.setFile(sourceFile);
         childConfig.setDefault(this);
         try
@@ -174,17 +171,16 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     }
 
     /**
-     * Tries to get the Codec of a configuration implementation.
+     * Tries to get the CodecClazz of a configuration implementation.
      *
      * @param clazz    the clazz of the configuration
-     * @param <C>      the CodecType
      *
      * @return the Codec
      *
      * @throws InvalidConfigurationException if no Codec was defined through the GenericType
      */
     @SuppressWarnings("unchecked")
-    private static <C extends ConfigurationCodec> C getCodec(Class clazz)
+    private Class<Codec> getCodecClass(Class clazz)
     {
         Type genericSuperclass = clazz.getGenericSuperclass(); // Get generic superclass
         try
@@ -192,26 +188,19 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             if (genericSuperclass.equals(Configuration.class))
             {
                 // superclass is this class -> No Codec set as GenericType Missing Codec!
-                throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+                return null;
             }
             if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
             {
                 Type gType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0]; // get First gType
                 if (gType instanceof Class && ConfigurationCodec.class.isAssignableFrom((Class<?>) gType)) // check if it is codec
                 {
-                    try
-                    {
-                        return ((Class<C>) gType).newInstance();
-                    }
-                    catch (ReflectiveOperationException ex)
-                    {
-                        throw new ConfigurationInstantiationException((Class) gType, ex);
-                    }
+                    return (Class<Codec>) gType;
                 }
             }
             if (genericSuperclass instanceof Class)
             {
-                return getCodec((Class)genericSuperclass); // lookup next superclass
+                return getCodecClass((Class) genericSuperclass); // lookup next superclass
             }
             throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
         }
@@ -228,8 +217,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             throw new IllegalStateException("Something went wrong", ex);
         }
     }
-
-    protected transient File file;
 
     /**
      * Saves the configuration to the set file.
@@ -280,7 +267,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void save(OutputStream os) throws IOException
     {
-        this.codec.saveConfig(this, os);
+        this.getCodec().saveConfig(this, os);
     }
 
     /**
@@ -362,7 +349,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         try
         {
-            this.showLoadErrors(this.codec.loadConfig(this, is));//load config in maps -> updates -> sets fields
+            this.showLoadErrors(this.getCodec().loadConfig(this, is));//load config in maps -> updates -> sets fields
         }
         catch (RuntimeException e)
         {
@@ -402,10 +389,16 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Returns the Codec
      *
      * @return the ConfigurationCodec defined in the GenericType of the Configuration
+     *
+     * @throws MissingCodecException when no codec was set via genericType
      */
-    public final Codec getCodec()
+    public final Codec getCodec() throws MissingCodecException
     {
-        return this.codec;
+        if (defaultCodec == null)
+        {
+            throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+        }
+        return this.factory.getCodecManager().getCodec(this.defaultCodec);
     }
 
     /**
@@ -464,71 +457,5 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public String[] tail()
     {
         return null;
-    }
-
-    /**
-     * Creates an instance of this given configuration-class.
-     * <p>The configuration has to have the default Constructor for this to work!
-     *
-     * @param clazz the configurations class
-     * @param <T>   The Type of the returned configuration
-     *
-     * @return the created configuration
-     */
-    public static <T extends Configuration> T create(Class<T> clazz) throws ConfigurationInstantiationException
-    {
-        try
-        {
-            return clazz.newInstance();
-        }
-        catch (ReflectiveOperationException e)
-        {
-            throw new ConfigurationInstantiationException(clazz, e);
-        }
-    }
-
-    /**
-     * Loads the configuration from given file and optionally saves it afterwards
-     *
-     * @param clazz the configurations class
-     * @param file  the file to load from and save to
-     * @param save  whether to save the configuration or not
-     *
-     * @return the loaded Configuration
-     */
-    public static <T extends Configuration> T load(Class<T> clazz, File file, boolean save)
-    {
-        T config = create(clazz); // loading
-        config.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
-        config.reload(save);
-        return config;
-    }
-
-    /**
-     * Loads the configuration from given file and saves it afterwards
-     *
-     * @param clazz the configurations class
-     * @param file  the file to load from and save to
-     *
-     * @return the loaded Configuration
-     */
-    public static <T extends Configuration> T load(Class<T> clazz, File file)
-    {
-        return load(clazz, file, true);
-    }
-
-    /**
-     * Loads the configuration from the InputStream
-     *
-     * @param clazz the configurations class
-     * @param is    the InputStream to load from
-     *
-     * @return the loaded configuration
-     */
-    public static <T extends Configuration> T load(Class<T> clazz, InputStream is)
-    {
-        T config = create(clazz);
-        config.loadFrom(is);
-        return config;
     }
 }

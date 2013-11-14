@@ -20,8 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.configuration.convert;
+package de.cubeisland.engine.configuration.exception;
 
+/**
+ * This Exception is thrown when a conversion was not successful
+ */
 public class ConversionException extends Exception
 {
     public ConversionException(String message)

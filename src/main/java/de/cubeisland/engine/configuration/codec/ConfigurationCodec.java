@@ -25,8 +25,7 @@ package de.cubeisland.engine.configuration.codec;
 import de.cubeisland.engine.configuration.*;
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
-import de.cubeisland.engine.configuration.convert.ConversionException;
-import de.cubeisland.engine.configuration.convert.ConverterNotFoundException;
+import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.convert.converter.generic.CollectionConverter;
 import de.cubeisland.engine.configuration.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
@@ -40,7 +39,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -51,20 +49,35 @@ import static de.cubeisland.engine.configuration.FieldType.*;
  */
 public abstract class ConfigurationCodec
 {
-    private static final Map<Class, Convert> CODEC_CONVERTERS = new HashMap<Class, Convert>();
+    private ConverterManager converterManager = null;
 
-    public static Convert getConverters(Class<? extends ConfigurationCodec> codecClass)
+    /**
+     * Called via registering with the CodecManager
+     *
+     * @param converterManager
+     */
+    final void setConverterManager(ConverterManager converterManager)
     {
-        Convert convert = CODEC_CONVERTERS.get(codecClass);
-        if (convert == null)
-        {
-            convert = Convert.emptyConverter();
-            CODEC_CONVERTERS.put(codecClass, convert);
-        }
-        return convert;
+        this.converterManager = converterManager;
     }
 
-    // PUBLIC Methods
+    // PUBLIC FINAL API Methods
+
+    /**
+     * Returns the <code>ConverterManager</code> for this codec, allowing to register custom <code>Converter</code> for this codec only
+     *
+     * @return the ConverterManager
+     *
+     * @throws IllegalStateException if the Codec was not instantiated by the Factory
+     */
+    public final ConverterManager getConverterManager()
+    {
+        if (converterManager == null)
+        {
+            throw new UnsupportedOperationException("This codec is not registered in the CodecManager and therefor has no ConverterManager for its own converters");
+        }
+        return converterManager;
+    }
 
     /**
      * Loads in the given <code>Configuration</code> using the <code>InputStream</code>
@@ -118,10 +131,7 @@ public abstract class ConfigurationCodec
      */
     protected abstract MapNode load(InputStream is, Configuration config) throws InvalidConfigurationException;
 
-    // PACKAGE-PRIVATE STATIC Methods
-
     // Configuration loading Methods
-
     /**
      * Dumps the contents of the MapNode into the fields of the section using the defaultSection as default if a node is not given
      *
@@ -132,7 +142,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    final Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
+    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
     {
         if (defaultSection == null) // Special case for Section in Maps
         {
@@ -202,7 +212,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
+    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         if (parentSection != section)
         {
@@ -226,7 +236,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    final Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
+    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -236,7 +246,7 @@ public abstract class ConfigurationCodec
         switch (fieldType)
         {
             case NORMAL:
-                fieldValue = convertFromNode(fieldNode, type); // Convert the value
+                fieldValue = converterManager.convertFromNode(fieldNode, type); // Convert the value
                 if (fieldValue == null && !(section == defaultSection))
                 {
                     fieldValue = field.get(defaultSection);
@@ -314,7 +324,7 @@ public abstract class ConfigurationCodec
                     Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
                     for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
                     {
-                        Object key = convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
+                        Object key = converterManager.convertFromNode(StringNode.of(entry.getKey()), ((ParameterizedType) type).getActualTypeArguments()[0]);
                         Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                         if (entry.getValue() instanceof NullNode)
                         {
@@ -340,26 +350,14 @@ public abstract class ConfigurationCodec
         return errorNodes;
     }
 
-    final protected Object convertFromNode(Node node, Type type) throws ConversionException
-    {
-        try
-        {
-            return getConverters(this.getClass()).convertFromNode(node, type);
-        }
-        catch (ConverterNotFoundException ignored)
-        {}
-        return Configuration.CONVERTERS.convertFromNode(node, type);
-    }
-
     // Configuration saving Methods
-
     /**
      * Fills the map with values from the Fields to save
      *
      * @param defaultSection the parent config
      * @param section       the config
      */
-    final MapNode convertSection(Section defaultSection, Section section, Configuration config)
+    final MapNode convertSection(Section defaultSection, Section section, Configuration config) // this is only package private as it is used for testing
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
@@ -419,7 +417,7 @@ public abstract class ConfigurationCodec
         switch (fieldType)
         {
             case NORMAL:
-                node = convertToNode(fieldValue);
+                node = converterManager.convertToNode(fieldValue);
                 break;
             case SECTION:
                 if (fieldValue == null)
@@ -464,7 +462,7 @@ public abstract class ConfigurationCodec
                 Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
                 for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
                 {
-                    Node keyNode = convertToNode(defaultEntry.getKey());
+                    Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
                     if (keyNode instanceof StringNode)
                     {
                         MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);
@@ -481,17 +479,6 @@ public abstract class ConfigurationCodec
 
     }
 
-    final protected Node convertToNode(Object o) throws ConversionException
-    {
-        try
-        {
-            return getConverters(this.getClass()).convertToNode(o);
-        }
-        catch (ConverterNotFoundException ignored)
-        {}
-        return Configuration.CONVERTERS.convertToNode(o);
-    }
-
     // HELPER Methods
 
     /**
@@ -500,7 +487,7 @@ public abstract class ConfigurationCodec
      * @param node  the Node to add the comment to
      * @param field the field possibly having a {@link de.cubeisland.engine.configuration.annotations.Comment} annotation
      */
-    final void addComment(Node node, Field field)
+    private void addComment(Node node, Field field)
     {
         if (field.isAnnotationPresent(Comment.class))
         {
@@ -515,7 +502,7 @@ public abstract class ConfigurationCodec
      *
      * @return the Type of the field
      */
-    final FieldType getFieldType(Field field)
+    private FieldType getFieldType(Field field)
     {
         FieldType fieldType = NORMAL;
         if (SectionFactory.isSectionClass(field.getType()))
@@ -554,13 +541,13 @@ public abstract class ConfigurationCodec
      *
      * @return whether the field is a field of the configuration that needs to be serialized
      */
-    final boolean isConfigField(Field field)
+    private boolean isConfigField(Field field)
     {
         int modifiers = field.getModifiers();
         return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
-    final ConfigPath getPathFor(Field field)
+    private ConfigPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {
