@@ -36,6 +36,7 @@ import java.lang.reflect.Type;
 import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public final class ConverterManager
 {
@@ -87,6 +88,7 @@ public final class ConverterManager
         this.registerConverter(Date.class, new DateConverter());
         this.registerConverter(UUID.class, new UUIDConverter());
         this.registerConverter(Locale.class, new LocaleConverter());
+        this.registerConverter(Level.class, new LevelConverter());
     }
 
     /**
