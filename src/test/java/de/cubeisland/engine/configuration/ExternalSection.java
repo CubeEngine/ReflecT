@@ -23,10 +23,13 @@
 package de.cubeisland.engine.configuration;
 
 import java.util.Locale;
+import java.util.logging.Level;
 
 public class ExternalSection implements Section
 {
     public byte aByte = 8;
 
     public Locale defaultLocale = Locale.US;
+
+    public Level level = Level.ALL;
 }

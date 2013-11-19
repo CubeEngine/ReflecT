@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.convert.converter.BooleanConverter;
@@ -104,6 +105,7 @@ public final class ConverterManager
         this.registerConverter(Date.class, new DateConverter());
         this.registerConverter(UUID.class, new UUIDConverter());
         this.registerConverter(Locale.class, new LocaleConverter());
+        this.registerConverter(Level.class, new LevelConverter());
     }
 
     /**
