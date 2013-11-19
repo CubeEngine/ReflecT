@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert.converter;
 
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.convert.BasicConverter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
@@ -29,7 +30,7 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class StringConverter extends BasicConverter<String>
 {
-    public String fromNode(Node node) throws ConversionException
+    public String fromNode(ConverterManager manager, Node node) throws ConversionException
     {
         if (node instanceof StringNode)
         {

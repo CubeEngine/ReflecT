@@ -24,6 +24,7 @@ package de.cubeisland.engine.configuration.convert.converter;
 
 import java.sql.Date;
 
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
@@ -31,12 +32,12 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class DateConverter implements Converter<Date>
 {
-    public Node toNode(Date object) throws ConversionException
+    public Node toNode(ConverterManager manager, Date object) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
-    public Date fromNode(Node node) throws ConversionException
+    public Date fromNode(ConverterManager manager, Node node) throws ConversionException
     {
         if (node instanceof StringNode)
         {

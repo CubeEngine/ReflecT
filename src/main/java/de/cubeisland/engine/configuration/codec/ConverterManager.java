@@ -65,9 +65,9 @@ public final class ConverterManager
     private ConverterManager(ConverterManager defaultConverters)
     {
         this.defaultConverters = defaultConverters;
-        this.mapConverter = new MapConverter(this);
-        this.arrayConverter = new ArrayConverter(this);
-        this.collectionConverter = new CollectionConverter(this);
+        this.mapConverter = new MapConverter();
+        this.arrayConverter = new ArrayConverter();
+        this.collectionConverter = new CollectionConverter();
     }
 
     static ConverterManager defaultManager()
@@ -219,18 +219,18 @@ public final class ConverterManager
         }
         if (object.getClass().isArray())
         {
-            return arrayConverter.toNode((Object[])object);
+            return arrayConverter.toNode(this, (Object[])object);
         }
         else if (object instanceof Collection)
         {
-            return collectionConverter.toNode((Collection)object);
+            return collectionConverter.toNode(this, (Collection)object);
         }
         else if (object instanceof Map)
         {
-            return mapConverter.toNode((Map)object);
+            return mapConverter.toNode(this, (Map)object);
         }
         Converter<T> converter = (Converter<T>)matchConverter(object.getClass());
-        return converter.toNode(object);
+        return converter.toNode(this, object);
     }
 
     /**
@@ -270,7 +270,7 @@ public final class ConverterManager
             {
                 if (node instanceof ListNode)
                 {
-                    return (T)arrayConverter.fromNode((Class<T[]>)type, (ListNode)node);
+                    return (T)arrayConverter.fromNode(this, (Class<T[]>)type, (ListNode)node);
                 }
                 else
                 {
@@ -280,7 +280,7 @@ public final class ConverterManager
             else
             {
                 Converter<T> converter = matchConverter((Class<T>)type);
-                return converter.fromNode(node);
+                return converter.fromNode(this, node);
             }
         }
         else if (type instanceof ParameterizedType)
@@ -292,7 +292,7 @@ public final class ConverterManager
                 {
                     if (node instanceof ListNode)
                     {
-                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(ptype, (ListNode)node);
+                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(this, ptype, (ListNode)node);
                     }
                     else
                     {
@@ -303,7 +303,7 @@ public final class ConverterManager
                 {
                     if (node instanceof MapNode)
                     {
-                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(ptype, (MapNode)node);
+                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(this, ptype, (MapNode)node);
                     }
                     else
                     {

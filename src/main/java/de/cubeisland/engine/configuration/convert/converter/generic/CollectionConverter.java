@@ -41,14 +41,6 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class CollectionConverter
 {
-    private ConverterManager converters;
-
-    public CollectionConverter(ConverterManager converters)
-    {
-        this.converters = converters;
-    }
-
-
     /**
      * Returns the converted collection
      *
@@ -56,7 +48,7 @@ public class CollectionConverter
      *
      * @return the converted collection
      */
-    public ListNode toNode(Collection collection) throws ConversionException
+    public ListNode toNode(ConverterManager manager, Collection collection) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
         if (collection == null || collection.isEmpty())
@@ -65,7 +57,7 @@ public class CollectionConverter
         }
         for (Object value : collection)
         {
-            result.addNode(converters.convertToNode(value));
+            result.addNode(manager.convertToNode(value));
         }
         return result;
     }
@@ -81,7 +73,7 @@ public class CollectionConverter
      * @return the converted collection
      */
     @SuppressWarnings("unchecked")
-    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode) throws ConversionException
+    public <V, S extends Collection<V>> S fromNode(ConverterManager manager, ParameterizedType pType, ListNode listNode) throws ConversionException
     {
         if (pType.getRawType() instanceof Class)
         {
@@ -89,7 +81,7 @@ public class CollectionConverter
             Type subType = pType.getActualTypeArguments()[0];
             for (Node node : listNode.getListedNodes())
             {
-                V value = converters.convertFromNode(node, subType);
+                V value = manager.convertFromNode(node, subType);
                 result.add(value);
             }
             return result;

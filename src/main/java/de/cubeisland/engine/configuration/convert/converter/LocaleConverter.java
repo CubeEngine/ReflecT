@@ -24,6 +24,7 @@ package de.cubeisland.engine.configuration.convert.converter;
 
 import java.util.Locale;
 
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
@@ -31,13 +32,13 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class LocaleConverter implements Converter<Locale>
 {
-    public Node toNode(Locale locale) throws ConversionException
+    public Node toNode(ConverterManager manager, Locale locale) throws ConversionException
     {
         return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
                              locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
-    public Locale fromNode(Node node) throws ConversionException
+    public Locale fromNode(ConverterManager manager, Node node) throws ConversionException
     {
         if (node instanceof StringNode)
         {

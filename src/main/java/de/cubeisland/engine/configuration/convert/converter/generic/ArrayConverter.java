@@ -33,14 +33,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class ArrayConverter
 {
-    private ConverterManager converters;
-
-    public ArrayConverter(ConverterManager converters)
-    {
-        this.converters = converters;
-    }
-
-    public ListNode toNode(Object[] array) throws ConversionException
+    public ListNode toNode(ConverterManager manager, Object[] array) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
         if (array == null || array.length == 0)
@@ -49,19 +42,19 @@ public class ArrayConverter
         }
         for (Object value : array)
         {
-            result.addNode(converters.convertToNode(value));
+            result.addNode(manager.convertToNode(value));
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode) throws ConversionException
+    public <V> V[] fromNode(ConverterManager manager, Class<V[]> arrayType, ListNode listNode) throws ConversionException
     {
         Class<V> valueType = (Class<V>)arrayType.getComponentType();
         Collection<V> result = new LinkedList<V>();
         for (Node node : listNode.getListedNodes())
         {
-            V value = converters.convertFromNode(node, valueType);
+            V value = manager.convertFromNode(node, valueType);
             result.add(value);
         }
         return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));

@@ -24,6 +24,7 @@ package de.cubeisland.engine.configuration.convert.converter;
 
 import java.util.UUID;
 
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
@@ -31,12 +32,12 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class UUIDConverter implements Converter<UUID>
 {
-    public Node toNode(UUID object) throws ConversionException
+    public Node toNode(ConverterManager manager, UUID object) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
-    public UUID fromNode(Node node) throws ConversionException
+    public UUID fromNode(ConverterManager manager, Node node) throws ConversionException
     {
         if (node instanceof StringNode)
         {

@@ -37,13 +37,6 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class MapConverter
 {
-    private ConverterManager converters;
-
-    public MapConverter(ConverterManager converters)
-    {
-        this.converters = converters;
-    }
-
     /**
      * Makes a map serializable for configs
      *
@@ -51,7 +44,7 @@ public class MapConverter
      *
      * @return the serializable map
      */
-    public MapNode toNode(Map<?, ?> map) throws ConversionException
+    public MapNode toNode(ConverterManager manager, Map<?, ?> map) throws ConversionException
     {
         MapNode result = MapNode.emptyMap();
         if (map == null || map.isEmpty())
@@ -60,14 +53,14 @@ public class MapConverter
         }
         for (Object key : map.keySet())
         {
-            Node keyNode = converters.convertToNode(key);
+            Node keyNode = manager.convertToNode(key);
             if (keyNode instanceof StringNode)
             {
-                result.setNode((StringNode)keyNode, converters.convertToNode(map.get(key)));
+                result.setNode((StringNode)keyNode, manager.convertToNode(map.get(key)));
             }
             else
             {
-                result.setNode(StringNode.of(keyNode.asText()), converters.convertToNode(map.get(key)));
+                result.setNode(StringNode.of(keyNode.asText()), manager.convertToNode(map.get(key)));
             }
         }
         return result;
@@ -85,7 +78,7 @@ public class MapConverter
      * @return the converted map
      */
     @SuppressWarnings("unchecked")
-    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode) throws ConversionException
+    public <K, V, S extends Map<K, V>> S fromNode(ConverterManager manager, ParameterizedType ptype, MapNode mapNode) throws ConversionException
     {
         if (ptype.getRawType() instanceof Class)
         {
@@ -96,8 +89,8 @@ public class MapConverter
             {
                 // preserve Casing in Key
                 StringNode keyNode = new StringNode(mapNode.getOriginalKey(entry.getKey()));
-                K newKey = converters.convertFromNode(keyNode, keyType);
-                V newVal = converters.convertFromNode(entry.getValue(), valType);
+                K newKey = manager.convertFromNode(keyNode, keyType);
+                V newVal = manager.convertFromNode(entry.getValue(), valType);
                 result.put(newKey, newVal);
             }
             return result;

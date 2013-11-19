@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.configuration.convert.converter;
 
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.convert.BasicConverter;
 import de.cubeisland.engine.configuration.exception.ConversionException;
 import de.cubeisland.engine.configuration.node.Node;
@@ -29,7 +30,7 @@ import de.cubeisland.engine.configuration.node.ShortNode;
 
 public class ShortConverter extends BasicConverter<Short>
 {
-    public Short fromNode(Node node) throws ConversionException
+    public Short fromNode(ConverterManager manager, Node node) throws ConversionException
     {
         if (node instanceof ShortNode)
         {
