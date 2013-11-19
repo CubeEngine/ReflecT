@@ -24,6 +24,7 @@ package de.cubeisland.engine.configuration;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 import de.cubeisland.engine.configuration.codec.CodecManager;
 import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
@@ -31,6 +32,17 @@ import de.cubeisland.engine.configuration.exception.ConfigInstantiationException
 public class ConfigurationFactory
 {
     private CodecManager codecManager = new CodecManager();
+    Logger logger; // package private
+
+    public ConfigurationFactory()
+    {
+        this.logger = Logger.getLogger("ConfigurationAPI");
+    }
+
+    public ConfigurationFactory(Logger logger)
+    {
+        this.logger = logger;
+    }
 
     /**
      * Loads the configuration from given file and optionally saves it afterwards
@@ -103,5 +115,15 @@ public class ConfigurationFactory
     public CodecManager getCodecManager()
     {
         return this.codecManager;
+    }
+
+    /**
+     * Sets the logger for all configuration created by this factory
+     *
+     * @param logger the logger
+     */
+    public void setLogger(Logger logger)
+    {
+        this.logger = logger;
     }
 }

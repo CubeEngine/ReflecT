@@ -46,7 +46,6 @@ import de.cubeisland.engine.configuration.node.ErrorNode;
  */
 public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
 {
-    protected transient static Logger LOGGER = Logger.getLogger(Configuration.class.getName());
     private transient ConfigurationFactory factory;
     private transient Configuration defaultConfig = this;
     private transient final Class<Codec> defaultCodec = getCodecClass(this.getClass());
@@ -56,11 +55,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * Saves the fields that got inherited from the parent-configuration
      */
     private transient HashSet<Field> inheritedFields;
-
-    public static void setLogger(Logger logger)
-    {
-        LOGGER = logger;
-    }
 
     public final void init(ConfigurationFactory factory)
     {
@@ -282,7 +276,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         boolean result = false;
         if (!this.loadFrom(this.file) && save)
         {
-            LOGGER.info("Saved configuration in new file: " + file.getAbsolutePath());
+            this.factory.logger.info("Saved configuration in new file: " + file.getAbsolutePath());
             result = true;
         }
         if (save)
@@ -313,7 +307,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            LOGGER.log(Level.INFO, "Could not load configuration from file! Using default...", ex);
+            this.factory.logger.log(Level.INFO, "Could not load configuration from file! Using default...", ex);
             return false;
         }
         return true;
@@ -337,10 +331,10 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         if (!errors.isEmpty())
         {
-            LOGGER.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
+            this.factory.logger.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
             for (ErrorNode error : errors)
             {
-                LOGGER.log(Level.WARNING, error.getErrorMessage());
+                this.factory.logger.log(Level.WARNING, error.getErrorMessage());
             }
         }
     }
@@ -423,6 +417,6 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
 
     public Logger getLogger()
     {
-        return LOGGER;
+        return this.factory.logger;
     }
 }
