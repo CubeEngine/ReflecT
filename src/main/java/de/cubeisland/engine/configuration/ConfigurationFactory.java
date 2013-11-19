@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 
 import de.cubeisland.engine.configuration.codec.CodecManager;
+import de.cubeisland.engine.configuration.codec.ConverterManager;
 import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
 
 public class ConfigurationFactory
@@ -115,6 +116,11 @@ public class ConfigurationFactory
     public CodecManager getCodecManager()
     {
         return this.codecManager;
+    }
+
+    public ConverterManager getDefaultConverterManager()
+    {
+        return this.codecManager.getDefaultConverterManager();
     }
 
     /**

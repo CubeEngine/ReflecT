@@ -69,4 +69,14 @@ public class CodecManager
         this.codecs.put(codec.getClass(), codec);
         codec.setConverterManager(ConverterManager.emptyManager(this.defaultManager));
     }
+
+    /**
+     * Returns the default ConverterManager for all codecs managed by this CodecManager
+     *
+     * @return the default ConverterManager
+     */
+    public ConverterManager getDefaultConverterManager()
+    {
+        return this.defaultManager;
+    }
 }
