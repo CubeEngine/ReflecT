@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import de.cubeisland.engine.configuration.convert.Converter;
 import de.cubeisland.engine.configuration.convert.converter.BooleanConverter;
@@ -39,6 +40,7 @@ import de.cubeisland.engine.configuration.convert.converter.DateConverter;
 import de.cubeisland.engine.configuration.convert.converter.DoubleConverter;
 import de.cubeisland.engine.configuration.convert.converter.FloatConverter;
 import de.cubeisland.engine.configuration.convert.converter.IntegerConverter;
+import de.cubeisland.engine.configuration.convert.converter.LevelConverter;
 import de.cubeisland.engine.configuration.convert.converter.LocaleConverter;
 import de.cubeisland.engine.configuration.convert.converter.LongConverter;
 import de.cubeisland.engine.configuration.convert.converter.ShortConverter;
@@ -104,6 +106,7 @@ public final class ConverterManager
         this.registerConverter(Date.class, new DateConverter());
         this.registerConverter(UUID.class, new UUIDConverter());
         this.registerConverter(Locale.class, new LocaleConverter());
+        this.registerConverter(Level.class, new LevelConverter());
     }
 
     /**

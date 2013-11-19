@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import de.cubeisland.engine.configuration.annotations.Comment;
 import de.cubeisland.engine.configuration.annotations.Name;
@@ -46,6 +47,8 @@ public class TestConfig extends Configuration<TestCodec>
     @Comment({"This is a multi-line comment too", "but using the array"})
     @Name("subsection-using.annotation.quoted")
     public String s3 = "|This will be quoted";
+
+    public Level level = Level.INFO;
 
     @Name("subsection-using.annotation.unquoted")
     public String s4 = "This needs no quotes";
