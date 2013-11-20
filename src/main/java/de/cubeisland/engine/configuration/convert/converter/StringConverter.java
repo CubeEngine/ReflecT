@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class StringConverter extends BasicConverter<String>
 {
-    public String fromNode(ConverterManager manager, Node node) throws ConversionException
+    public String fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {

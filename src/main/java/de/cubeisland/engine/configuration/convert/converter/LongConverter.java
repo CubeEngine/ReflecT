@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class LongConverter extends BasicConverter<Long>
 {
-    public Long fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Long fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof LongNode)
         {

@@ -32,12 +32,12 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class DateConverter implements Converter<Date>
 {
-    public Node toNode(ConverterManager manager, Date object) throws ConversionException
+    public Node toNode(Date object, ConverterManager manager) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
-    public Date fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Date fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {

@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.ShortNode;
 
 public class ShortConverter extends BasicConverter<Short>
 {
-    public Short fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Short fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof ShortNode)
         {

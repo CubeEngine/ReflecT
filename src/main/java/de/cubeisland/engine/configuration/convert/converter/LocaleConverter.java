@@ -32,13 +32,13 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class LocaleConverter implements Converter<Locale>
 {
-    public Node toNode(ConverterManager manager, Locale locale) throws ConversionException
+    public Node toNode(Locale locale, ConverterManager manager) throws ConversionException
     {
         return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
                              locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
-    public Locale fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Locale fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {

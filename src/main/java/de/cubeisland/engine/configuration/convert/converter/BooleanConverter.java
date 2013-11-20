@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class BooleanConverter extends BasicConverter<Boolean>
 {
-    public Boolean fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Boolean fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof BooleanNode)
         {

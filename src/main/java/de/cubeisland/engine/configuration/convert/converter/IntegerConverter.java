@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class IntegerConverter extends BasicConverter<Integer>
 {
-    public Integer fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Integer fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof IntNode)
         {

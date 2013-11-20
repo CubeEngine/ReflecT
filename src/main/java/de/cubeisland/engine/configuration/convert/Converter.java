@@ -34,22 +34,20 @@ public interface Converter<T extends Object>
     /**
      * Converts the object into a serializable Node
      *
-     *
-     * @param manager
      * @param object the object to convert
+     * @param manager
      *
      * @return the converted object
      */
-    public Node toNode(ConverterManager manager, T object) throws ConversionException;
+    public Node toNode(T object, ConverterManager manager) throws ConversionException;
 
     /**
      * Converts the node back into the original object
      *
-     *
-     * @param manager
      * @param node the node to convert
+     * @param manager
      *
      * @return the converted node
      */
-    public T fromNode(ConverterManager manager, Node node) throws ConversionException;
+    public T fromNode(Node node, ConverterManager manager) throws ConversionException;
 }

@@ -31,7 +31,7 @@ import static de.cubeisland.engine.configuration.node.Node.wrapIntoNode;
 public abstract class BasicConverter<T> implements Converter<T>
 {
     @SuppressWarnings("unchecked")
-    public Node toNode(ConverterManager manager, T object) throws ConversionException
+    public Node toNode(T object, ConverterManager manager) throws ConversionException
     {
         Class<T> clazz = (Class<T>)object.getClass();
         if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) ||

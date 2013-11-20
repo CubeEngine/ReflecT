@@ -44,7 +44,7 @@ public class MapConverter
      *
      * @return the serializable map
      */
-    public MapNode toNode(ConverterManager manager, Map<?, ?> map) throws ConversionException
+    public MapNode toNode(Map<?, ?> map, ConverterManager manager) throws ConversionException
     {
         MapNode result = MapNode.emptyMap();
         if (map == null || map.isEmpty())
@@ -69,16 +69,13 @@ public class MapConverter
     /**
      * Deserializes an object back to a map
      *
-     * @param <K>     the KeyType
-     * @param <V>     the ValueType
-     * @param <S>     the MapType
      * @param ptype   the MapTypeClass
      * @param mapNode the object to convert
      *
      * @return the converted map
      */
     @SuppressWarnings("unchecked")
-    public <K, V, S extends Map<K, V>> S fromNode(ConverterManager manager, ParameterizedType ptype, MapNode mapNode) throws ConversionException
+    public <K, V, S extends Map<K, V>> S fromNode(ParameterizedType ptype, MapNode mapNode, ConverterManager manager) throws ConversionException
     {
         if (ptype.getRawType() instanceof Class)
         {

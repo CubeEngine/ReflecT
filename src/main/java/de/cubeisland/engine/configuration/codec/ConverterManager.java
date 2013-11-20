@@ -222,18 +222,18 @@ public final class ConverterManager
         }
         if (object.getClass().isArray())
         {
-            return arrayConverter.toNode(this, (Object[])object);
+            return arrayConverter.toNode((Object[])object, this);
         }
         else if (object instanceof Collection)
         {
-            return collectionConverter.toNode(this, (Collection)object);
+            return collectionConverter.toNode((Collection)object, this);
         }
         else if (object instanceof Map)
         {
-            return mapConverter.toNode(this, (Map)object);
+            return mapConverter.toNode((Map)object, this);
         }
         Converter<T> converter = (Converter<T>)matchConverter(object.getClass());
-        return converter.toNode(this, object);
+        return converter.toNode(object, this);
     }
 
     /**
@@ -273,7 +273,7 @@ public final class ConverterManager
             {
                 if (node instanceof ListNode)
                 {
-                    return (T)arrayConverter.fromNode(this, (Class<T[]>)type, (ListNode)node);
+                    return (T)arrayConverter.fromNode((Class<T[]>)type, (ListNode)node, this);
                 }
                 else
                 {
@@ -283,7 +283,7 @@ public final class ConverterManager
             else
             {
                 Converter<T> converter = matchConverter((Class<T>)type);
-                return converter.fromNode(this, node);
+                return converter.fromNode(node, this);
             }
         }
         else if (type instanceof ParameterizedType)
@@ -295,7 +295,7 @@ public final class ConverterManager
                 {
                     if (node instanceof ListNode)
                     {
-                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(this, ptype, (ListNode)node);
+                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(ptype, (ListNode)node, this);
                     }
                     else
                     {
@@ -306,7 +306,7 @@ public final class ConverterManager
                 {
                     if (node instanceof MapNode)
                     {
-                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(this, ptype, (MapNode)node);
+                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(ptype, (MapNode)node, this);
                     }
                     else
                     {

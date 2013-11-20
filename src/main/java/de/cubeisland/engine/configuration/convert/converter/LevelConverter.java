@@ -33,12 +33,12 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class LevelConverter implements Converter<Level>
 {
-    public Node toNode(ConverterManager manager, Level object) throws ConversionException
+    public Node toNode(Level object, ConverterManager manager) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
-    public Level fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Level fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {

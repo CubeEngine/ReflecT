@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class FloatConverter extends BasicConverter<Float>
 {
-    public Float fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Float fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof FloatNode)
         {

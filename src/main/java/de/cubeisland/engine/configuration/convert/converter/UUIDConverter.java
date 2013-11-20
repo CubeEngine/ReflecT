@@ -32,12 +32,12 @@ import de.cubeisland.engine.configuration.node.StringNode;
 
 public class UUIDConverter implements Converter<UUID>
 {
-    public Node toNode(ConverterManager manager, UUID object) throws ConversionException
+    public Node toNode(UUID object, ConverterManager manager) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
-    public UUID fromNode(ConverterManager manager, Node node) throws ConversionException
+    public UUID fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {

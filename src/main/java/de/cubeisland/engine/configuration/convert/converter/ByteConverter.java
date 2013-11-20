@@ -30,7 +30,7 @@ import de.cubeisland.engine.configuration.node.Node;
 
 public class ByteConverter extends BasicConverter<Byte>
 {
-    public Byte fromNode(ConverterManager manager, Node node) throws ConversionException
+    public Byte fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof ByteNode)
         {

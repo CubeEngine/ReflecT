@@ -48,7 +48,7 @@ public class CollectionConverter
      *
      * @return the converted collection
      */
-    public ListNode toNode(ConverterManager manager, Collection collection) throws ConversionException
+    public ListNode toNode(Collection collection, ConverterManager manager) throws ConversionException
     {
         ListNode result = ListNode.emptyList();
         if (collection == null || collection.isEmpty())
@@ -65,15 +65,13 @@ public class CollectionConverter
     /**
      * Deserializes an object back to a collection
      *
-     * @param <V>      the ValueType
-     * @param <S>      the Type of collection
      * @param pType    the Type of the collection
      * @param listNode the Node to convert
      *
      * @return the converted collection
      */
     @SuppressWarnings("unchecked")
-    public <V, S extends Collection<V>> S fromNode(ConverterManager manager, ParameterizedType pType, ListNode listNode) throws ConversionException
+    public <V, S extends Collection<V>> S fromNode(ParameterizedType pType, ListNode listNode, ConverterManager manager) throws ConversionException
     {
         if (pType.getRawType() instanceof Class)
         {
