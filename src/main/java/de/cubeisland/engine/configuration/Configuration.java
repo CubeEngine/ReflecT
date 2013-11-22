@@ -307,7 +307,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            this.factory.logger.log(Level.INFO, "Could not load configuration from file! Using default...", ex);
+            this.factory.logger.log(Level.INFO, "Could not load configuration from file! Using default...");
             return false;
         }
         return true;
