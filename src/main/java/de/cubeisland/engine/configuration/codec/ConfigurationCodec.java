@@ -241,7 +241,7 @@ public abstract class ConfigurationCodec
                     {
                         throw e;
                     }
-                    catch (ReflectiveOperationException e)
+                    catch (IllegalAccessException e)
                     {
                         throw FieldAccessException.of(getPathFor(field), section.getClass(), field, e);
                     }
@@ -254,7 +254,7 @@ public abstract class ConfigurationCodec
                         }
                         config.getLogger().log(Level.WARNING, ex.getMessage(), ex);
                     }
-                    catch (Exception e)
+                    catch (RuntimeException e)
                     {
                         throw InvalidConfigurationException.of("Unknown Error while dumping loaded config into fields", getPathFor(field), section.getClass(), field, e);
                     }
@@ -274,7 +274,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, ReflectiveOperationException
+    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, IllegalAccessException
     {
         if (parentSection != section)
         {
@@ -298,7 +298,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, ReflectiveOperationException
+    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, IllegalAccessException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -449,7 +449,7 @@ public abstract class ConfigurationCodec
                 {
                     throw e;
                 }
-                catch (ReflectiveOperationException e)
+                catch (IllegalAccessException e)
                 {
                     throw FieldAccessException.of(getPathFor(field), sectionClass, field, e);
                 }
@@ -457,7 +457,7 @@ public abstract class ConfigurationCodec
                 {
                     throw InvalidConfigurationException.of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
                 }
-                catch (Exception e)
+                catch (RuntimeException e)
                 {
                     throw InvalidConfigurationException.of("Unknown Error while converting Section!", getPathFor(field), section.getClass(), field, e);
                 }
@@ -481,7 +481,7 @@ public abstract class ConfigurationCodec
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ReflectiveOperationException, ConversionException
+    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ConversionException, IllegalAccessException
     {
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);

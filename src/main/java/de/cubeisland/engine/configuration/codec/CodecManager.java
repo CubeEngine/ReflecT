@@ -51,7 +51,11 @@ public class CodecManager
                 codec = codecClass.newInstance();
                 this.registerCodec(codec);
             }
-            catch (ReflectiveOperationException e)
+            catch (InstantiationException e)
+            {
+                throw new ConfigInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
+            }
+            catch (IllegalAccessException e)
             {
                 throw new ConfigInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
             }

@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.configuration;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import de.cubeisland.engine.configuration.exception.ConfigInstantiationException;
@@ -69,7 +70,19 @@ public class SectionFactory
                 return sectionClass.getDeclaredConstructor(sectionClass.getEnclosingClass()).newInstance(parent);
             }
         }
-        catch (ReflectiveOperationException e)
+        catch (IllegalAccessException e)
+        {
+            throw new ConfigInstantiationException(sectionClass, e);
+        }
+        catch (InstantiationException e)
+        {
+            throw new ConfigInstantiationException(sectionClass, e);
+        }
+        catch (NoSuchMethodException e)
+        {
+            throw new ConfigInstantiationException(sectionClass, e);
+        }
+        catch (InvocationTargetException e)
         {
             throw new ConfigInstantiationException(sectionClass, e);
         }

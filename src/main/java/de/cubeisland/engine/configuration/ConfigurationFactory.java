@@ -107,7 +107,11 @@ public class ConfigurationFactory
             config.init(this);
             return config;
         }
-        catch (ReflectiveOperationException e)
+        catch (IllegalAccessException e)
+        {
+            throw new ConfigInstantiationException(clazz, e);
+        }
+        catch (InstantiationException e)
         {
             throw new ConfigInstantiationException(clazz, e);
         }

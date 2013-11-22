@@ -28,7 +28,7 @@ import de.cubeisland.engine.configuration.Section;
 import de.cubeisland.engine.configuration.node.ConfigPath;
 
 /**
- * This exception is thrown when field.get(...) or field.set(...) caused a ReflectiveOperationException
+ * This exception is thrown when field.get(...) or field.set(...) caused an IllegalAccessException
  */
 public class FieldAccessException extends InvalidConfigurationException
 {

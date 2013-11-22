@@ -122,9 +122,13 @@ public class CollectionConverter
             }
             return result;
         }
-        catch (ReflectiveOperationException ex)
+        catch (InstantiationException e)
         {
-            throw new ConfigInstantiationException((Class)ptype.getRawType(), ex);
+            throw new ConfigInstantiationException((Class)ptype.getRawType(), e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new ConfigInstantiationException((Class)ptype.getRawType(), e);
         }
     }
 }
