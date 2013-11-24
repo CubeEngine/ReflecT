@@ -281,7 +281,11 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         if (save)
         {
-            this.save();
+            this.getDefault().save(this.getFile()); // save the default values
+            if (this.getDefault() != this) // If default is another config
+            {
+                this.reload(false); // reload from saved default
+            }
         }
         return result;
     }
