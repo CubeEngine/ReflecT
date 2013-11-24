@@ -4,7 +4,7 @@
 
     <groupId>de.cubeisland.engine</groupId>
     <artifactId>configuration</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ConfigurationAPI</name>
@@ -28,7 +28,7 @@
         <url>https://github.com/CubeEngineDev/ConfigurationAPI</url>
         <connection>scm:git:https://github.com/CubeEngineDev/ConfigurationAPI</connection>
         <developerConnection>scm:git:https://github.com/CubeEngineDev/ConfigurationAPI</developerConnection>
-        <tag>configuration-1.0.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
