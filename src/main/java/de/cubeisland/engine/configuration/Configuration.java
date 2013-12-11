@@ -448,8 +448,8 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             {
                 if (isConfigField(field))
                 {
-                    Object value = field.get(this);
-                    Object defaultValue = field.get(this.defaultConfig);
+                    Object value = field.get(section);
+                    Object defaultValue = field.get(defaultSection);
                     if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultSection)))
                     {
                         this.addInheritedField(field);
