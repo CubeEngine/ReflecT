@@ -33,6 +33,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +42,9 @@ import de.cubeisland.engine.configuration.codec.ConfigurationCodec;
 import de.cubeisland.engine.configuration.exception.InvalidConfigurationException;
 import de.cubeisland.engine.configuration.exception.MissingCodecException;
 import de.cubeisland.engine.configuration.node.ErrorNode;
+
+import static de.cubeisland.engine.configuration.codec.ConfigurationCodec.getFieldType;
+import static de.cubeisland.engine.configuration.codec.ConfigurationCodec.isConfigField;
 
 /**
  * This abstract class represents a configuration.
@@ -285,6 +290,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             if (this.getDefault() != this) // If default is another config
             {
                 this.reload(false); // reload from saved default
+                // TODO set inherited fields? configurable?
             }
         }
         return result;
@@ -422,5 +428,63 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public Logger getLogger()
     {
         return this.factory.logger;
+    }
+
+    public final void updateInheritance()
+    {
+        if (this.defaultConfig == null || this.defaultConfig == this)
+        {
+            return; // Default is this config anyways
+        }
+        this.updateInheritance(this, defaultConfig);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updateInheritance(Section section, Section defaultSection)
+    {
+        try
+        {
+            for (Field field : this.getClass().getFields())
+            {
+                if (isConfigField(field))
+                {
+                    Object value = field.get(this);
+                    Object defaultValue = field.get(this.defaultConfig);
+                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultSection)))
+                    {
+                        this.addInheritedField(field);
+                        return;
+                    }
+                    else if (value == null || defaultValue == null)
+                    {
+                        return;
+                    }
+                    switch (getFieldType(field))
+                    {
+                    case NORMAL: // Already handled
+                        break;
+                    case SECTION:
+                        this.updateInheritance((Section)value, (Section)defaultValue);
+                        break;
+                    case SECTION_COLLECTION:
+                        throw new IllegalStateException("Collections in child configurations are not allowed!");
+                    case SECTION_MAP:
+                        for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())
+                        {
+                            Section defaulted = ((Map<?, Section>)defaultValue).get(entry.getKey());
+                            if (defaulted != null)
+                            {
+                                this.updateInheritance(entry.getValue(), defaulted);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        catch (ReflectiveOperationException e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
 }

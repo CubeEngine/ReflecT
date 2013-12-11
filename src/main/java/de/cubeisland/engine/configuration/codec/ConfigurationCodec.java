@@ -574,7 +574,7 @@ public abstract class ConfigurationCodec
      *
      * @return the Type of the field
      */
-    private FieldType getFieldType(Field field)
+    public static FieldType getFieldType(Field field)
     {
         FieldType fieldType = NORMAL;
         if (SectionFactory.isSectionClass(field.getType()))
@@ -613,13 +613,13 @@ public abstract class ConfigurationCodec
      *
      * @return whether the field is a field of the configuration that needs to be serialized
      */
-    private boolean isConfigField(Field field)
+    public static boolean isConfigField(Field field)
     {
         int modifiers = field.getModifiers();
         return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
-    private ConfigPath getPathFor(Field field)
+    protected static ConfigPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {
