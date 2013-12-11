@@ -444,7 +444,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {
         try
         {
-            for (Field field : this.getClass().getFields())
+            for (Field field : section.getClass().getFields())
             {
                 if (isConfigField(field))
                 {
