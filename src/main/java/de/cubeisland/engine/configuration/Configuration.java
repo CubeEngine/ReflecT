@@ -450,14 +450,14 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
                 {
                     Object value = field.get(section);
                     Object defaultValue = field.get(defaultSection);
-                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultSection)))
+                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
                     {
                         this.addInheritedField(field);
-                        return;
+                        continue;
                     }
                     else if (value == null || defaultValue == null)
                     {
-                        return;
+                        continue;
                     }
                     switch (getFieldType(field))
                     {
