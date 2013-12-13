@@ -432,6 +432,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         {
             return; // Default is this config anyways
         }
+        this.inheritedFields = new HashSet<Field>();
         this.updateInheritance(this, defaultConfig);
     }
 
