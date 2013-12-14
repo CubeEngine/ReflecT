@@ -64,6 +64,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     public final void init(ConfigurationFactory factory)
     {
         this.factory = factory;
+        this.onInit();
     }
 
     public final Configuration getDefault()
@@ -254,6 +255,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     public final void save(OutputStream os)
     {
+        this.onSave();
         this.getCodec().saveConfig(this, os);
     }
 
@@ -330,6 +332,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         {
             throw new IllegalArgumentException("The input stream must not be null!");
         }
+        this.onLoad();
         this.showLoadErrors(this.getCodec().loadConfig(this, is));
     }
 
@@ -389,15 +392,31 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * This method gets called right after the configuration got loaded.
      */
     public void onLoaded(File loadedFrom)
-    {
-    }
+    {}
 
     /**
      * This method gets called right after the configuration get saved.
      */
     public void onSaved(File savedTo)
-    {
-    }
+    {}
+
+    /**
+     * Gets called after {@link #init(ConfigurationFactory)} was called
+     */
+    public void onInit()
+    {}
+
+    /**
+     * Gets called right before saving
+     */
+    public void onSave()
+    {}
+
+    /**
+     * Gets called right before loading
+     */
+    public void onLoad()
+    {}
 
     /**
      * Returns the lines to be added in front of the Configuration.
