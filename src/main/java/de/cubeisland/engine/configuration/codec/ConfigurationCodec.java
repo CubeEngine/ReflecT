@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import de.cubeisland.engine.configuration.Configuration;
@@ -443,7 +444,22 @@ public abstract class ConfigurationCodec
             {
                 try
                 {
-                    baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
+                    Node prevNode = baseNode.getNodeAt(getPathFor(field));
+                    if (prevNode instanceof MapNode)
+                    {
+                        Node node = convertField(field, defaultSection, section, config);
+                        if (node instanceof MapNode)
+                        {
+                            for (Entry<String, Node> entry : ((MapNode)prevNode).getMappedNodes().entrySet())
+                            {
+                                ((MapNode)prevNode).setExactNode(entry.getKey(), entry.getValue());
+                            }
+                        }
+                    }
+                    else
+                    {
+                        baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
+                    }
                 }
                 catch (InvalidConfigurationException e) // rethrow
                 {
