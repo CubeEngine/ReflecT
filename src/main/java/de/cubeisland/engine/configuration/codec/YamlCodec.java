@@ -331,8 +331,9 @@ public class YamlCodec extends ConfigurationCodec
     {
         return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`")
              || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|")
-             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.startsWith("- ")
-             || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || s.equals("*")
+             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.contains(": ")
+             || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+"))
+             || isEmpty(s) || s.equals("*")
              || s.matches("[0][0-9]+");
     }
 }
