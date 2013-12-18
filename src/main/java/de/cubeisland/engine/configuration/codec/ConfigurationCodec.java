@@ -450,7 +450,7 @@ public abstract class ConfigurationCodec
                         Node node = convertField(field, defaultSection, section, config);
                         if (node instanceof MapNode)
                         {
-                            for (Entry<String, Node> entry : ((MapNode)prevNode).getMappedNodes().entrySet())
+                            for (Entry<String, Node> entry : ((MapNode)node).getMappedNodes().entrySet())
                             {
                                 ((MapNode)prevNode).setExactNode(entry.getKey(), entry.getValue());
                             }
