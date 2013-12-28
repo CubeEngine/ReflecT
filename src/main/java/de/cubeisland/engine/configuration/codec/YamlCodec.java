@@ -38,6 +38,7 @@ import de.cubeisland.engine.configuration.node.Node;
 import de.cubeisland.engine.configuration.node.NullNode;
 import de.cubeisland.engine.configuration.node.StringNode;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import static de.cubeisland.engine.configuration.StringUtils.isEmpty;
@@ -83,6 +84,10 @@ public class YamlCodec extends ConfigurationCodec
             }
         }
         catch (ScannerException ex)
+        {
+            throw ConversionException.of(this, is, "Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+        }
+        catch (ParserException ex)
         {
             throw ConversionException.of(this, is, "Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
