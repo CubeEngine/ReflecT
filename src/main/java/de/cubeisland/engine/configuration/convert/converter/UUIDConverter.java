@@ -41,7 +41,7 @@ public class UUIDConverter implements Converter<UUID>
     {
         if (node instanceof StringNode)
         {
-            UUID.fromString(node.asText());
+            return UUID.fromString(node.asText());
         }
         throw ConversionException.of(this, node, "Node incompatible with UUID!");
     }
