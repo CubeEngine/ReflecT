@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect.node;
 /**
  * The Path to a value inside a Node
  */
-public class ConfigPath
+public class ReflectedPath
 {
     /**
      * A basePath indicating a list will start with this String
@@ -33,19 +33,19 @@ public class ConfigPath
     static final String LIST = "[";
 
     private final String basePath;
-    private final ConfigPath subPath;
+    private final ReflectedPath subPath;
 
     /**
-     * Create a new ConfigPath for given name
+     * Create a new ReflectedPath for given name
      *
      * @param name the name
      */
-    private ConfigPath(String name)
+    private ReflectedPath(String name)
     {
         if (name.contains("."))
         {
             this.basePath = name.substring(0, name.indexOf("."));
-            this.subPath = new ConfigPath(name.substring(name.indexOf(".") + 1));
+            this.subPath = new ReflectedPath(name.substring(name.indexOf(".") + 1));
         }
         else
         {
@@ -55,41 +55,41 @@ public class ConfigPath
     }
 
     /**
-     * Creates a new ConfigPath as SubPath of given basePath
+     * Creates a new ReflectedPath as SubPath of given basePath
      *
      * @param basePath the basePath
      * @param path     the subPath
      */
-    private ConfigPath(String basePath, ConfigPath path)
+    private ReflectedPath(String basePath, ReflectedPath path)
     {
         this.basePath = basePath;
         this.subPath = path;
     }
 
     /**
-     * Create a new ConfigPath as SubPath of given basePath
+     * Create a new ReflectedPath as SubPath of given basePath
      */
-    public final ConfigPath asSubPath(String basePath)
+    public final ReflectedPath asSubPath(String basePath)
     {
-        return new ConfigPath(basePath, this);
+        return new ReflectedPath(basePath, this);
     }
 
     /**
-     * Creates a ConfigPath for given name. The Path will be splitted at every . into basePath and a subPath
+     * Creates a ReflectedPath for given name. The Path will be splitted at every . into basePath and a subPath
      *
      * @param name the textual path
      *
-     * @return the ConfigPath
+     * @return the ReflectedPath
      */
-    public final static ConfigPath forName(String name)
+    public final static ReflectedPath forName(String name)
     {
-        return new ConfigPath(name);
+        return new ReflectedPath(name);
     }
 
     /**
-     * Returns true if this ConfigPath has no subPath
+     * Returns true if this ReflectedPath has no subPath
      *
-     * @return true if this ConfigPath is a basePath
+     * @return true if this ReflectedPath is a basePath
      */
     public final boolean isBasePath()
     {
@@ -107,7 +107,7 @@ public class ConfigPath
     }
 
     /**
-     * Returns the basePath of this ConfigPath
+     * Returns the basePath of this ReflectedPath
      *
      * @return the basePath
      */
@@ -117,17 +117,17 @@ public class ConfigPath
     }
 
     /**
-     * Gets the subPath of this ConfigPath
+     * Gets the subPath of this ReflectedPath
      *
      * @return the subPath or null if {@link #isBasePath()}
      */
-    public final ConfigPath getSubPath()
+    public final ReflectedPath getSubPath()
     {
         return subPath;
     }
 
     /**
-     * Returns true if the basePath of this ConfigPath points to a list
+     * Returns true if the basePath of this ReflectedPath points to a list
      *
      * @return whether this path points to a list next
      */

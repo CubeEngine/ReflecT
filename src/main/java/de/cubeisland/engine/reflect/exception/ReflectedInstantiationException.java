@@ -23,7 +23,7 @@
 package de.cubeisland.engine.reflect.exception;
 
 /**
- * This exception is thrown when a class needed for the configuration could not be instantiated
+ * This exception is thrown when a class needed for the reflected object could not be instantiated
  */
 public class ReflectedInstantiationException extends InvalidReflectedObjectException
 {

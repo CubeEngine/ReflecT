@@ -45,7 +45,7 @@ import static de.cubeisland.engine.reflect.StringUtils.isEmpty;
 import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
 
 /**
- * A Codec for YAML-Configurations allowing child-configurations
+ * A Codec for YAML-Reflected Objects allowing child-reflected
  */
 public class YamlCodec extends Codec
 {
@@ -60,23 +60,23 @@ public class YamlCodec extends Codec
         return "yml";
     }
 
-    // Configuration loading Method
+    // Reflected loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Reflected config) throws ConversionException
+    protected final MapNode load(InputStream is, Reflected reflected) throws ConversionException
     {
         MapNode values;
         try
         {
             if (is == null)
             {
-                values = MapNode.emptyMap(); // InputStream null -> config was not existent
+                values = MapNode.emptyMap(); // InputStream null -> reflected was not existent
                 return values;
             }
             Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(is);
             if (map == null)
             {
-                values = MapNode.emptyMap(); // loadValues null -> config exists but was empty
+                values = MapNode.emptyMap(); // loadValues null -> reflected exists but was empty
             }
             else
             {
@@ -85,31 +85,31 @@ public class YamlCodec extends Codec
         }
         catch (ScannerException ex)
         {
-            throw ConversionException.of(this, is, "Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+            throw ConversionException.of(this, is, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         catch (ParserException ex)
         {
-            throw ConversionException.of(this, is, "Failed to parse the YAML configuration. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+            throw ConversionException.of(this, is, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         return values;
     }
 
-    // Configuration saving Methods
+    // Reflected saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Reflected config) throws ConversionException
+    protected final void save(MapNode node, OutputStream os, Reflected reflected) throws ConversionException
     {
         try
         {
             OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
-            if (config.head() != null)
+            if (reflected.head() != null)
             {
-                writer.append("# ").append(StringUtils.implode("\n# ", config.head())).append(LINE_BREAK)
+                writer.append("# ").append(StringUtils.implode("\n# ", reflected.head())).append(LINE_BREAK)
                       .append(LINE_BREAK);
             }
             convertMapNode(writer, node, 0, false);
-            if (config.tail() != null)
+            if (reflected.tail() != null)
             {
-                writer.append("# ").append(StringUtils.implode("\n# ", config.tail()));
+                writer.append("# ").append(StringUtils.implode("\n# ", reflected.tail()));
             }
             writer.flush();
             writer.close();

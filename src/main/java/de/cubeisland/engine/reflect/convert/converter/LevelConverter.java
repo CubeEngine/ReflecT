@@ -42,12 +42,14 @@ public class LevelConverter implements Converter<Level>
     {
         if (node instanceof StringNode)
         {
-            Level lv = Level.parse(((StringNode)node).getValue());
-            if (lv == null)
+            try
             {
-                throw ConversionException.of(this, node, "Unknown Level: " + ((StringNode)node).getValue());
+                return Level.parse(((StringNode)node).getValue());
             }
-            return lv;
+            catch (IllegalArgumentException e)
+            {
+                throw ConversionException.of(this, node, "Unknown Level: " + ((StringNode)node).getValue(), e);
+            }
         }
         else if (node instanceof BooleanNode && !((BooleanNode)node).getValue())
         { // OFF is interpreted as a boolean false, ALL as a boolean true

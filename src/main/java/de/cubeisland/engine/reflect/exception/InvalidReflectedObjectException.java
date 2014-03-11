@@ -25,10 +25,10 @@ package de.cubeisland.engine.reflect.exception;
 import java.lang.reflect.Field;
 
 import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.node.ConfigPath;
+import de.cubeisland.engine.reflect.node.ReflectedPath;
 
 /**
- * This exception is thrown when a configuration is invalid.
+ * This exception is thrown when a reflected object is invalid.
  */
 public class InvalidReflectedObjectException extends RuntimeException
 {
@@ -44,7 +44,7 @@ public class InvalidReflectedObjectException extends RuntimeException
         super(msg, t);
     }
 
-    public static InvalidReflectedObjectException of(String msg, ConfigPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    public static InvalidReflectedObjectException of(String msg, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
     {
         msg += "\nField: " + field.getName();
         msg += "\nSection: " + clazz.toString();

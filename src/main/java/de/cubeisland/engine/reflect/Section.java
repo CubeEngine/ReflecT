@@ -23,9 +23,9 @@
 package de.cubeisland.engine.reflect;
 
 /**
- * A ConfigurationSection containing fields to serialize
+ * A Section containing fields to serialize
  *
- * <p>The elements in the configuration may be unsorted and in no particular order, this is depending on the
+ * <p>The elements in the section may be unsorted and in no particular order, this is depending on the
  * implementation used for reflection when getting the fields
  */
 public interface Section

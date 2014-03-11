@@ -23,9 +23,9 @@
 package de.cubeisland.engine.reflect.exception;
 
 /**
- * This Exception is thrown when a configuration has no codec set, but tries to use it anyways
+ * This Exception is thrown when a reflected object has no codec set, but tries to use it anyways
  */
-public class MissingCodecException extends UnsupportedConfigurationException
+public class MissingCodecException extends UnsupportedReflectedException
 {
     public MissingCodecException(String message)
     {

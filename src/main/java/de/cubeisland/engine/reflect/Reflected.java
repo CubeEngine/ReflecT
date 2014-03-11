@@ -44,20 +44,20 @@ import de.cubeisland.engine.reflect.exception.MissingCodecException;
 import de.cubeisland.engine.reflect.node.ErrorNode;
 
 import static de.cubeisland.engine.reflect.codec.Codec.getFieldType;
-import static de.cubeisland.engine.reflect.codec.Codec.isConfigField;
+import static de.cubeisland.engine.reflect.codec.Codec.isReflectedField;
 
 /**
- * This abstract class represents a configuration.
+ * This abstract class represents a reflected object to be serialized using a Codec C.
  */
 public abstract class Reflected<C extends Codec> implements Section
 {
     private transient Reflector factory;
-    private transient Reflected defaultConfig = this;
+    private transient Reflected defaultReflected = this;
     private transient final Class<C> defaultCodec = getCodecClass(this.getClass());
     protected transient File file;
 
     /**
-     * Saves the fields that got inherited from the parent-configuration
+     * Saves the fields that got inherited from the parent-reflected
      */
     private transient HashSet<Field> inheritedFields;
 
@@ -69,23 +69,23 @@ public abstract class Reflected<C extends Codec> implements Section
 
     public final Reflected getDefault()
     {
-        return this.defaultConfig;
+        return this.defaultReflected;
     }
 
-    public final void setDefault(Reflected config)
+    public final void setDefault(Reflected reflected)
     {
-        if (config == null)
+        if (reflected == null)
         {
-            this.defaultConfig = this;
+            this.defaultReflected = this;
             this.inheritedFields = null;
         }
         else
         {
-            if (!this.getClass().equals(config.getClass()))
+            if (!this.getClass().equals(reflected.getClass()))
             {
-                throw new IllegalArgumentException("Parent and child-configuration have to be the same type of configuration!");
+                throw new IllegalArgumentException("Parent and child-reflected have to be the same type of reflected!");
             }
-            this.defaultConfig = config;
+            this.defaultReflected = reflected;
             this.inheritedFields = new HashSet<Field>();
         }
     }
@@ -104,8 +104,8 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Marks a field as being inherited from the parent configuration and thus not being saved
-     * <p>if this configuration is not a child-configuration nothing happens
+     * Marks a field as being inherited from the parent reflected and thus not being saved
+     * <p>if this reflectd is not a child-reflected nothing happens
      *
      * @param field the inherited field
      */
@@ -119,8 +119,8 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Marks a field as not being inherited from the parent configuration and thus saved into file
-     * <p>if this configuration is not a child-configuration nothing happens
+     * Marks a field as not being inherited from the parent reflected and thus saved into file
+     * <p>if this reflected is not a child-reflected nothing happens
      *
      * @param field the not inherited field
      */
@@ -134,8 +134,8 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Returns whether the given field-value was inherited from a parent-configuration
-     * <p>Returns always false when this is not a child-configuration
+     * Returns whether the given field-value was inherited from a parent-reflected
+     * <p>Returns always false when this is not a child-reflected
      *
      * @param field the field to check
      *
@@ -147,23 +147,23 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Loads and saves a child-configuration from given path with this configuration as parent
+     * Loads and saves a child-reflected from given path with this reflected as parent
      *
      * @param sourceFile the path to the file
-     * @param <T>        the ConfigurationType
+     * @param <T>        the ReflectedType
      *
-     * @return the loaded child-configuration
+     * @return the loaded child-reflected
      */
     @SuppressWarnings("unchecked")
     public <T extends Reflected> T loadChild(File sourceFile)
     {
-        Reflected<C> childConfig = factory.create(this.getClass());
-        childConfig.setFile(sourceFile);
-        childConfig.setDefault(this);
+        Reflected<C> childReflected = factory.create(this.getClass());
+        childReflected.setFile(sourceFile);
+        childReflected.setDefault(this);
         try
         {
-            childConfig.reload(true);
-            return (T)childConfig;
+            childReflected.reload(true);
+            return (T)childReflected;
         }
         catch (InvalidReflectedObjectException ex)
         {
@@ -171,14 +171,14 @@ public abstract class Reflected<C extends Codec> implements Section
         }
         catch (Exception ex)
         {
-            throw new IllegalStateException("Unknown Exception while loading ChildConfig!", ex);
+            throw new IllegalStateException("Unknown Exception while loading Child-Reflected!", ex);
         }
     }
 
     /**
-     * Tries to get the CodecClazz of a configuration implementation.
+     * Tries to get the CodecClazz of a Reflected implementation.
      *
-     * @param clazz the clazz of the configuration
+     * @param clazz the clazz of the reflected
      *
      * @return the Codec
      */
@@ -219,7 +219,7 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Saves the configuration to the set file.
+     * Saves the reflected to the set file.
      */
     public final void save()
     {
@@ -227,7 +227,7 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Saves this configuration into the given file
+     * Saves this reflected into the given file
      *
      * @param target the file to save into
      */
@@ -235,7 +235,7 @@ public abstract class Reflected<C extends Codec> implements Section
     {
         if (target == null)
         {
-            throw new IllegalArgumentException("A configuration cannot be saved without a valid file!");
+            throw new IllegalArgumentException("A reflected cannot be saved without a valid file!");
         }
         try
         {
@@ -249,19 +249,19 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Saves this configuration using given OutputStream
+     * Saves this reflected using given OutputStream
      *
      * @param os the OutputStream to write into
      */
     public final void save(OutputStream os)
     {
         this.onSave();
-        this.getCodec().saveConfig(this, os);
+        this.getCodec().saveReflected(this, os);
     }
 
     /**
-     * Reloads the configuration from file
-     * <p>This will only work if the file of the configuration got set previously
+     * Reloads the reflected from file
+     * <p>This will only work if the file of the reflected got set previously
      */
     public final void reload()
     {
@@ -269,10 +269,10 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Reloads the configuration from file
-     * <p>This will only work if the file of the configuration got set previously
+     * Reloads the reflected from file
+     * <p>This will only work if the file of the reflected got set previously
      *
-     * @param save true if the configuration should be saved after loading
+     * @param save true if the reflected should be saved after loading
      *
      * @return true when a new file got created while saving
      *
@@ -283,7 +283,7 @@ public abstract class Reflected<C extends Codec> implements Section
         boolean result = false;
         if (!this.loadFrom(this.file) && save)
         {
-            this.factory.logger.info("Saved configuration in new file: " + file.getAbsolutePath());
+            this.factory.logger.info("Saved reflected in new file: " + file.getAbsolutePath());
             result = true;
         }
         if (save)
@@ -295,18 +295,18 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Loads the configuration using the given File
-     * <p>This will NOT set the file of this configuration
+     * Loads the Reflected using the given File
+     * <p>This will NOT set the file of this Reflected
      *
      * @param file the file to load from
      *
-     * @return true if the configuration was loaded from file
+     * @return true if the Reflected was loaded from file
      */
     public final boolean loadFrom(File file)
     {
         if (this.file == null)
         {
-            throw new IllegalArgumentException("The file must not be null in order to load the configuration!");
+            throw new IllegalArgumentException("The file must not be null in order to load the reflected!");
         }
         try
         {
@@ -315,14 +315,14 @@ public abstract class Reflected<C extends Codec> implements Section
         }
         catch (FileNotFoundException ex)
         {
-            this.factory.logger.log(Level.INFO, "Could not load configuration from file! Using default...");
+            this.factory.logger.log(Level.INFO, "Could not load reflected from file! Using default...", ex);
             return false;
         }
         return true;
     }
 
     /**
-     * Loads the configuration using the given InputStream
+     * Loads the reflected using the given InputStream
      *
      * @param is the InputStream to load from
      */
@@ -333,14 +333,14 @@ public abstract class Reflected<C extends Codec> implements Section
             throw new IllegalArgumentException("The input stream must not be null!");
         }
         this.onLoad();
-        this.showLoadErrors(this.getCodec().loadConfig(this, is));
+        this.showLoadErrors(this.getCodec().loadReflected(this, is));
     }
 
     final void showLoadErrors(Collection<ErrorNode> errors)
     {
         if (!errors.isEmpty())
         {
-            this.factory.logger.warning(errors.size() + " ErrorNodes were encountered while loading the configuration!");
+            this.factory.logger.warning(errors.size() + " ErrorNodes were encountered while loading the reflected!");
             for (ErrorNode error : errors)
             {
                 this.factory.logger.log(Level.WARNING, error.getErrorMessage());
@@ -351,7 +351,7 @@ public abstract class Reflected<C extends Codec> implements Section
     /**
      * Returns the Codec
      *
-     * @return the ConfigurationCodec defined in the GenericType of the Configuration
+     * @return the Codec defined in the GenericType of the reflected
      *
      * @throws MissingCodecException when no codec was set via genericType
      */
@@ -359,7 +359,7 @@ public abstract class Reflected<C extends Codec> implements Section
     {
         if (defaultCodec == null)
         {
-            throw new MissingCodecException("Configuration has no Codec set! A configuration needs to have a codec defined in its GenericType");
+            throw new MissingCodecException("Reflected has no Codec set! A reflected object needs to have a codec defined in its GenericType");
         }
         return this.factory.getCodecManager().getCodec(this.defaultCodec);
     }
@@ -367,7 +367,7 @@ public abstract class Reflected<C extends Codec> implements Section
     /**
      * Sets the path to load from
      *
-     * @param file the path the configuration will load from
+     * @param file the path the reflected will load from
      */
     public final void setFile(File file)
     {
@@ -379,9 +379,9 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Returns the path this config will be saved to and loaded from by default
+     * Returns the path this reflected will be saved to and loaded from by default
      *
-     * @return the path of this config
+     * @return the path of this reflected
      */
     public final File getFile()
     {
@@ -389,13 +389,13 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * This method gets called right after the configuration got loaded.
+     * This method gets called right after the reflected got loaded.
      */
     public void onLoaded(File loadedFrom)
     {}
 
     /**
-     * This method gets called right after the configuration get saved.
+     * This method gets called right after the reflected get saved.
      */
     public void onSaved(File savedTo)
     {}
@@ -419,8 +419,8 @@ public abstract class Reflected<C extends Codec> implements Section
     {}
 
     /**
-     * Returns the lines to be added in front of the Configuration.
-     * <p>not every Codec may use this
+     * Returns the lines to be added in front of the Reflected.
+     * <p>not every Codec may be able to use this
      *
      * @return the head
      */
@@ -430,8 +430,8 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Returns the lines to be added at the end of the Configuration.
-     * <p>not every Codec may use this
+     * Returns the lines to be added at the end of the reflected.
+     * <p>not every Codec may be able to use this
      *
      * @return the head
      */
@@ -447,12 +447,12 @@ public abstract class Reflected<C extends Codec> implements Section
 
     public final void updateInheritance()
     {
-        if (this.defaultConfig == null || this.defaultConfig == this)
+        if (this.defaultReflected == null || this.defaultReflected == this)
         {
-            return; // Default is this config anyways
+            return; // Default is this reflected anyways
         }
         this.inheritedFields = new HashSet<Field>();
-        this.updateInheritance(this, defaultConfig);
+        this.updateInheritance(this, defaultReflected);
     }
 
     @SuppressWarnings("unchecked")
@@ -462,7 +462,7 @@ public abstract class Reflected<C extends Codec> implements Section
         {
             for (Field field : section.getClass().getFields())
             {
-                if (isConfigField(field))
+                if (isReflectedField(field))
                 {
                     Object value = field.get(section);
                     Object defaultValue = field.get(defaultSection);
@@ -483,7 +483,7 @@ public abstract class Reflected<C extends Codec> implements Section
                         this.updateInheritance((Section)value, (Section)defaultValue);
                         break;
                     case SECTION_COLLECTION:
-                        throw new IllegalStateException("Collections in child configurations are not allowed!");
+                        throw new IllegalStateException("Collections in child reflected are not allowed!");
                     case SECTION_MAP:
                         for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())
                         {

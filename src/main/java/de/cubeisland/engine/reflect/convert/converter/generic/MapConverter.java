@@ -27,6 +27,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
@@ -38,7 +39,7 @@ import de.cubeisland.engine.reflect.node.StringNode;
 public class MapConverter
 {
     /**
-     * Makes a map serializable for configs
+     * Makes a map serializable for reflected
      *
      * @param map the map to convert
      *
@@ -51,16 +52,16 @@ public class MapConverter
         {
             return result;
         }
-        for (Object key : map.keySet())
+        for (Entry entry : map.entrySet())
         {
-            Node keyNode = manager.convertToNode(key);
+            Node keyNode = manager.convertToNode(entry.getKey());
             if (keyNode instanceof StringNode)
             {
-                result.setNode((StringNode)keyNode, manager.convertToNode(map.get(key)));
+                result.setNode((StringNode)keyNode, manager.convertToNode(entry.getValue()));
             }
             else
             {
-                result.setNode(StringNode.of(keyNode.asText()), manager.convertToNode(map.get(key)));
+                result.setNode(StringNode.of(keyNode.asText()), manager.convertToNode(entry.getValue()));
             }
         }
         return result;

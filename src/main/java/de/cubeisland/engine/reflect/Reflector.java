@@ -37,7 +37,7 @@ public class Reflector
 
     public Reflector()
     {
-        this.logger = Logger.getLogger("ConfigurationAPI");
+        this.logger = Logger.getLogger("ReflecT");
     }
 
     public Reflector(Logger logger)
@@ -46,29 +46,29 @@ public class Reflector
     }
 
     /**
-     * Loads the configuration from given file and optionally saves it afterwards
+     * Loads the reflected from given file and optionally saves it afterwards
      *
-     * @param clazz the configurations class
+     * @param clazz the reflected class
      * @param file  the file to load from and save to
-     * @param save  whether to save the configuration or not
+     * @param save  whether to save the reflected or not
      *
-     * @return the loaded Configuration
+     * @return the loaded reflected
      */
     public <T extends Reflected> T load(Class<T> clazz, File file, boolean save)
     {
-        T config = create(clazz); // loading
-        config.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
-        config.reload(save);
-        return config;
+        T reflected = create(clazz); // loading
+        reflected.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
+        reflected.reload(save);
+        return reflected;
     }
 
     /**
-     * Loads the configuration from given file and saves it afterwards
+     * Loads the reflected from given file and saves it afterwards
      *
-     * @param clazz the configurations class
+     * @param clazz the reflected class
      * @param file  the file to load from and save to
      *
-     * @return the loaded Configuration
+     * @return the loaded reflected
      */
     public <T extends Reflected> T load(Class<T> clazz, File file)
     {
@@ -76,36 +76,36 @@ public class Reflector
     }
 
     /**
-     * Loads the configuration from the InputStream
+     * Loads the reflected from the InputStream
      *
-     * @param clazz the configurations class
+     * @param clazz the reflected class
      * @param is    the InputStream to load from
      *
-     * @return the loaded configuration
+     * @return the loaded reflected
      */
     public <T extends Reflected> T load(Class<T> clazz, InputStream is)
     {
-        T config = create(clazz);
-        config.loadFrom(is);
-        return config;
+        T reflected = create(clazz);
+        reflected.loadFrom(is);
+        return reflected;
     }
 
     /**
-     * Creates an instance of given configuration-class.
-     * <p>The configuration has to have the default Constructor for this to work!
+     * Creates an instance of given reflected-class.
+     * <p>The reflected has to have the default Constructor for this to work!
      *
-     * @param clazz the configurations class
-     * @param <T>   The type of the returned configuration
+     * @param clazz the reflected class
+     * @param <T>   The type of the returned reflected
      *
-     * @return the created configuration
+     * @return the created reflected
      */
     public <T extends Reflected> T create(Class<T> clazz) throws ReflectedInstantiationException
     {
         try
         {
-            T config = clazz.newInstance();
-            config.init(this);
-            return config;
+            T reflected = clazz.newInstance();
+            reflected.init(this);
+            return reflected;
         }
         catch (IllegalAccessException e)
         {
@@ -128,7 +128,7 @@ public class Reflector
     }
 
     /**
-     * Sets the logger for all configuration created by this factory
+     * Sets the logger for all reflected created by this factory
      *
      * @param logger the logger
      */

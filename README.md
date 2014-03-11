@@ -67,12 +67,12 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
 
 (Please note: edit the "RELATIVE_PATH_TO_SNAKEYAML_ANDROID_JAR" part!)
 
-## Usage example (in a Bukkit plugin)
+## Usage example (in a Bukkit plugin) as a Configuration
 ```java
 public class ExamplePlugin extends JavaPlugin
 {
     // Create the Factory
-    private ConfigurationFactory factory = new ConfigurationFactory();
+    private Reflector factory = new Reflector();
 
     private MyConfig config;
 
@@ -80,17 +80,17 @@ public class ExamplePlugin extends JavaPlugin
     {
         File file = new File(this.getDataFolder(), "config.yml");
 
-        // load the configuration using the factory (this will also save after loading)
+        // load the reflected using the factory (this will also save after loading)
         config = factory.load(MyConfig.class, file);
 
-        // at any time you can reload the configuration
-        config.reload(); // this will also save the configuration!
-        // or save the configuration
+        // at any time you can reload the reflected object
+        config.reload(); // this will also save the reflected object!
+        // or save the reflected object
         config.save();
     }
 
-    // The Configuration Class
-    public class MyConfig extends YamlConfiguration // this is the same as extends Configuration<YamlCodec>
+    // The Reflected Class
+    public class MyConfig extends ReflectedYaml // this is the same as extends Reflected<YamlCodec>
     {
         public transient boolean noSaving; // fields that are transient are ignored
 

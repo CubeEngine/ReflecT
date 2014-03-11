@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static de.cubeisland.engine.reflect.node.ConfigPath.LIST;
+import static de.cubeisland.engine.reflect.node.ReflectedPath.LIST;
 
 public class ListNode extends ParentNode
 {
@@ -197,7 +197,7 @@ public class ListNode extends ParentNode
     }
 
     @Override
-    protected ConfigPath getPathOfSubNode(Node node, ConfigPath path)
+    protected ReflectedPath getPathOfSubNode(Node node, ReflectedPath path)
     {
         int pos = this.listedNodes.indexOf(node);
         if (pos == -1)
@@ -206,7 +206,7 @@ public class ListNode extends ParentNode
         }
         if (path == null)
         {
-            path = ConfigPath.forName(LIST + pos);
+            path = ReflectedPath.forName(LIST + pos);
         }
         else
         {
@@ -220,7 +220,7 @@ public class ListNode extends ParentNode
     }
 
     @Override
-    public ConfigPath getPathOfSubNode(Node node)
+    public ReflectedPath getPathOfSubNode(Node node)
     {
         return this.getPathOfSubNode(node, null);
     }

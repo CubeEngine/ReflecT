@@ -139,7 +139,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    protected ConfigPath getPathOfSubNode(Node node, ConfigPath path)
+    protected ReflectedPath getPathOfSubNode(Node node, ReflectedPath path)
     {
         String key = this.reverseMappedNodes.get(node);
         if (key == null)
@@ -148,7 +148,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
         }
         if (path == null)
         {
-            path = ConfigPath.forName(key);
+            path = ReflectedPath.forName(key);
         }
         else
         {
@@ -162,7 +162,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    public ConfigPath getPathOfSubNode(Node node)
+    public ReflectedPath getPathOfSubNode(Node node)
     {
         return this.getPathOfSubNode(node, null);
     }

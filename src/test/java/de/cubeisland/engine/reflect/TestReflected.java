@@ -35,7 +35,7 @@ import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.TestCodec;
 
-public class TestConfig extends Reflected<TestCodec>
+public class TestReflected extends Reflected<TestCodec>
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
@@ -72,7 +72,7 @@ public class TestConfig extends Reflected<TestCodec>
     {
         public String s1 = "#Not A Comment";
         public String s2 = "Important non comment stuff: # 42!";
-        public String s3 = "@Comment is used to add a comment to any field in a configuration-section";
+        public String s3 = "@Comment is used to add a comment to any field in a reflected-section";
         public String s4 = "{This is not a map}";
         public String s5 = "%s <- replace that now";
         public String s6 = "not followed by a map:";

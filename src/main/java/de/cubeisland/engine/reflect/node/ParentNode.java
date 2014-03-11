@@ -35,7 +35,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @return the previously mapped Node or null if not set
      */
-    public Node setNodeAt(ConfigPath path, Node node)
+    public Node setNodeAt(ReflectedPath path, Node node)
     {
         if (path.isBasePath())
         {
@@ -57,7 +57,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @return the Node at given path
      */
-    public Node getNodeAt(ConfigPath path)
+    public Node getNodeAt(ReflectedPath path)
     {
         if (path.isBasePath())
         {
@@ -75,7 +75,7 @@ public abstract class ParentNode<V> extends Node<V>
         }
         else
         {
-            ConfigPath subPath = path.getSubPath();
+            ReflectedPath subPath = path.getSubPath();
             Node baseNode = this.getExactNode(path.getBasePath());
             if (baseNode instanceof NullNode) // Node not found -> create new Node
             {
@@ -92,7 +92,7 @@ public abstract class ParentNode<V> extends Node<V>
             }
             else if (!(baseNode instanceof ParentNode))
             {
-                return new ErrorNode("Could not resolve path (" + path + ") for " + baseNode + "\nIs your configuration outdated?");
+                return new ErrorNode("Could not resolve path (" + path + ") for " + baseNode + "\nIs your reflected object outdated?");
             }
             return ((ParentNode)baseNode).getNodeAt(subPath);
         }
@@ -105,7 +105,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @return the previously mapped Node or null if not set
      */
-    public Node removeNode(ConfigPath path)
+    public Node removeNode(ReflectedPath path)
     {
         if (path.isBasePath())
         {
@@ -144,7 +144,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @throws IllegalArgumentException when the Node is not managed by this ParentNode
      */
-    protected abstract ConfigPath getPathOfSubNode(Node node, ConfigPath path);
+    protected abstract ReflectedPath getPathOfSubNode(Node node, ReflectedPath path);
 
     /**
      * Generates the path for a Node having this Node as ParentNode
@@ -155,7 +155,7 @@ public abstract class ParentNode<V> extends Node<V>
      *
      * @throws IllegalArgumentException when the Node is not managed by this ParentNode
      */
-    public abstract ConfigPath getPathOfSubNode(Node node);
+    public abstract ReflectedPath getPathOfSubNode(Node node);
 
     /**
      * Returns the Node for given direct key (without pathseparators).

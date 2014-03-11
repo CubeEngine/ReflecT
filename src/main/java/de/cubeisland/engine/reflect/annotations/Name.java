@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 public @interface Name
 {
     /**
-     * The path to save this Field in a config
+     * The path to save this Field in a reflected object
      *
      * @return the path
      */

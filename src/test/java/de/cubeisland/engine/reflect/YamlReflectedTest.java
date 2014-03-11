@@ -22,14 +22,14 @@
  */
 package de.cubeisland.engine.reflect;
 
-import junit.framework.TestCase;
-
 import java.io.File;
 
-public class YamlConfigurationTest extends TestCase
+import junit.framework.TestCase;
+
+public class YamlReflectedTest extends TestCase
 {
-    private TestConfig config;
-    private TestConfig loadConfig;
+    private TestReflected config;
+    private TestReflected loadConfig;
     private File file;
 
     private Reflector factory;
@@ -37,16 +37,16 @@ public class YamlConfigurationTest extends TestCase
     @Override
     public void setUp() throws Exception
     {
-        this.file = new File("../testconfig.yml");
+        this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        config = factory.create(TestConfig.class);
+        config = factory.create(TestReflected.class);
     }
 
-    public void testConfiguration() throws Exception
+    public void testReflected() throws Exception
     {
         config.save(file);
-        loadConfig = factory.load(TestConfig.class, file);
+        loadConfig = factory.load(TestReflected.class, file);
         file.delete();
-        assertEquals(config.getCodec().convertConfiguration(config).toString(), config.getCodec().convertConfiguration(loadConfig).toString());
+        assertEquals(config.getCodec().convertReflected(config).toString(), config.getCodec().convertReflected(loadConfig).toString());
     }
 }

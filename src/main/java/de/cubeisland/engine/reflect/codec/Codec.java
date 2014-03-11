@@ -49,8 +49,8 @@ import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.exception.FieldAccessException;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
-import de.cubeisland.engine.reflect.exception.UnsupportedConfigurationException;
-import de.cubeisland.engine.reflect.node.ConfigPath;
+import de.cubeisland.engine.reflect.exception.UnsupportedReflectedException;
+import de.cubeisland.engine.reflect.node.ReflectedPath;
 import de.cubeisland.engine.reflect.node.ErrorNode;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.MapNode;
@@ -61,7 +61,7 @@ import de.cubeisland.engine.reflect.node.StringNode;
 import static de.cubeisland.engine.reflect.FieldType.*;
 
 /**
- * This abstract Codec can be implemented to read and write configurations that allow child-configs
+ * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
  */
 public abstract class Codec
 {
@@ -94,27 +94,27 @@ public abstract class Codec
     }
 
     /**
-     * Loads in the given <code>Configuration</code> using the <code>InputStream</code>
-     * <p>if the configuration has no default set it will be saved normally!
+     * Loads in the given <code>Reflected</code> using the <code>InputStream</code>
+     * <p>if the reflected object has no default set it will be saved normally!
      *
-     * @param config the Configuration to load
+     * @param reflected the Reflected to load
      * @param is     the InputStream to load from
      *
      * @return a collection of all erroneous Nodes
      */
-    public final Collection<ErrorNode> loadConfig(Reflected config, InputStream is)
+    public final Collection<ErrorNode> loadReflected(Reflected reflected, InputStream is)
     {
         try
         {
-            return dumpIntoSection(config.getDefault(), config, this.load(is, config), config);
+            return dumpIntoSection(reflected.getDefault(), reflected, this.load(is, reflected), reflected);
         }
         catch (ConversionException ex)
         {
-            if (config.useStrictExceptionPolicy())
+            if (reflected.useStrictExceptionPolicy())
             {
-                throw new CodecIOException("Could not load configuration", ex);
+                throw new CodecIOException("Could not load reflected", ex);
             }
-            config.getLogger().warning("Could not load configuration" + ex);
+            reflected.getLogger().warning("Could not load reflected" + ex);
             return Collections.emptyList();
         }
         finally
@@ -125,30 +125,30 @@ public abstract class Codec
             }
             catch (IOException e)
             {
-                config.getLogger().log(Level.WARNING, "Failed to close InputStream", e);
+                reflected.getLogger().log(Level.WARNING, "Failed to close InputStream", e);
             }
         }
     }
 
     /**
-     * Saves the <code>Configuration</code> using given <code>OutputStream</code>
+     * Saves the <code>Reflected</code> using given <code>OutputStream</code>
      *
-     * @param config the Configuration to save
+     * @param reflected the Reflected to save
      * @param os     the OutputStream to save into
      */
-    public final void saveConfig(Reflected config, OutputStream os)
+    public final void saveReflected(Reflected reflected, OutputStream os)
     {
         try
         {
-            this.save(convertSection(config.getDefault(), config, config), os, config);
+            this.save(convertSection(reflected.getDefault(), reflected, reflected), os, reflected);
         }
         catch (ConversionException ex)
         {
-            if (config.useStrictExceptionPolicy())
+            if (reflected.useStrictExceptionPolicy())
             {
-                throw new CodecIOException("Could not save configuration", ex);
+                throw new CodecIOException("Could not save reflected", ex);
             }
-            config.getLogger().warning("Could not save configuration" + ex);
+            reflected.getLogger().warning("Could not save reflected" + ex);
         }
         finally
         {
@@ -158,7 +158,7 @@ public abstract class Codec
             }
             catch (IOException e)
             {
-                config.getLogger().log(Level.WARNING, "Failed to close OutputStream", e);
+                reflected.getLogger().log(Level.WARNING, "Failed to close OutputStream", e);
             }
         }
     }
@@ -177,31 +177,31 @@ public abstract class Codec
      *
      * @param node   the Node containing all data to save
      * @param os     the File to save into
-     * @param config the Configuration
+     * @param reflected the reflected
      */
-    protected abstract void save(MapNode node, OutputStream os, Reflected config) throws ConversionException;
+    protected abstract void save(MapNode node, OutputStream os, Reflected reflected) throws ConversionException;
 
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
      *
      * @param is     the InputStream to load from
-     * @param config the Configuration
+     * @param reflected the reflected
      */
-    protected abstract MapNode load(InputStream is, Reflected config) throws ConversionException;
+    protected abstract MapNode load(InputStream is, Reflected reflected) throws ConversionException;
 
-    // Configuration loading Methods
+    // Reflected loading Methods
 
     /**
      * Dumps the contents of the MapNode into the fields of the section using the defaultSection as default if a node is not given
      *
-     * @param defaultSection the parent configuration-section
-     * @param section        the configuration-section
+     * @param defaultSection the parent reflected-section
+     * @param section        the reflected-section
      * @param currentNode    the Node to load from
-     * @param config         the MultiConfiguration containing this section
+     * @param reflected         the MultiReflected containing this section
      *
      * @return a collection of all erroneous Nodes
      */
-    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected config)
+    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected reflected)
     {
         if (defaultSection == null) // Special case for Section in Maps
         {
@@ -214,7 +214,7 @@ public abstract class Codec
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
         {
-            if (isConfigField(field))
+            if (isReflectedField(field))
             {
                 Node fieldNode = currentNode.getNodeAt(getPathFor(field));
                 if (fieldNode instanceof ErrorNode)
@@ -227,15 +227,15 @@ public abstract class Codec
                     {
                         if (fieldNode instanceof NullNode)
                         {
-                            errorNodes.addAll(dumpDefaultIntoField(defaultSection, section, field, config));
+                            errorNodes.addAll(dumpDefaultIntoField(defaultSection, section, field, reflected));
                             if (section != defaultSection)
                             {
-                                config.addInheritedField(field);
+                                reflected.addInheritedField(field);
                             }
                         }
                         else
                         {
-                            errorNodes.addAll(dumpIntoField(defaultSection, section, field, fieldNode, config));
+                            errorNodes.addAll(dumpIntoField(defaultSection, section, field, fieldNode, reflected));
                         }
                     }
                     catch (InvalidReflectedObjectException e) // rethrow
@@ -251,16 +251,16 @@ public abstract class Codec
                         InvalidReflectedObjectException ex = InvalidReflectedObjectException
                             .of("Error while converting Node to dump into field!", getPathFor(field), section
                                 .getClass(), field, e);
-                        if (config.useStrictExceptionPolicy())
+                        if (reflected.useStrictExceptionPolicy())
                         {
                             throw ex;
                         }
-                        config.getLogger().log(Level.WARNING, ex.getMessage(), ex);
+                        reflected.getLogger().log(Level.WARNING, ex.getMessage(), ex);
                     }
                     catch (RuntimeException e)
                     {
                         throw InvalidReflectedObjectException
-                            .of("Unknown Error while dumping loaded config into fields", getPathFor(field), section
+                            .of("Unknown Error while dumping loaded reflected into fields", getPathFor(field), section
                                 .getClass(), field, e);
                     }
                 }
@@ -272,38 +272,38 @@ public abstract class Codec
     /**
      * Copy the contents of the parent section into a field of the section
      *
-     * @param parentSection the parent configuration-section
-     * @param section       the configuration-section
+     * @param parentSection the parent reflected-section
+     * @param section       the reflected-section
      * @param field         the Field to load into
      *
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Reflected config) throws ConversionException, IllegalAccessException
+    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Reflected reflected) throws ConversionException, IllegalAccessException
     {
         if (parentSection != section)
         {
             if (getFieldType(field) == FieldType.SECTION_COLLECTION)
             {
-                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+                throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
         }
-        return dumpIntoField(parentSection, section, field, convertField(field, parentSection, parentSection, config), config); // convert parent in node and dump back in
+        return dumpIntoField(parentSection, section, field, convertField(field, parentSection, parentSection, reflected), reflected); // convert parent in node and dump back in
     }
 
     /**
      * Dumps the contents of the Node into a field of the section
      *
-     * @param defaultSection the parent configuration-section
-     * @param section        the configuration-section
+     * @param defaultSection the parent reflected-section
+     * @param section        the reflected-section
      * @param field          the Field to load into
      * @param fieldNode      the Node to load from
-     * @param config         the MultiConfiguration containing this section
+     * @param reflected         the MultiReflected containing this section
      *
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected config) throws ConversionException, IllegalAccessException
+    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected) throws ConversionException, IllegalAccessException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -317,7 +317,7 @@ public abstract class Codec
             if (fieldValue == null && !(section == defaultSection))
             {
                 fieldValue = field.get(defaultSection);
-                config.addInheritedField(field);
+                reflected.addInheritedField(field);
             }
             break;
         case SECTION:
@@ -336,7 +336,7 @@ public abstract class Codec
                             .getType(), defaultSection);
                     }
                 }
-                errorNodes.addAll(dumpIntoSection((Section)defaultValue, (Section)fieldValue, (MapNode)fieldNode, config));
+                errorNodes.addAll(dumpIntoSection((Section)defaultValue, (Section)fieldValue, (MapNode)fieldNode, reflected));
             }
             else
             {
@@ -346,7 +346,7 @@ public abstract class Codec
         case SECTION_COLLECTION:
             if (section != defaultSection)
             {
-                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+                throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
             if (fieldNode instanceof ListNode)
             {
@@ -365,7 +365,7 @@ public abstract class Codec
                     if (listedNode instanceof MapNode)
                     {
                         Section subSection = SectionFactory.newSectionInstance(subSectionClass, section);
-                        errorNodes.addAll(dumpIntoSection(subSection, subSection, (MapNode)listedNode, config));
+                        errorNodes.addAll(dumpIntoSection(subSection, subSection, (MapNode)listedNode, reflected));
                         ((Collection<Section>)fieldValue).add(subSection);
                     }
                     else
@@ -400,11 +400,11 @@ public abstract class Codec
                     Section value = SectionFactory.newSectionInstance(subSectionClass, section);
                     if (entry.getValue() instanceof NullNode)
                     {
-                        errorNodes.addAll(dumpIntoSection(defaultSection, section, MapNode.emptyMap(), config));
+                        errorNodes.addAll(dumpIntoSection(defaultSection, section, MapNode.emptyMap(), reflected));
                     }
                     else if (entry.getValue() instanceof MapNode)
                     {
-                        errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), config));
+                        errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), reflected));
                     }
                     else
                     {
@@ -417,20 +417,22 @@ public abstract class Codec
             {
                 throw ConversionException.of(this, fieldNode, "Node for mapped Sections is not a MapNode!");
             }
+        default:
+            throw new IllegalArgumentException("Invalid FieldType!");
         }
         field.set(section, fieldValue);
         return errorNodes;
     }
 
-    // Configuration saving Methods
+    // Reflected saving Methods
 
     /**
      * Fills the map with values from the Fields to save
      *
-     * @param defaultSection the parent config
-     * @param section        the config
+     * @param defaultSection the parent section
+     * @param section        the section
      */
-    final MapNode convertSection(Section defaultSection, Section section, Reflected config) // this is only package private as it is used for testing
+    final MapNode convertSection(Section defaultSection, Section section, Reflected reflected) // this is only package private as it is used for testing
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
@@ -440,18 +442,18 @@ public abstract class Codec
         Class<? extends Section> sectionClass = section.getClass();
         for (Field field : sectionClass.getFields())
         {
-            if (section != defaultSection && config.isInheritedField(field))
+            if (section != defaultSection && reflected.isInheritedField(field))
             {
                 continue;
             }
-            if (isConfigField(field))
+            if (isReflectedField(field))
             {
                 try
                 {
                     Node prevNode = baseNode.getNodeAt(getPathFor(field));
                     if (prevNode instanceof MapNode)
                     {
-                        Node node = convertField(field, defaultSection, section, config);
+                        Node node = convertField(field, defaultSection, section, reflected);
                         if (node instanceof MapNode)
                         {
                             for (Entry<String, Node> entry : ((MapNode)node).getMappedNodes().entrySet())
@@ -462,7 +464,7 @@ public abstract class Codec
                     }
                     else
                     {
-                        baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
+                        baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, reflected));
                     }
                 }
                 catch (InvalidReflectedObjectException e) // rethrow
@@ -485,7 +487,7 @@ public abstract class Codec
                 }
             }
         }
-        if (section != defaultSection) // remove generated empty ParentNodes ONLY from child-configs
+        if (section != defaultSection) // remove generated empty ParentNodes ONLY from child-reflected
         {
             baseNode.cleanUpEmptyNodes();
         }
@@ -498,12 +500,12 @@ public abstract class Codec
      * @param field          the field to convert
      * @param defaultSection the defaultSection
      * @param section        the section containing the fields value
-     * @param config         the configuration
+     * @param reflected      the reflected object
      *
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private Node convertField(Field field, Section defaultSection, Section section, Reflected config) throws ConversionException, IllegalAccessException
+    private Node convertField(Field field, Section defaultSection, Section section, Reflected reflected) throws ConversionException, IllegalAccessException
     {
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
@@ -527,27 +529,27 @@ public abstract class Codec
                     }
                     else
                     {
-                        dumpDefaultIntoField(defaultSection, section, field, config);
+                        dumpDefaultIntoField(defaultSection, section, field, reflected);
                         fieldValue = field.get(section);
                     }
                 }
                 else
                 {
-                    dumpDefaultIntoField(defaultSection, section, field, config);
+                    dumpDefaultIntoField(defaultSection, section, field, reflected);
                     fieldValue = field.get(section);
                 }
             }
-            node = convertSection((Section)defaultValue, (Section)fieldValue, config);
+            node = convertSection((Section)defaultValue, (Section)fieldValue, reflected);
             break;
         case SECTION_COLLECTION:
             if (defaultSection != section)
             {
-                throw new UnsupportedConfigurationException("Child-Configurations are not allowed for Sections in Collections");
+                throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
             node = ListNode.emptyList();
             for (Section subSection : (Collection<Section>)fieldValue)
             {
-                MapNode listElemNode = convertSection(subSection, subSection, config);
+                MapNode listElemNode = convertSection(subSection, subSection, reflected);
                 ((ListNode)node).addNode(listElemNode);
             }
             break;
@@ -560,14 +562,16 @@ public abstract class Codec
                 Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
                 if (keyNode instanceof StringNode)
                 {
-                    MapNode configNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), config);
-                    ((MapNode)node).setNode((StringNode)keyNode, configNode);
+                    MapNode mapNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), reflected);
+                    ((MapNode)node).setNode((StringNode)keyNode, mapNode);
                 }
                 else // TODO allow Numbers
                 {
-                    throw new UnsupportedConfigurationException("Key-Node is not supported for mapped Sections: " + keyNode);
+                    throw new UnsupportedReflectedException("Key-Node is not supported for mapped Sections: " + keyNode);
                 }
             }
+        default:
+            throw new IllegalArgumentException("Invalid FieldType!");
         }
         addComment(node, field);
         return node;
@@ -633,20 +637,20 @@ public abstract class Codec
      *
      * @param field the field to check
      *
-     * @return whether the field is a field of the configuration that needs to be serialized
+     * @return whether the field is a field of the reflected that needs to be serialized
      */
-    public static boolean isConfigField(Field field)
+    public static boolean isReflectedField(Field field)
     {
         int modifiers = field.getModifiers();
         return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
-    protected static ConfigPath getPathFor(Field field)
+    protected static ReflectedPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))
         {
-            return ConfigPath.forName(field.getAnnotation(Name.class).value());
+            return ReflectedPath.forName(field.getAnnotation(Name.class).value());
         }
-        return ConfigPath.forName(StringUtils.fieldNameToPath(field.getName()));
+        return ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName()));
     }
 }

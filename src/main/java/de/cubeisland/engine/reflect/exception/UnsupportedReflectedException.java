@@ -23,11 +23,11 @@
 package de.cubeisland.engine.reflect.exception;
 
 /**
- * This exception is thrown when a feature cannot be used with that type of configuration
+ * This exception is thrown when a feature cannot be used with that type of reflected object
  */
-public class UnsupportedConfigurationException extends InvalidReflectedObjectException
+public class UnsupportedReflectedException extends InvalidReflectedObjectException
 {
-    public UnsupportedConfigurationException(String s)
+    public UnsupportedReflectedException(String s)
     {
         super(s);
     }

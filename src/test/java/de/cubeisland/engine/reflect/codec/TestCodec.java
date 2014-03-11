@@ -27,8 +27,8 @@ import de.cubeisland.engine.reflect.node.MapNode;
 
 public class TestCodec extends YamlCodec
 {
-    public MapNode convertConfiguration(Reflected config)
+    public MapNode convertReflected(Reflected reflected)
     {
-        return convertSection(config, config, config);
+        return convertSection(reflected, reflected, reflected);
     }
 }

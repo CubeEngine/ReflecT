@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A config Node
+ * A reflected Node
  */
 public abstract class Node<V>
 {
@@ -60,7 +60,7 @@ public abstract class Node<V>
      *
      * @return the path or null if this Node is a root-Node
      */
-    public ConfigPath getPath()
+    public ReflectedPath getPath()
     {
         if (this.getParentNode() == null)
         {
