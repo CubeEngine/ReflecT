@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter.generic;
+package de.cubeisland.engine.reflect.codec.converter.generic;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;

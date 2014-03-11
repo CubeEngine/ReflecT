@@ -20,30 +20,37 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.node.BooleanNode;
 import de.cubeisland.engine.reflect.node.Node;
-import de.cubeisland.engine.reflect.node.ShortNode;
 
-public class ShortConverter extends BasicConverter<Short>
+public class BooleanConverter extends BasicConverter<Boolean>
 {
-    public Short fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Boolean fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof ShortNode)
+        if (node instanceof BooleanNode)
         {
-            return ((ShortNode)node).getValue();
+            return ((BooleanNode)node).getValue();
         }
         String s = node.asText();
-        try
+        if (s == null)
         {
-            return Short.parseShort(s);
+            return null;
         }
-        catch (NumberFormatException e)
+        if ("true".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)
+            || "yes".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s))
         {
-            throw ConversionException.of(this, node, "Node incompatible with Short!", e);
+            return true;
         }
+        if ("false".equalsIgnoreCase(s) || "off".equalsIgnoreCase(s)
+            || "no".equalsIgnoreCase(s) || "0".equalsIgnoreCase(s))
+        {
+            return false;
+        }
+
+        throw ConversionException.of(this, node, "Node incompatible with Boolean!");
     }
 }

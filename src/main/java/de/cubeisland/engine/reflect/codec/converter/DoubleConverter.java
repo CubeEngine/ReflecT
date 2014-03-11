@@ -20,30 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.IntNode;
+import de.cubeisland.engine.reflect.node.DoubleNode;
 import de.cubeisland.engine.reflect.node.Node;
 
-public class IntegerConverter extends BasicConverter<Integer>
+public class DoubleConverter extends BasicConverter<Double>
 {
-    public Integer fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Double fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof IntNode)
+        if (node instanceof DoubleNode)
         {
-            return ((IntNode)node).getValue();
+            return ((DoubleNode)node).getValue();
         }
         String s = node.asText();
         try
         {
-            return Integer.parseInt(s);
+            return Double.parseDouble(s);
         }
         catch (NumberFormatException e)
         {
-            throw ConversionException.of(this, node, "Node incompatible with Integer!", e);
+            throw ConversionException.of(this, node, "Node incompatible with Double!", e);
         }
     }
 }

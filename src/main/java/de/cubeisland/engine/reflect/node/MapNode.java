@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import de.cubeisland.engine.reflect.StringUtils;
+import de.cubeisland.engine.reflect.util.StringUtils;
 
 public class MapNode extends ParentNode<Map<String, Node>>
 {

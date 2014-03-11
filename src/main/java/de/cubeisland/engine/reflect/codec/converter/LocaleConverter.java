@@ -20,48 +20,49 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
-import java.util.logging.Level;
+import java.util.Locale;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.Converter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.BooleanNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
-public class LevelConverter implements Converter<Level>
+public class LocaleConverter implements Converter<Locale>
 {
-    public Node toNode(Level object, ConverterManager manager) throws ConversionException
+    public Node toNode(Locale locale, ConverterManager manager) throws ConversionException
     {
-        return StringNode.of(object.toString());
+        return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
+                             locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
-    public Level fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Locale fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {
-            try
+            String localeTag = ((StringNode)node).getValue().trim();
+
+            localeTag = localeTag.replace("-", "_");
+
+            String[] parts = localeTag.split("_", 2);
+            String language = parts[0];
+            String country = "";
+
+            if (language.length() > 3)
             {
-                return Level.parse(((StringNode)node).getValue());
+                language = language.substring(0, 2);
             }
-            catch (IllegalArgumentException e)
+            if (parts.length > 1)
             {
-                throw ConversionException.of(this, node, "Unknown Level: " + ((StringNode)node).getValue(), e);
+                country = parts[1];
+                if (country.length() > 2)
+                {
+                    country = country.substring(0, 2);
+                }
             }
+            return new Locale(language, country);
         }
-        else if (node instanceof BooleanNode && !((BooleanNode)node).getValue())
-        { // OFF is interpreted as a boolean false, ALL as a boolean true
-            if ((Boolean)node.getValue())
-            {
-                return Level.ALL;
-            }
-            else
-            {
-                return Level.OFF;
-            }
-        }
-        throw ConversionException.of(this, node, "Node is not a StringNode OR BooleanNode!");
+        throw ConversionException.of(this, node, "Locales can only be loaded from a string node!");
     }
 }

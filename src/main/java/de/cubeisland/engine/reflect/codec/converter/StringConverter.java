@@ -20,20 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect;
+package de.cubeisland.engine.reflect.codec.converter;
 
-import junit.framework.TestCase;
+import de.cubeisland.engine.reflect.codec.ConverterManager;
+import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.node.Node;
+import de.cubeisland.engine.reflect.node.StringNode;
 
-public class StringUtilsTest extends TestCase
+public class StringConverter extends BasicConverter<String>
 {
-    public void testimplode() throws Exception
+    public String fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        assertEquals("a.b.c", StringUtils.implode(".", new String[] {"a", "b", "c"}));
-    }
-
-    public void testfieldNameToPath() throws Exception
-    {
-        assertEquals("camel-casing", StringUtils.fieldNameToPath("CamelCasing"));
-        assertEquals("camel.casing", StringUtils.fieldNameToPath("Camel_Casing"));
+        if (node instanceof StringNode)
+        {
+            return ((StringNode)node).getValue().trim();
+        }
+        return node.asText().trim();
     }
 }

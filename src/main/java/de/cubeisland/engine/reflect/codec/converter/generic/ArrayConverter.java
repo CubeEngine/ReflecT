@@ -20,50 +20,43 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter.generic;
 
-import java.util.Locale;
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.Converter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.Node;
-import de.cubeisland.engine.reflect.node.StringNode;
 
-public class LocaleConverter implements Converter<Locale>
+public class ArrayConverter
 {
-    public Node toNode(Locale locale, ConverterManager manager) throws ConversionException
+    public ListNode toNode(Object[] array, ConverterManager manager) throws ConversionException
     {
-        return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
-                             locale.getCountry().toUpperCase(Locale.ENGLISH));
+        ListNode result = ListNode.emptyList();
+        if (array == null || array.length == 0)
+        {
+            return result;
+        }
+        for (Object value : array)
+        {
+            result.addNode(manager.convertToNode(value));
+        }
+        return result;
     }
 
-    public Locale fromNode(Node node, ConverterManager manager) throws ConversionException
+    @SuppressWarnings("unchecked")
+    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof StringNode)
+        Class<V> valueType = (Class<V>)arrayType.getComponentType();
+        Collection<V> result = new LinkedList<V>();
+        for (Node node : listNode.getListedNodes())
         {
-            String localeTag = ((StringNode)node).getValue().trim();
-
-            localeTag = localeTag.replace("-", "_");
-
-            String[] parts = localeTag.split("_", 2);
-            String language = parts[0];
-            String country = "";
-
-            if (language.length() > 3)
-            {
-                language = language.substring(0, 2);
-            }
-            if (parts.length > 1)
-            {
-                country = parts[1];
-                if (country.length() > 2)
-                {
-                    country = country.substring(0, 2);
-                }
-            }
-            return new Locale(language, country);
+            V value = manager.convertFromNode(node, valueType);
+            result.add(value);
         }
-        throw ConversionException.of(this, node, "Locales can only be loaded from a string node!");
+        return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));
     }
 }

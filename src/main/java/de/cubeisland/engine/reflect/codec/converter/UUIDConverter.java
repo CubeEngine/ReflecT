@@ -20,22 +20,28 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
+
+import java.util.UUID;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
-public class StringConverter extends BasicConverter<String>
+public class UUIDConverter implements Converter<UUID>
 {
-    public String fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Node toNode(UUID object, ConverterManager manager) throws ConversionException
+    {
+        return StringNode.of(object.toString());
+    }
+
+    public UUID fromNode(Node node, ConverterManager manager) throws ConversionException
     {
         if (node instanceof StringNode)
         {
-            return ((StringNode)node).getValue().trim();
+            return UUID.fromString(node.asText());
         }
-        return node.asText().trim();
+        throw ConversionException.of(this, node, "Node incompatible with UUID!");
     }
 }

@@ -20,25 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.node.LongNode;
 import de.cubeisland.engine.reflect.node.Node;
 
-import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
-
-public abstract class BasicConverter<T> implements Converter<T>
+public class LongConverter extends BasicConverter<Long>
 {
-    @SuppressWarnings("unchecked")
-    public Node toNode(T object, ConverterManager manager) throws ConversionException
+    public Long fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        Class<T> clazz = (Class<T>)object.getClass();
-        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) ||
-            CharSequence.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz))
+        if (node instanceof LongNode)
         {
-            return wrapIntoNode(object);
+            return ((LongNode)node).getValue();
         }
-        throw ConversionException.of(this, object, "Object is not a primitive, Number, CharSequence or Boolean");
+        String s = node.asText();
+        try
+        {
+            return Long.parseLong(s);
+        }
+        catch (NumberFormatException e)
+        {
+            throw ConversionException.of(this, node, "Node incompatible with Long!", e);
+        }
     }
 }

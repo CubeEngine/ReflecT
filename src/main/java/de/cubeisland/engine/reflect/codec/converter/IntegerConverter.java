@@ -20,43 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter.generic;
-
-import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.LinkedList;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.ListNode;
+import de.cubeisland.engine.reflect.node.IntNode;
 import de.cubeisland.engine.reflect.node.Node;
 
-public class ArrayConverter
+public class IntegerConverter extends BasicConverter<Integer>
 {
-    public ListNode toNode(Object[] array, ConverterManager manager) throws ConversionException
+    public Integer fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        ListNode result = ListNode.emptyList();
-        if (array == null || array.length == 0)
+        if (node instanceof IntNode)
         {
-            return result;
+            return ((IntNode)node).getValue();
         }
-        for (Object value : array)
+        String s = node.asText();
+        try
         {
-            result.addNode(manager.convertToNode(value));
+            return Integer.parseInt(s);
         }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V> V[] fromNode(Class<V[]> arrayType, ListNode listNode, ConverterManager manager) throws ConversionException
-    {
-        Class<V> valueType = (Class<V>)arrayType.getComponentType();
-        Collection<V> result = new LinkedList<V>();
-        for (Node node : listNode.getListedNodes())
+        catch (NumberFormatException e)
         {
-            V value = manager.convertFromNode(node, valueType);
-            result.add(value);
+            throw ConversionException.of(this, node, "Node incompatible with Integer!", e);
         }
-        return result.toArray((V[])Array.newInstance((Class)valueType, result.size()));
     }
 }

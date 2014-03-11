@@ -20,30 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.FloatNode;
+import de.cubeisland.engine.reflect.node.ByteNode;
 import de.cubeisland.engine.reflect.node.Node;
 
-public class FloatConverter extends BasicConverter<Float>
+public class ByteConverter extends BasicConverter<Byte>
 {
-    public Float fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Byte fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof FloatNode)
+        if (node instanceof ByteNode)
         {
-            return ((FloatNode)node).getValue();
+            return ((ByteNode)node).getValue();
         }
         String s = node.asText();
         try
         {
-            return Float.parseFloat(s);
+            return Byte.parseByte(s);
         }
         catch (NumberFormatException e)
         {
-            throw ConversionException.of(this, node, "Node Incompatible with Float", e);
+            throw ConversionException.of(this, node, "Node incompatible with Byte!", e);
         }
     }
 }

@@ -20,30 +20,47 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
+
+import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.LongNode;
+import de.cubeisland.engine.reflect.node.BooleanNode;
 import de.cubeisland.engine.reflect.node.Node;
+import de.cubeisland.engine.reflect.node.StringNode;
 
-public class LongConverter extends BasicConverter<Long>
+public class LevelConverter implements Converter<Level>
 {
-    public Long fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Node toNode(Level object, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof LongNode)
+        return StringNode.of(object.toString());
+    }
+
+    public Level fromNode(Node node, ConverterManager manager) throws ConversionException
+    {
+        if (node instanceof StringNode)
         {
-            return ((LongNode)node).getValue();
+            try
+            {
+                return Level.parse(((StringNode)node).getValue());
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw ConversionException.of(this, node, "Unknown Level: " + ((StringNode)node).getValue(), e);
+            }
         }
-        String s = node.asText();
-        try
-        {
-            return Long.parseLong(s);
+        else if (node instanceof BooleanNode && !((BooleanNode)node).getValue())
+        { // OFF is interpreted as a boolean false, ALL as a boolean true
+            if ((Boolean)node.getValue())
+            {
+                return Level.ALL;
+            }
+            else
+            {
+                return Level.OFF;
+            }
         }
-        catch (NumberFormatException e)
-        {
-            throw ConversionException.of(this, node, "Node incompatible with Long!", e);
-        }
+        throw ConversionException.of(this, node, "Node is not a StringNode OR BooleanNode!");
     }
 }

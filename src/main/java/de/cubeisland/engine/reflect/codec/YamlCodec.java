@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.StringUtils;
+import de.cubeisland.engine.reflect.util.StringUtils;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.MapNode;
@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import static de.cubeisland.engine.reflect.StringUtils.isEmpty;
+import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
 
 /**

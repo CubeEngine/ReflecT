@@ -20,29 +20,25 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
-
-import java.sql.Date;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.Converter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
-import de.cubeisland.engine.reflect.node.StringNode;
 
-public class DateConverter implements Converter<Date>
+import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
+
+public abstract class BasicConverter<T> implements Converter<T>
 {
-    public Node toNode(Date object, ConverterManager manager) throws ConversionException
+    @SuppressWarnings("unchecked")
+    public Node toNode(T object, ConverterManager manager) throws ConversionException
     {
-        return StringNode.of(object.toString());
-    }
-
-    public Date fromNode(Node node, ConverterManager manager) throws ConversionException
-    {
-        if (node instanceof StringNode)
+        Class<T> clazz = (Class<T>)object.getClass();
+        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) ||
+            CharSequence.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz))
         {
-            return Date.valueOf(((StringNode)node).getValue());
+            return wrapIntoNode(object);
         }
-        throw ConversionException.of(this, node, "Node incompatible with Date!");
+        throw ConversionException.of(this, object, "Object is not a primitive, Number, CharSequence or Boolean");
     }
 }

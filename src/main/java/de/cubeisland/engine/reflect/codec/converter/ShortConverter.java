@@ -20,30 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.ByteNode;
 import de.cubeisland.engine.reflect.node.Node;
+import de.cubeisland.engine.reflect.node.ShortNode;
 
-public class ByteConverter extends BasicConverter<Byte>
+public class ShortConverter extends BasicConverter<Short>
 {
-    public Byte fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Short fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof ByteNode)
+        if (node instanceof ShortNode)
         {
-            return ((ByteNode)node).getValue();
+            return ((ShortNode)node).getValue();
         }
         String s = node.asText();
         try
         {
-            return Byte.parseByte(s);
+            return Short.parseShort(s);
         }
         catch (NumberFormatException e)
         {
-            throw ConversionException.of(this, node, "Node incompatible with Byte!", e);
+            throw ConversionException.of(this, node, "Node incompatible with Short!", e);
         }
     }
 }

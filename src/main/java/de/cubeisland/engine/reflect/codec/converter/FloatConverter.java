@@ -20,38 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.codec.converter;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.BooleanNode;
+import de.cubeisland.engine.reflect.node.FloatNode;
 import de.cubeisland.engine.reflect.node.Node;
 
-public class BooleanConverter extends BasicConverter<Boolean>
+public class FloatConverter extends BasicConverter<Float>
 {
-    public Boolean fromNode(Node node, ConverterManager manager) throws ConversionException
+    public Float fromNode(Node node, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof BooleanNode)
+        if (node instanceof FloatNode)
         {
-            return ((BooleanNode)node).getValue();
+            return ((FloatNode)node).getValue();
         }
         String s = node.asText();
-        if (s == null)
+        try
         {
-            return null;
+            return Float.parseFloat(s);
         }
-        if ("true".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)
-            || "yes".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s))
+        catch (NumberFormatException e)
         {
-            return true;
+            throw ConversionException.of(this, node, "Node Incompatible with Float", e);
         }
-        if ("false".equalsIgnoreCase(s) || "off".equalsIgnoreCase(s)
-            || "no".equalsIgnoreCase(s) || "0".equalsIgnoreCase(s))
-        {
-            return false;
-        }
-
-        throw ConversionException.of(this, node, "Node incompatible with Boolean!");
     }
 }

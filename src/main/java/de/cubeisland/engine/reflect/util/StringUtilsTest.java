@@ -20,30 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.convert.converter;
+package de.cubeisland.engine.reflect.util;
 
-import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.convert.BasicConverter;
-import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.DoubleNode;
-import de.cubeisland.engine.reflect.node.Node;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
-public class DoubleConverter extends BasicConverter<Double>
+public class StringUtilsTest extends TestCase
 {
-    public Double fromNode(Node node, ConverterManager manager) throws ConversionException
+    public void testimplode() throws Exception
     {
-        if (node instanceof DoubleNode)
-        {
-            return ((DoubleNode)node).getValue();
-        }
-        String s = node.asText();
-        try
-        {
-            return Double.parseDouble(s);
-        }
-        catch (NumberFormatException e)
-        {
-            throw ConversionException.of(this, node, "Node incompatible with Double!", e);
-        }
+        Assert.assertEquals("a.b.c", StringUtils.implode(".", new String[]{"a", "b", "c"}));
+    }
+
+    public void testfieldNameToPath() throws Exception
+    {
+        assertEquals("camel-casing", StringUtils.fieldNameToPath("CamelCasing"));
+        assertEquals("camel.casing", StringUtils.fieldNameToPath("Camel_Casing"));
     }
 }
