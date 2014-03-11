@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.cubeisland.engine</groupId>
-    <artifactId>configuration</artifactId>
+    <artifactId>reflect</artifactId>
     <version>1.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>ConfigurationAPI</name>
-    <description>A Configuration API for Java</description>
+    <name><![CDATA[Reflec<T>]]></name>
+    <description>Typesafe serializazion of data</description>
     <url>engine.cubeisland.de</url>
 
     <licenses>
