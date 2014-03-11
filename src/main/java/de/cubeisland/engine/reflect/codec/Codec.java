@@ -297,124 +297,150 @@ public abstract class Codec
      *
      * @return a collection of all erroneous Nodes
      */
-    @SuppressWarnings("unchecked")
     private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected) throws ConversionException, IllegalAccessException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
         FieldType fieldType = getFieldType(field);
-        Object fieldValue = null;
+        Object fieldValue;
         Object defaultValue = field.get(defaultSection);
-        switch (fieldType)
+        if (fieldType == FieldType.NORMAL)
         {
-        case NORMAL:
-            fieldValue = converterManager.convertFromNode(fieldNode, type); // Convert the value
-            if (fieldValue == null && !(section == defaultSection))
-            {
-                fieldValue = field.get(defaultSection);
-                reflected.addInheritedField(field);
-            }
-            break;
-        case SECTION:
+            fieldValue = dumpIntoNormalField(defaultSection, section, field, fieldNode, reflected, type);
+        }
+        else if (fieldType == FieldType.SECTION)
+        {
             if (fieldNode instanceof MapNode)
             {
-                fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), section);
-                if (defaultValue == null)
-                {
-                    if (section == defaultSection)
-                    {
-                        defaultValue = fieldValue;
-                    }
-                    else
-                    {
-                        defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>)field
-                            .getType(), defaultSection);
-                    }
-                }
-                errorNodes.addAll(dumpIntoSection((Section)defaultValue, (Section)fieldValue, (MapNode)fieldNode, reflected));
+                fieldValue = dumpIntoSectionField(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, defaultValue);
             }
             else
             {
                 throw ConversionException.of(this, fieldNode, "Node for Section is not a MapNode!");
             }
-            break;
-        case SECTION_COLLECTION:
+        }
+        else if (fieldType == FieldType.SECTION_COLLECTION)
+        {
             if (section != defaultSection)
             {
                 throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
             if (fieldNode instanceof ListNode)
             {
-                fieldValue = CollectionConverter.getCollectionFor((ParameterizedType)type);
-                if (((ListNode)fieldNode).isEmpty())
-                {
-                    break;
-                }
-                Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[0];
-                for (Node listedNode : ((ListNode)fieldNode).getValue())
-                {
-                    if (listedNode instanceof NullNode)
-                    {
-                        listedNode = MapNode.emptyMap();
-                    }
-                    if (listedNode instanceof MapNode)
-                    {
-                        Section subSection = SectionFactory.newSectionInstance(subSectionClass, section);
-                        errorNodes.addAll(dumpIntoSection(subSection, subSection, (MapNode)listedNode, reflected));
-                        ((Collection<Section>)fieldValue).add(subSection);
-                    }
-                    else
-                    {
-                        throw ConversionException.of(this, listedNode, "Node for listed Section is not a MapNode!");
-                    }
-                }
+                fieldValue = dumpIntoSectionCollectionField(section, (ListNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
             }
             else
             {
                 throw ConversionException.of(this, fieldNode, "\"Node for listed Sections is not a ListNode!");
             }
-            break;
-        case SECTION_MAP:
+        }
+        else if (fieldType == FieldType.SECTION_MAP)
+        {
             if (fieldNode instanceof MapNode)
             {
-                fieldValue = MapConverter.getMapFor((ParameterizedType)type);
-                if (((MapNode)fieldNode).isEmpty())
-                {
-                   break;
-                }
-                Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(defaultSection);
-                Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
-                for (Map.Entry<String, Node> entry : ((MapNode)fieldNode).getMappedNodes().entrySet())
-                {
-                    Object key = converterManager.convertFromNode(StringNode
-                                                                      .of(entry.getKey()), ((ParameterizedType)type)
-                                                                      .getActualTypeArguments()[0]);
-                    Section value = SectionFactory.newSectionInstance(subSectionClass, section);
-                    if (entry.getValue() instanceof NullNode)
-                    {
-                        errorNodes.addAll(dumpIntoSection(defaultSection, section, MapNode.emptyMap(), reflected));
-                    }
-                    else if (entry.getValue() instanceof MapNode)
-                    {
-                        errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), reflected));
-                    }
-                    else
-                    {
-                        throw ConversionException.of(this, entry.getValue(), "Value-Node for mapped Section is not a MapNode!");
-                    }
-                    ((Map<Object, Section>)fieldValue).put(key, value);
-                }
+                fieldValue = dumpIntoSectionMapField(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
             }
             else
             {
                 throw ConversionException.of(this, fieldNode, "Node for mapped Sections is not a MapNode!");
             }
-            break;
-        default:
+        }
+        else
+        {
             throw new IllegalArgumentException("Invalid FieldType!");
         }
         field.set(section, fieldValue);
         return errorNodes;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object dumpIntoSectionMapField(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws IllegalAccessException, ConversionException
+    {
+        Object fieldValue = MapConverter.getMapFor(type);
+        if (fieldNode.isEmpty())
+        {
+            return fieldValue;
+        }
+        Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(defaultSection);
+        Class<? extends Section> subSectionClass = (Class<? extends Section>)type.getActualTypeArguments()[1];
+        for (Entry<String, Node> entry : fieldNode.getMappedNodes().entrySet())
+        {
+            Object key = converterManager.convertFromNode(StringNode.of(entry.getKey()), type.getActualTypeArguments()[0]);
+            Section value = SectionFactory.newSectionInstance(subSectionClass, section);
+            if (entry.getValue() instanceof NullNode)
+            {
+                errorNodes.addAll(dumpIntoSection(defaultSection, section, MapNode.emptyMap(), reflected));
+            }
+            else if (entry.getValue() instanceof MapNode)
+            {
+                errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), reflected));
+            }
+            else
+            {
+                throw ConversionException.of(this, entry.getValue(), "Value-Node for mapped Section is not a MapNode!");
+            }
+            ((Map<Object, Section>)fieldValue).put(key, value);
+        }
+        return fieldValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object dumpIntoSectionCollectionField(Section section, ListNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws ConversionException
+    {
+        Object fieldValue = CollectionConverter.getCollectionFor(type);
+        if (fieldNode.isEmpty())
+        {
+            return fieldValue;
+        }
+        Class<? extends Section> subSectionClass = (Class<? extends Section>)type.getActualTypeArguments()[0];
+        for (Node listedNode : fieldNode.getValue())
+        {
+            if (listedNode instanceof NullNode)
+            {
+                listedNode = MapNode.emptyMap();
+            }
+            if (listedNode instanceof MapNode)
+            {
+                Section subSection = SectionFactory.newSectionInstance(subSectionClass, section);
+                errorNodes.addAll(dumpIntoSection(subSection, subSection, (MapNode)listedNode, reflected));
+                ((Collection<Section>)fieldValue).add(subSection);
+            }
+            else
+            {
+                throw ConversionException.of(this, listedNode, "Node for listed Section is not a MapNode!");
+            }
+        }
+        return fieldValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object dumpIntoSectionField(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, Object defaultValue)
+    {
+        Object fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), section);
+        if (defaultValue == null)
+        {
+            if (section == defaultSection)
+            {
+                defaultValue = fieldValue;
+            }
+            else
+            {
+                defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), defaultSection);
+            }
+        }
+        errorNodes.addAll(dumpIntoSection((Section)defaultValue, (Section)fieldValue, fieldNode, reflected));
+        return fieldValue;
+    }
+
+    private Object dumpIntoNormalField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected, Type type) throws ConversionException, IllegalAccessException
+    {
+        Object fieldValue = converterManager.convertFromNode(fieldNode, type); // Convert the value
+        if (fieldValue == null && !(section == defaultSection))
+        {
+            fieldValue = field.get(defaultSection);
+            reflected.addInheritedField(field);
+        }
+        return fieldValue;
     }
 
     // Reflected saving Methods
@@ -503,72 +529,78 @@ public abstract class Codec
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);
         FieldType fieldType = getFieldType(field);
-        Node node = null;
+        Node node;
         switch (fieldType)
         {
         case NORMAL:
             node = converterManager.convertToNode(fieldValue);
             break;
         case SECTION:
-            if (fieldValue == null)
-            {
-                if (defaultValue == null) // default section is not set -> generate new
-                {
-                    defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), defaultSection);
-                    field.set(defaultSection, defaultValue);
-                    if (section == defaultSection)
-                    {
-                        fieldValue = defaultValue;
-                    }
-                    else
-                    {
-                        dumpDefaultIntoField(defaultSection, section, field, reflected);
-                        fieldValue = field.get(section);
-                    }
-                }
-                else
-                {
-                    dumpDefaultIntoField(defaultSection, section, field, reflected);
-                    fieldValue = field.get(section);
-                }
-            }
-            node = convertSection((Section)defaultValue, (Section)fieldValue, reflected);
+            node = convertSectionField(field, defaultSection, section, reflected, fieldValue, defaultValue);
             break;
         case SECTION_COLLECTION:
             if (defaultSection != section)
             {
                 throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
-            node = ListNode.emptyList();
-            for (Section subSection : (Collection<Section>)fieldValue)
-            {
-                MapNode listElemNode = convertSection(subSection, subSection, reflected);
-                ((ListNode)node).addNode(listElemNode);
-            }
+            node = convertSectionCollectionField(reflected, (Collection<Section>)fieldValue);
             break;
         case SECTION_MAP:
-            node = MapNode.emptyMap();
-            Map<Object, Section> defaultFieldMap = (Map<Object, Section>)defaultValue;
-            Map<Object, Section> fieldMap = (Map<Object, Section>)fieldValue;
-            for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
-            {
-                Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
-                if (keyNode instanceof KeyNode)
-                {
-                    MapNode mapNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), reflected);
-                    ((MapNode)node).setNode((KeyNode)keyNode, mapNode);
-                }
-                else
-                {
-                    throw new UnsupportedReflectedException("Node is not a KeyNode! " + keyNode);
-                }
-            }
+            node = convertSectionMapField(reflected, (Map<Object, Section>)fieldValue, (Map<Object, Section>)defaultValue);
             break;
         default:
             throw new IllegalArgumentException("Invalid FieldType!");
         }
         addComment(node, field);
         return node;
+    }
+
+    private Node convertSectionMapField(Reflected reflected, Map<Object, Section> fieldMap, Map<Object, Section> defaultFieldMap) throws ConversionException
+    {
+        MapNode node = MapNode.emptyMap();
+        for (Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
+        {
+            Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
+            if (keyNode instanceof KeyNode)
+            {
+                node.setNode((KeyNode)keyNode, convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), reflected));
+            }
+            else
+            {
+                throw new UnsupportedReflectedException("Node is not a KeyNode! " + keyNode);
+            }
+        }
+        return node;
+    }
+
+    private Node convertSectionCollectionField(Reflected reflected, Collection<Section> fieldValue)
+    {
+        ListNode node = ListNode.emptyList();
+        for (Section subSection : fieldValue)
+        {
+            node.addNode(convertSection(subSection, subSection, reflected));
+        }
+        return node;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Node convertSectionField(Field field, Section defaultSection, Section section, Reflected reflected, Object fieldValue, Object defaultValue) throws IllegalAccessException, ConversionException
+    {
+        if (fieldValue == null && defaultValue == null)
+        {
+            defaultValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), defaultSection);
+            field.set(defaultSection, defaultValue);
+            if (section == defaultSection)
+            {
+                fieldValue = defaultValue;
+            }
+        }
+        if (fieldValue == null)
+        {
+            dumpDefaultIntoField(defaultSection, section, field, reflected);
+            fieldValue = field.get(section);
+        }
+        return convertSection((Section)defaultValue, (Section)fieldValue, reflected);
     }
 
     // HELPER Methods
@@ -605,25 +637,26 @@ public abstract class Codec
         if (type instanceof ParameterizedType)
         {
             ParameterizedType pType = (ParameterizedType)type;
-            if (Collection.class.isAssignableFrom((Class)pType.getRawType()))
+            if (hasSectionTypeArgument(Collection.class, 0, pType))
             {
-                Type subType1 = pType.getActualTypeArguments()[0];
-                if (subType1 instanceof Class && SectionFactory.isSectionClass((Class)subType1))
-                {
-                    return SECTION_COLLECTION;
-                }
+                fieldType = SECTION_COLLECTION;
             }
-
-            if (Map.class.isAssignableFrom((Class)pType.getRawType()))
+            else if (hasSectionTypeArgument(Map.class, 1, pType))
             {
-                Type subType2 = pType.getActualTypeArguments()[1];
-                if (subType2 instanceof Class && SectionFactory.isSectionClass((Class)subType2))
-                {
-                    return SECTION_MAP;
-                }
+                fieldType = SECTION_MAP;
             }
         }
         return fieldType;
+    }
+
+    private static boolean hasSectionTypeArgument(Class<?> clazz, int i, ParameterizedType pType)
+    {
+        if (clazz.isAssignableFrom((Class)pType.getRawType()))
+        {
+            Type subType = pType.getActualTypeArguments()[i];
+            return (subType instanceof Class && SectionFactory.isSectionClass((Class)subType));
+        }
+        return false;
     }
 
     /**

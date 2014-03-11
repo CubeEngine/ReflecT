@@ -186,26 +186,26 @@ public abstract class Reflected<C extends Codec> implements Section
     @SuppressWarnings("unchecked")
     private Class<C> getCodecClass(Class clazz)
     {
-        Type genericSuperclass = clazz.getGenericSuperclass(); // Get generic superclass
+        Type genericSuperclass = clazz;
         try
         {
-            if (genericSuperclass.equals(Reflected.class))
+            while (genericSuperclass instanceof Class)
             {
-                // superclass is this class -> No Codec set as GenericType Missing Codec!
-                return null;
-            }
-            if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
-            {
-                Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // get First gType
-                // check if it is codec
-                if (gType instanceof Class && Codec.class.isAssignableFrom((Class<?>)gType))
+                genericSuperclass = ((Class)genericSuperclass).getGenericSuperclass();
+                if (Reflected.class.equals(genericSuperclass))
                 {
-                    return (Class<C>)gType;
+                    // superclass is this class -> No Codec set as GenericType Missing Codec!
+                    return null;
                 }
-            }
-            if (genericSuperclass instanceof Class)
-            {
-                return getCodecClass((Class)genericSuperclass); // lookup next superclass
+                if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
+                {
+                    Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // get First gType
+                    // check if it is codec
+                    if (gType instanceof Class && Codec.class.isAssignableFrom((Class<?>)gType))
+                    {
+                        return (Class<C>)gType;
+                    }
+                }
             }
             throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
         }
@@ -477,7 +477,8 @@ public abstract class Reflected<C extends Codec> implements Section
                 {
                     Object value = field.get(section);
                     Object defaultValue = field.get(defaultSection);
-                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
+                    if ((value == null && defaultValue == null)
+                     || (value != null && defaultValue != null && value.equals(defaultValue)))
                     {
                         this.addInheritedField(field);
                         continue;
@@ -496,14 +497,7 @@ public abstract class Reflected<C extends Codec> implements Section
                     case SECTION_COLLECTION:
                         throw new IllegalStateException("Collections in child reflected are not allowed!");
                     case SECTION_MAP:
-                        for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())
-                        {
-                            Section defaulted = ((Map<?, Section>)defaultValue).get(entry.getKey());
-                            if (defaulted != null)
-                            {
-                                this.updateInheritance(entry.getValue(), defaulted);
-                            }
-                        }
+                        updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
                         break;
                     default:
                         throw new IllegalArgumentException("Illegal FieldType");
@@ -514,6 +508,18 @@ public abstract class Reflected<C extends Codec> implements Section
         catch (ReflectiveOperationException e)
         {
             throw new IllegalStateException(e);
+        }
+    }
+
+    private void updateSectionMapInheritance(Map<?, Section> value, Map<?, Section> defaultValue)
+    {
+        for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())
+        {
+            Section defaulted = defaultValue.get(entry.getKey());
+            if (defaulted != null)
+            {
+                this.updateInheritance(entry.getValue(), defaulted);
+            }
         }
     }
 }

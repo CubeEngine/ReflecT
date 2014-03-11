@@ -22,7 +22,6 @@
  */
 package de.cubeisland.engine.reflect;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
@@ -72,19 +71,7 @@ public class SectionFactory
                 return sectionClass.getDeclaredConstructor(sectionClass.getEnclosingClass()).newInstance(parent);
             }
         }
-        catch (IllegalAccessException e)
-        {
-            throw new ReflectedInstantiationException(sectionClass, e);
-        }
-        catch (InstantiationException e)
-        {
-            throw new ReflectedInstantiationException(sectionClass, e);
-        }
-        catch (NoSuchMethodException e)
-        {
-            throw new ReflectedInstantiationException(sectionClass, e);
-        }
-        catch (InvocationTargetException e)
+        catch (ReflectiveOperationException e)
         {
             throw new ReflectedInstantiationException(sectionClass, e);
         }
