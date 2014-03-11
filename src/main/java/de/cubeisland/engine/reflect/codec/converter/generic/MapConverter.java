@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.exception.UnsupportedReflectedException;
+import de.cubeisland.engine.reflect.node.KeyNode;
 import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
@@ -55,13 +57,13 @@ public class MapConverter
         for (Entry entry : map.entrySet())
         {
             Node keyNode = manager.convertToNode(entry.getKey());
-            if (keyNode instanceof StringNode)
+            if (keyNode instanceof KeyNode)
             {
-                result.setNode((StringNode)keyNode, manager.convertToNode(entry.getValue()));
+                result.setNode((KeyNode)keyNode, manager.convertToNode(entry.getValue()));
             }
             else
             {
-                result.setNode(StringNode.of(keyNode.asText()), manager.convertToNode(entry.getValue()));
+                throw new UnsupportedReflectedException("Node is not a KeyNode! " + keyNode);
             }
         }
         return result;

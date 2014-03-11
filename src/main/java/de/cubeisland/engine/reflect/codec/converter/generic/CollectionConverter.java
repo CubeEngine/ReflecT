@@ -77,7 +77,7 @@ public class CollectionConverter
         {
             S result = getCollectionFor(pType);
             Type subType = pType.getActualTypeArguments()[0];
-            for (Node node : listNode.getListedNodes())
+            for (Node node : listNode.getValue())
             {
                 V value = manager.convertFromNode(node, subType);
                 result.add(value);

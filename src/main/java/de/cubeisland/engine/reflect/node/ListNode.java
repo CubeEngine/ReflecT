@@ -29,10 +29,19 @@ import java.util.Set;
 
 import static de.cubeisland.engine.reflect.node.ReflectedPath.LIST;
 
+/**
+ * A List Node
+ * <p>It can contain a list of other Nodes
+ */
 public class ListNode extends ParentNode
 {
     private List<Node> listedNodes = new ArrayList<Node>();
 
+    /**
+     * Creates a ListNode from an Iterable
+     *
+     * @param list an Iterable
+     */
     public ListNode(Iterable list)
     {
         if (list != null)
@@ -46,6 +55,11 @@ public class ListNode extends ParentNode
         }
     }
 
+    /**
+     * Creates a ListNode from an Array
+     *
+     * @param array an array
+     */
     public ListNode(Object[] array)
     {
         if (array != null)
@@ -63,22 +77,27 @@ public class ListNode extends ParentNode
     {
     }
 
-    public List<Node> getListedNodes()
-    {
-        return listedNodes;
-    }
-
     @Override
     public List<Node> getValue()
     {
-        return this.getListedNodes();
+        return this.listedNodes;
     }
 
+    /**
+     * Creates an Empty ListNode
+     *
+     * @return the empty listnode
+     */
     public static ListNode emptyList()
     {
         return new ListNode();
     }
 
+    /**
+     * Adds a node to the list
+     *
+     * @param node the node to add
+     */
     public void addNode(Node node)
     {
         this.listedNodes.add(node);
@@ -161,11 +180,6 @@ public class ListNode extends ParentNode
         }
     }
 
-    public Node setNode(IntNode keyNode, Node node)
-    {
-        return this.setExactNode(LIST + keyNode.getValue(), node);
-    }
-
     @Override
     public boolean isEmpty()
     {
@@ -173,16 +187,10 @@ public class ListNode extends ParentNode
     }
 
     @Override
-    public boolean removeNode(Node node)
-    {
-        return this.listedNodes.remove(node);
-    }
-
-    @Override
     public void cleanUpEmptyNodes()
     {
         Set<Node> nodesToRemove = new HashSet<Node>();
-        for (Node node : this.getListedNodes())
+        for (Node node : this.getValue())
         {
             if (node instanceof ParentNode)
             {

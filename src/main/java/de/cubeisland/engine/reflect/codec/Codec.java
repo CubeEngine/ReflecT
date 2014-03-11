@@ -351,7 +351,7 @@ public abstract class Codec
                     break;
                 }
                 Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[0];
-                for (Node listedNode : ((ListNode)fieldNode).getListedNodes())
+                for (Node listedNode : ((ListNode)fieldNode).getValue())
                 {
                     if (listedNode instanceof NullNode)
                     {
@@ -560,7 +560,7 @@ public abstract class Codec
                 }
                 else
                 {
-                    throw new UnsupportedReflectedException("Key-Node is not supported for mapped Sections: " + keyNode);
+                    throw new UnsupportedReflectedException("Node is not a KeyNode! " + keyNode);
                 }
             }
             break;

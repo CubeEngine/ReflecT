@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Char Node
+ */
 public class CharNode extends KeyNode<Character>
 {
     private char value;
 
+    /**
+     * Creates a CharNode
+     *
+     * @param value a character
+     */
     public CharNode(char value)
     {
         this.value = value;

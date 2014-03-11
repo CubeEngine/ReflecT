@@ -52,7 +52,7 @@ public class ArrayConverter
     {
         Class<V> valueType = (Class<V>)arrayType.getComponentType();
         Collection<V> result = new LinkedList<V>();
-        for (Node node : listNode.getListedNodes())
+        for (Node node : listNode.getValue())
         {
             V value = manager.convertFromNode(node, valueType);
             result.add(value);

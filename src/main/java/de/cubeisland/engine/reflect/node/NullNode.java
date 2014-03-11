@@ -22,12 +22,21 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Null Node
+ * <p>Represents a non-existent value
+ */
 public class NullNode extends Node
 {
     private NullNode()
     {
     }
 
+    /**
+     * Creates a NullNode
+     *
+     * @return the NullNode
+     */
     public static NullNode emptyNode()
     {
         return new NullNode();

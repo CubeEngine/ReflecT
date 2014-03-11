@@ -31,6 +31,10 @@ import java.util.Set;
 
 import de.cubeisland.engine.reflect.util.StringUtils;
 
+/**
+ * A MapNode
+ * <p>It can map KeyNodes onto other Nodes
+ */
 public class MapNode extends ParentNode<Map<String, Node>>
 {
     private Map<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
@@ -67,7 +71,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     /**
-     * Returns an empty MapNode
+     * Creates an empty MapNode
      * <p>This is equivalent to {@link #MapNode(Map)} with null parameter
      *
      * @return an empty MapNode
@@ -134,12 +138,6 @@ public class MapNode extends ParentNode<Map<String, Node>>
     public boolean isEmpty()
     {
         return this.mappedNodes.isEmpty();
-    }
-
-    @Override
-    public boolean removeNode(Node node)
-    {
-        return this.mappedNodes.values().remove(node);
     }
 
     @Override

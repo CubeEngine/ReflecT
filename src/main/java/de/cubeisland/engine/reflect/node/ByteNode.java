@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Byte Node
+ */
 public class ByteNode extends KeyNode<Byte>
 {
     private byte value;
 
+    /**
+     * Creates a ByteNode
+     *
+     * @param value a byte
+     */
     public ByteNode(byte value)
     {
         this.value = value;

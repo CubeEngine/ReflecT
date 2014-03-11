@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Boolean Node
+ */
 public class BooleanNode extends Node<Boolean>
 {
     private final boolean bool;
 
+    /**
+     * Creates a BooleanNode
+     *
+     * @param bool a boolean
+     */
     public BooleanNode(boolean bool)
     {
         this.bool = bool;
@@ -43,16 +51,32 @@ public class BooleanNode extends Node<Boolean>
         return String.valueOf(bool);
     }
 
+    /**
+     * Creates a "False" Node
+     *
+     * @return the BooleanNode
+     */
     public static BooleanNode falseNode()
     {
         return new BooleanNode(false);
     }
 
+    /**
+     * Creates a "True" Node
+     *
+     * @return the BooleanNode
+     */
     public static BooleanNode trueNode()
     {
         return new BooleanNode(true);
     }
 
+    /**
+     * Creates a BooleanNode
+     *
+     * @param bool a boolean
+     * @return the BooleanNode
+     */
     public static BooleanNode of(boolean bool)
     {
         return bool ? trueNode() : falseNode();

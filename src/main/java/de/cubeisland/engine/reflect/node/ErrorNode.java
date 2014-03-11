@@ -22,15 +22,29 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * An Error Node.
+ * <p>ErrorNodes indicate that something went wrong when converting
+ */
 public class ErrorNode extends Node<Void>
 {
     private final String message;
 
+    /**
+     * Creates an ErrorNode with a Message
+     *
+     * @param message the message
+     */
     public ErrorNode(String message)
     {
         this.message = message;
     }
 
+    /**
+     * Returns the ErrorMessage of the Node
+     *
+     * @return the errorMessage
+     */
     public String getErrorMessage()
     {
         return message;

@@ -189,8 +189,6 @@ public abstract class ParentNode<V> extends Node<V>
      */
     public abstract boolean isEmpty();
 
-    public abstract boolean removeNode(Node node);
-
     @Override
     public String asText()
     {

@@ -243,7 +243,7 @@ public class YamlCodec extends Codec
     {
         writer.append(LINE_BREAK);
         boolean endOfMapOrList = false;
-        for (Node listedNode : value.getListedNodes()) //Convert Collection
+        for (Node listedNode : value.getValue()) //Convert Collection
         {
             if (endOfMapOrList)
             {

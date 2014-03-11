@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Long Node
+ */
 public class LongNode extends KeyNode<Long>
 {
     private long value;
 
+    /**
+     * Creates a LongNode
+     *
+     * @param value a long
+     */
     public LongNode(long value)
     {
         this.value = value;

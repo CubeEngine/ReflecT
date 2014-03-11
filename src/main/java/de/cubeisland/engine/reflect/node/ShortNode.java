@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Short Node
+ */
 public class ShortNode extends KeyNode<Short>
 {
     private short value;
 
+    /**
+     * Creates a ShortNode
+     *
+     * @param value a short
+     */
     public ShortNode(short value)
     {
         this.value = value;

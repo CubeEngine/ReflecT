@@ -32,8 +32,7 @@ import java.util.Map;
 public abstract class Node<V>
 {
     private ParentNode parentNode;
-
-    private String[] comments;
+    private String[] comments = null;
 
     /**
      * Gets the ParentNode
@@ -83,14 +82,24 @@ public abstract class Node<V>
      */
     public abstract V getValue();
 
+    /**
+     * Gets the comments of this node
+     *
+     * @return the comments or null
+     */
     public String[] getComments()
     {
         return this.comments == null ? null : this.comments.clone();
     }
 
+    /**
+     * Sets the comments of this node
+     *
+     * @param comments the comments to set
+     */
     public void setComments(String[] comments)
     {
-        this.comments = comments.clone();
+        this.comments = comments == null ? null : comments.clone();
     }
 
     public abstract String toString();

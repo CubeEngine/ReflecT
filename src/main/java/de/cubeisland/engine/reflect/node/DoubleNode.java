@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Double Node
+ */
 public class DoubleNode extends KeyNode<Double>
 {
     private double value;
 
+    /**
+     * Creates a DoubleNode
+     *
+     * @param value a double
+     */
     public DoubleNode(double value)
     {
         this.value = value;

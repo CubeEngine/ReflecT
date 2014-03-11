@@ -29,6 +29,11 @@ package de.cubeisland.engine.reflect.node;
  */
 public abstract class KeyNode<V> extends Node<V>
 {
+    /**
+     * Converts the value of the node into a String to use as key
+     *
+     * @return the key
+     */
     public String toKey()
     {
         return String.valueOf(this.getValue());

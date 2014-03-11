@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Float Node
+ */
 public class FloatNode extends KeyNode<Float>
 {
     private float value;
 
+    /**
+     * Creates A FloatNode
+     *
+     * @param value a float
+     */
     public FloatNode(float value)
     {
         this.value = value;

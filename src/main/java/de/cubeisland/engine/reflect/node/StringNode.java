@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A String Node
+ */
 public class StringNode extends KeyNode<String>
 {
     private String value;
 
+    /**
+     * Creates a StringNode
+     *
+     * @param string a string
+     */
     public StringNode(String string)
     {
         this.value = string;
@@ -37,17 +45,18 @@ public class StringNode extends KeyNode<String>
         return value;
     }
 
-    public void setValue(String string)
-    {
-        this.value = string;
-    }
-
     @Override
     public String asText()
     {
         return value;
     }
 
+    /**
+     * Creates a StringNode of given String
+     *
+     * @param string the string
+     * @return the StringNode
+     */
     public static StringNode of(String string)
     {
         return new StringNode(string);

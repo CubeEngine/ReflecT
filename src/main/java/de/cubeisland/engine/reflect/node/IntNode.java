@@ -22,10 +22,18 @@
  */
 package de.cubeisland.engine.reflect.node;
 
+/**
+ * A Integer Node
+ */
 public class IntNode extends KeyNode<Integer>
 {
     private int value;
 
+    /**
+     * Creates an IntNode
+     *
+     * @param value a integer
+     */
     public IntNode(int value)
     {
         this.value = value;
