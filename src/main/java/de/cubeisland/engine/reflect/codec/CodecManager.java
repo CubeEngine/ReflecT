@@ -36,7 +36,7 @@ public class CodecManager
      * Gets the instance of given <code>codecClass</code>
      *
      * @param codecClass the class of the codec
-     * @param <C>    the type of the returned codec
+     * @param <C>        the type of the returned codec
      *
      * @return the codec instance
      */

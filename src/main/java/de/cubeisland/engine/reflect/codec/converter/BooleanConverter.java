@@ -50,7 +50,6 @@ public class BooleanConverter extends BasicConverter<Boolean>
         {
             return false;
         }
-
         throw ConversionException.of(this, node, "Node incompatible with Boolean!");
     }
 }

@@ -55,6 +55,7 @@ public class StringNode extends KeyNode<String>
      * Creates a StringNode of given String
      *
      * @param string the string
+     *
      * @return the StringNode
      */
     public static StringNode of(String string)

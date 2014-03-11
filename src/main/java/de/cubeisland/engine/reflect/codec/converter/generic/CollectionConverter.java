@@ -107,13 +107,9 @@ public class CollectionConverter
                         result = (S)new HashSet();
                     }
                 }
-                else if (List.class.isAssignableFrom(collectionType))
+                else// if (List.class.isAssignableFrom(collectionType)) // or other collection
                 {
                     result = (S)new LinkedList();
-                }
-                else
-                {
-                    result = (S)new LinkedList(); // other collection
                 }
             }
             else

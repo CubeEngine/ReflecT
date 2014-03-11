@@ -99,7 +99,7 @@ public abstract class Codec
      * <p>if the reflected object has no default set it will be saved normally!
      *
      * @param reflected the Reflected to load
-     * @param is     the InputStream to load from
+     * @param is        the InputStream to load from
      *
      * @return a collection of all erroneous Nodes
      */
@@ -135,7 +135,7 @@ public abstract class Codec
      * Saves the <code>Reflected</code> using given <code>OutputStream</code>
      *
      * @param reflected the Reflected to save
-     * @param os     the OutputStream to save into
+     * @param os        the OutputStream to save into
      */
     public final void saveReflected(Reflected reflected, OutputStream os)
     {
@@ -176,8 +176,8 @@ public abstract class Codec
     /**
      * Saves the values contained in the <code>MapNode</code> using given <code>OutputStream</code>
      *
-     * @param node   the Node containing all data to save
-     * @param os     the File to save into
+     * @param node      the Node containing all data to save
+     * @param os        the File to save into
      * @param reflected the reflected
      */
     protected abstract void save(MapNode node, OutputStream os, Reflected reflected) throws ConversionException;
@@ -185,7 +185,7 @@ public abstract class Codec
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
      *
-     * @param is     the InputStream to load from
+     * @param is        the InputStream to load from
      * @param reflected the reflected
      */
     protected abstract MapNode load(InputStream is, Reflected reflected) throws ConversionException;
@@ -198,7 +198,7 @@ public abstract class Codec
      * @param defaultSection the parent reflected-section
      * @param section        the reflected-section
      * @param currentNode    the Node to load from
-     * @param reflected         the MultiReflected containing this section
+     * @param reflected      the MultiReflected containing this section
      *
      * @return a collection of all erroneous Nodes
      */
@@ -293,7 +293,7 @@ public abstract class Codec
      * @param section        the reflected-section
      * @param field          the Field to load into
      * @param fieldNode      the Node to load from
-     * @param reflected         the MultiReflected containing this section
+     * @param reflected      the MultiReflected containing this section
      *
      * @return a collection of all erroneous Nodes
      */
@@ -373,7 +373,8 @@ public abstract class Codec
             }
             else if (entry.getValue() instanceof MapNode)
             {
-                errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), reflected));
+                errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry
+                    .getValue(), reflected));
             }
             else
             {

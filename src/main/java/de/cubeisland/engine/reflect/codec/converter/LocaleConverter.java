@@ -34,7 +34,7 @@ public class LocaleConverter implements Converter<Locale>
     public Node toNode(Locale locale, ConverterManager manager) throws ConversionException
     {
         return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
-                             locale.getCountry().toUpperCase(Locale.ENGLISH));
+                                 locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
     public Locale fromNode(Node node, ConverterManager manager) throws ConversionException

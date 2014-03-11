@@ -35,7 +35,6 @@ public interface Converter<T extends Object>
      * Converts the object into a serializable Node
      *
      * @param object the object to convert
-     * @param manager
      *
      * @return the converted object
      */
@@ -45,7 +44,6 @@ public interface Converter<T extends Object>
      * Converts the node back into the original object
      *
      * @param node the node to convert
-     * @param manager
      *
      * @return the converted node
      */

@@ -187,7 +187,7 @@ public final class ConverterManager
         {
             return (Converter<T>)converter;
         }
-        if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass)
+        if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass) || Map.class.isAssignableFrom(objectClass))
          || Map.class.isAssignableFrom(objectClass))
         {
             return null;
@@ -286,11 +286,8 @@ public final class ConverterManager
                     throw ConversionException.of(arrayConverter, node, "Cannot convert to Array! Node is not a ListNode!");
                 }
             }
-            else
-            {
-                Converter<T> converter = matchConverter((Class<T>)type);
-                return converter.fromNode(node, this);
-            }
+            Converter<T> converter = matchConverter((Class<T>)type);
+            return converter.fromNode(node, this);
         }
         else if (type instanceof ParameterizedType)
         {
@@ -301,18 +298,18 @@ public final class ConverterManager
                 {
                     if (node instanceof ListNode)
                     {
-                        return (T)collectionConverter.<Object, Collection<Object>>fromNode(ptype, (ListNode)node, this);
+                        return (T)collectionConverter.fromNode(ptype, (ListNode)node, this);
                     }
                     else
                     {
                         throw ConversionException.of(collectionConverter, node, "Cannot convert to Collection! Node is not a ListNode!");
                     }
                 }
-                else if (Map.class.isAssignableFrom((Class)ptype.getRawType()))
+                if (Map.class.isAssignableFrom((Class)ptype.getRawType()))
                 {
                     if (node instanceof MapNode)
                     {
-                        return (T)mapConverter.<Object, Object, Map<Object, Object>>fromNode(ptype, (MapNode)node, this);
+                        return (T)mapConverter.fromNode(ptype, (MapNode)node, this);
                     }
                     else
                     {

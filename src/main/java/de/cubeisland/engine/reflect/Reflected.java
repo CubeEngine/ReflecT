@@ -94,7 +94,6 @@ public abstract class Reflected<C extends Codec> implements Section
     /**
      * Returns true if ConversionExceptions should be rethrown immediately
      * <p>this does not affect ConversionException thrown when converting fields into nodes
-     *
      * <p>override to change
      *
      * @return whether to rethrow ConversionExceptions or log them instead
@@ -477,8 +476,7 @@ public abstract class Reflected<C extends Codec> implements Section
                 {
                     Object value = field.get(section);
                     Object defaultValue = field.get(defaultSection);
-                    if ((value == null && defaultValue == null)
-                     || (value != null && defaultValue != null && value.equals(defaultValue)))
+                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
                     {
                         this.addInheritedField(field);
                         continue;

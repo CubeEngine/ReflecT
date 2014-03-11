@@ -90,7 +90,7 @@ public class TestReflected extends Reflected<TestCodec>
     public class CollectionsStuff implements Section
     {
         public String[] stringArray = {
-                "text1", "text2", "text3"
+            "text1", "text2", "text3"
         };
 
         public LinkedList<String> stringList = new LinkedList<String>()

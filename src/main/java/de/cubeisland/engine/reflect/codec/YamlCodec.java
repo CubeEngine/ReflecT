@@ -335,10 +335,10 @@ public class YamlCodec extends Codec
     private boolean needsQuote(String s)
     {
         return (s.startsWith("#") || s.contains(" #") || s.startsWith("@") || s.startsWith("`")
-             || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|")
-             || s.startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.contains(": ")
-             || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+"))
-             || isEmpty(s) || "*".equals(s)
+             || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}")
+             || s.startsWith("|") || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
+             || s.endsWith(":") || s.contains(": ") || s.startsWith("- ") || s.startsWith(",")
+             || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || "*".equals(s)
              || s.matches("[0][0-9]+");
     }
 }

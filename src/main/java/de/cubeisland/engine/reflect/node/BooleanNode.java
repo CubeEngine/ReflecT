@@ -75,6 +75,7 @@ public class BooleanNode extends Node<Boolean>
      * Creates a BooleanNode
      *
      * @param bool a boolean
+     *
      * @return the BooleanNode
      */
     public static BooleanNode of(boolean bool)

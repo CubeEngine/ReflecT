@@ -119,7 +119,7 @@ public abstract class Node<V>
         }
         if (o instanceof Map)
         {
-            return new MapNode((Map<?,?>)o);
+            return new MapNode((Map<?, ?>)o);
         }
         if (o instanceof Collection)
         {

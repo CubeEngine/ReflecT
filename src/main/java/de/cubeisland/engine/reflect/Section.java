@@ -24,7 +24,6 @@ package de.cubeisland.engine.reflect;
 
 /**
  * A Section containing fields to serialize
- *
  * <p>The elements in the section may be unsorted and in no particular order, this is depending on the
  * implementation used for reflection when getting the fields
  */
