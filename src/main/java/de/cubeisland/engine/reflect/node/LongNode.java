@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class LongNode extends Node<Long>
+public class LongNode extends KeyNode<Long>
 {
     private long value;
 

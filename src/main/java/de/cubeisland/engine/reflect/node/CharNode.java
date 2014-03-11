@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class CharNode extends Node<Character>
+public class CharNode extends KeyNode<Character>
 {
     private char value;
 

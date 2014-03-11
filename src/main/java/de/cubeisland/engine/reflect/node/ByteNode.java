@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class ByteNode extends Node<Byte>
+public class ByteNode extends KeyNode<Byte>
 {
     private byte value;
 

@@ -39,7 +39,7 @@ public interface Converter<T extends Object>
      *
      * @return the converted object
      */
-    public Node toNode(T object, ConverterManager manager) throws ConversionException;
+    Node toNode(T object, ConverterManager manager) throws ConversionException;
 
     /**
      * Converts the node back into the original object
@@ -49,5 +49,5 @@ public interface Converter<T extends Object>
      *
      * @return the converted node
      */
-    public T fromNode(Node node, ConverterManager manager) throws ConversionException;
+    T fromNode(Node node, ConverterManager manager) throws ConversionException;
 }

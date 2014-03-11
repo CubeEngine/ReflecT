@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class IntNode extends Node<Integer>
+public class IntNode extends KeyNode<Integer>
 {
     private int value;
 

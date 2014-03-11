@@ -115,9 +115,9 @@ public class MapNode extends ParentNode<Map<String, Node>>
         return node;
     }
 
-    public Node setNode(StringNode keyNode, Node node)
+    public Node setNode(KeyNode keyNode, Node node)
     {
-        return this.setExactNode(keyNode.getValue(), node);
+        return this.setExactNode(keyNode.toKey(), node);
     }
 
     public String getOriginalKey(String lowerCasedKey)

@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class ShortNode extends Node<Short>
+public class ShortNode extends KeyNode<Short>
 {
     private short value;
 

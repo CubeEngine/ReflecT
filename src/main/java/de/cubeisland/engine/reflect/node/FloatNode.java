@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class FloatNode extends Node<Float>
+public class FloatNode extends KeyNode<Float>
 {
     private float value;
 

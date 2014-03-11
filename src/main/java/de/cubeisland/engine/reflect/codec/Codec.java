@@ -50,6 +50,7 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.exception.FieldAccessException;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.UnsupportedReflectedException;
+import de.cubeisland.engine.reflect.node.KeyNode;
 import de.cubeisland.engine.reflect.node.ReflectedPath;
 import de.cubeisland.engine.reflect.node.ErrorNode;
 import de.cubeisland.engine.reflect.node.ListNode;
@@ -552,12 +553,12 @@ public abstract class Codec
             for (Map.Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
             {
                 Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
-                if (keyNode instanceof StringNode)
+                if (keyNode instanceof KeyNode)
                 {
                     MapNode mapNode = convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), reflected);
-                    ((MapNode)node).setNode((StringNode)keyNode, mapNode);
+                    ((MapNode)node).setNode((KeyNode)keyNode, mapNode);
                 }
-                else // TODO allow Numbers
+                else
                 {
                     throw new UnsupportedReflectedException("Key-Node is not supported for mapped Sections: " + keyNode);
                 }

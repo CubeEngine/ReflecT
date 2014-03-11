@@ -22,7 +22,7 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-public class DoubleNode extends Node<Double>
+public class DoubleNode extends KeyNode<Double>
 {
     private double value;
 
