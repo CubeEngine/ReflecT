@@ -41,13 +41,13 @@ public class BooleanConverter extends BasicConverter<Boolean>
         {
             return null;
         }
-        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("on")
-            || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("1"))
+        if ("true".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)
+            || "yes".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s))
         {
             return true;
         }
-        if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("off")
-            || s.equalsIgnoreCase("no") || s.equalsIgnoreCase("0"))
+        if ("false".equalsIgnoreCase(s) || "off".equalsIgnoreCase(s)
+            || "no".equalsIgnoreCase(s) || "0".equalsIgnoreCase(s))
         {
             return false;
         }

@@ -44,8 +44,8 @@ public class ReflectedPath
     {
         if (name.contains("."))
         {
-            this.basePath = name.substring(0, name.indexOf("."));
-            this.subPath = new ReflectedPath(name.substring(name.indexOf(".") + 1));
+            this.basePath = name.substring(0, name.indexOf('.'));
+            this.subPath = new ReflectedPath(name.substring(name.indexOf('.') + 1));
         }
         else
         {

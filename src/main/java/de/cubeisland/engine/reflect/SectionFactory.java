@@ -32,6 +32,8 @@ import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
  */
 public class SectionFactory
 {
+    private SectionFactory() {}
+
     /**
      * Returns true if the {@link Section} class <code>isAssignableFrom</code> the given class
      *

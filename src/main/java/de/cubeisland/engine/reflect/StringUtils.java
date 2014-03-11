@@ -24,6 +24,7 @@ package de.cubeisland.engine.reflect;
 
 public class StringUtils
 {
+    private StringUtils() {}
 
     /**
      * This method merges an array of strings to a single string

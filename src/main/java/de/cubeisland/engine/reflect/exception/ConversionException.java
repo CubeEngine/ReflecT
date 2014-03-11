@@ -29,22 +29,22 @@ public class ConversionException extends Exception
 {
     public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
     {
-        message += "\nConverter: " + converter.getClass().getName();
+        String msg = message + "\nConverter: " + converter.getClass().getName();
         if (toConvert != null)
         {
-            message += "\nConverting: " + toConvert.toString();
+            msg += "\nConverting: " + toConvert.toString();
         }
-        return new ConversionException(message, cause);
+        return new ConversionException(msg, cause);
     }
 
     public static ConversionException of(Object converter, Object toConvert, String message)
     {
-        message += "\nConverter: " + converter.getClass().getName();
+        String msg = message + "\nConverter: " + converter.getClass().getName();
         if (toConvert != null)
         {
-            message += "\nConverting: " + toConvert.toString();
+            msg += "\nConverting: " + toConvert.toString();
         }
-        return new ConversionException(message);
+        return new ConversionException(msg);
     }
 
     private ConversionException(String message)

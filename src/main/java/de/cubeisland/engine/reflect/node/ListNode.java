@@ -31,7 +31,7 @@ import static de.cubeisland.engine.reflect.node.ReflectedPath.LIST;
 
 public class ListNode extends ParentNode
 {
-    private ArrayList<Node> listedNodes = new ArrayList<Node>();
+    private List<Node> listedNodes = new ArrayList<Node>();
 
     public ListNode(Iterable list)
     {
@@ -63,7 +63,7 @@ public class ListNode extends ParentNode
     {
     }
 
-    public ArrayList<Node> getListedNodes()
+    public List<Node> getListedNodes()
     {
         return listedNodes;
     }
@@ -204,19 +204,20 @@ public class ListNode extends ParentNode
         {
             throw new IllegalArgumentException("Parented Node not in list!");
         }
+        ReflectedPath result;
         if (path == null)
         {
-            path = ReflectedPath.forName(LIST + pos);
+            result = ReflectedPath.forName(LIST + pos);
         }
         else
         {
-            path = path.asSubPath(LIST + pos);
+            result = path.asSubPath(LIST + pos);
         }
         if (this.getParentNode() != null)
         {
-            return this.getParentNode().getPathOfSubNode(this, path);
+            return this.getParentNode().getPathOfSubNode(this, result);
         }
-        return path;
+        return result;
     }
 
     @Override

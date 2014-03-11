@@ -85,12 +85,12 @@ public abstract class Node<V>
 
     public String[] getComments()
     {
-        return this.comments;
+        return this.comments == null ? null : this.comments.clone();
     }
 
     public void setComments(String[] comments)
     {
-        this.comments = comments;
+        this.comments = comments.clone();
     }
 
     public abstract String toString();
@@ -102,7 +102,7 @@ public abstract class Node<V>
      *
      * @return the wrapped object
      */
-    public static final Node wrapIntoNode(Object o)
+    public static Node wrapIntoNode(Object o)
     {
         if (o == null)
         {
@@ -110,11 +110,11 @@ public abstract class Node<V>
         }
         if (o instanceof Map)
         {
-            return new MapNode((Map)o);
+            return new MapNode((Map<?,?>)o);
         }
         if (o instanceof Collection)
         {
-            return new ListNode((List)o);
+            return new ListNode((List<?>)o);
         }
         if (o.getClass().isArray())
         {

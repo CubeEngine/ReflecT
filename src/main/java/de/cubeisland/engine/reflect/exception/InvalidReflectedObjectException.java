@@ -44,9 +44,9 @@ public class InvalidReflectedObjectException extends RuntimeException
         super(msg, t);
     }
 
-    public static InvalidReflectedObjectException of(String msg, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
     {
-        msg += "\nField: " + field.getName();
+        String msg = message + "\nField: " + field.getName();
         msg += "\nSection: " + clazz.toString();
         msg += "\nPath: " + path;
         if (t == null)

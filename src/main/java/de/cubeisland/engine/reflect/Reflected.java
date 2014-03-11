@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +60,7 @@ public abstract class Reflected<C extends Codec> implements Section
     /**
      * Saves the fields that got inherited from the parent-reflected
      */
-    private transient HashSet<Field> inheritedFields;
+    private transient Set<Field> inheritedFields;
 
     public final void init(Reflector factory)
     {
@@ -392,31 +393,41 @@ public abstract class Reflected<C extends Codec> implements Section
      * This method gets called right after the reflected got loaded.
      */
     public void onLoaded(File loadedFrom)
-    {}
+    {
+        // implement onLoaded
+    }
 
     /**
      * This method gets called right after the reflected get saved.
      */
     public void onSaved(File savedTo)
-    {}
+    {
+        // implement onSaved
+    }
 
     /**
      * Gets called after {@link #init(Reflector)} was called
      */
     public void onInit()
-    {}
+    {
+        // implement onInit
+    }
 
     /**
      * Gets called right before saving
      */
     public void onSave()
-    {}
+    {
+        // implement onSave
+    }
 
     /**
      * Gets called right before loading
      */
     public void onLoad()
-    {}
+    {
+        // implement onLoad
+    }
 
     /**
      * Returns the lines to be added in front of the Reflected.
@@ -494,6 +505,8 @@ public abstract class Reflected<C extends Codec> implements Section
                             }
                         }
                         break;
+                    default:
+                        throw new IllegalArgumentException("Illegal FieldType");
                     }
                 }
             }

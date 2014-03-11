@@ -22,16 +22,20 @@
  */
 package de.cubeisland.engine.reflect.node;
 
-import de.cubeisland.engine.reflect.StringUtils;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import de.cubeisland.engine.reflect.StringUtils;
 
 public class MapNode extends ParentNode<Map<String, Node>>
 {
-    private LinkedHashMap<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
-    private HashMap<String, String> keys = new HashMap<String, String>(); // LowerCase trimmed -> Original
-    private LinkedHashMap<Node, String> reverseMappedNodes = new LinkedHashMap<Node, String>();
+    private Map<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
+    private Map<String, String> keys = new HashMap<String, String>(); // LowerCase trimmed -> Original
+    private Map<Node, String> reverseMappedNodes = new LinkedHashMap<Node, String>();
 
     /**
      * Creates a MapNode with given map as values.
@@ -85,7 +89,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    public Node setExactNode(String key, Node node)
+    public final Node setExactNode(String key, Node node)
     {
         String loweredKey = key.trim().toLowerCase();
         if (StringUtils.isEmpty(loweredKey))
@@ -99,7 +103,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    protected Node removeExactNode(String key)
+    protected final Node removeExactNode(String key)
     {
         Node node = this.mappedNodes.remove(key);
         if (node instanceof NullNode)
@@ -121,7 +125,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
         return this.keys.get(lowerCasedKey);
     }
 
-    public LinkedHashMap<String, Node> getMappedNodes()
+    public Map<String, Node> getMappedNodes()
     {
         return mappedNodes;
     }
@@ -146,19 +150,20 @@ public class MapNode extends ParentNode<Map<String, Node>>
         {
             throw new IllegalArgumentException("Parented Node not in map!");
         }
+        ReflectedPath result;
         if (path == null)
         {
-            path = ReflectedPath.forName(key);
+            result = ReflectedPath.forName(key);
         }
         else
         {
-            path = path.asSubPath(key);
+            result = path.asSubPath(key);
         }
         if (this.getParentNode() != null)
         {
-            return this.getParentNode().getPathOfSubNode(this, path);
+            return this.getParentNode().getPathOfSubNode(this, result);
         }
-        return path;
+        return result;
     }
 
     @Override

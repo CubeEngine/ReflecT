@@ -36,14 +36,14 @@ public class CodecManager
      * Gets the instance of given <code>codecClass</code>
      *
      * @param codecClass the class of the codec
-     * @param <Codec>    the type of the returned codec
+     * @param <C>    the type of the returned codec
      *
      * @return the codec instance
      */
     @SuppressWarnings("unchecked")
-    public <Codec extends de.cubeisland.engine.reflect.codec.Codec> Codec getCodec(Class<Codec> codecClass)
+    public <C extends Codec> C getCodec(Class<C> codecClass)
     {
-        Codec codec = (Codec)this.codecs.get(codecClass);
+        C codec = (C)this.codecs.get(codecClass);
         if (codec == null) // Codec not registered yet! Try to auto-register...
         {
             try
@@ -68,7 +68,7 @@ public class CodecManager
      *
      * @param codec the codec to register
      */
-    public <Codec extends de.cubeisland.engine.reflect.codec.Codec> void registerCodec(Codec codec)
+    public <C extends Codec> void registerCodec(C codec)
     {
         this.codecs.put(codec.getClass(), codec);
         codec.setConverterManager(ConverterManager.emptyManager(this.defaultManager));

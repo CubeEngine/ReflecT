@@ -87,20 +87,26 @@ public final class ConverterManager
 
     private void registerDefaultConverters()
     {
-        Converter<?> converter;
-        this.registerConverter(Integer.class, converter = new IntegerConverter());
+        Converter<?> converter = new IntegerConverter();
+        this.registerConverter(Integer.class, converter);
         this.registerConverter(int.class, converter);
-        this.registerConverter(Short.class, converter = new ShortConverter());
+        converter = new ShortConverter();
+        this.registerConverter(Short.class, converter);
         this.registerConverter(short.class, converter);
-        this.registerConverter(Byte.class, converter = new ByteConverter());
+        converter = new ByteConverter();
+        this.registerConverter(Byte.class, converter);
         this.registerConverter(byte.class, converter);
-        this.registerConverter(Double.class, converter = new DoubleConverter());
+        converter = new DoubleConverter();
+        this.registerConverter(Double.class, converter);
         this.registerConverter(double.class, converter);
-        this.registerConverter(Float.class, converter = new FloatConverter());
+        converter = new FloatConverter();
+        this.registerConverter(Float.class, converter);
         this.registerConverter(float.class, converter);
-        this.registerConverter(Long.class, converter = new LongConverter());
+        converter = new LongConverter();
+        this.registerConverter(Long.class, converter);
         this.registerConverter(long.class, converter);
-        this.registerConverter(Boolean.class, converter = new BooleanConverter());
+        converter = new BooleanConverter();
+        this.registerConverter(Boolean.class, converter);
         this.registerConverter(boolean.class, converter);
         this.registerConverter(String.class, new StringConverter());
         this.registerConverter(Date.class, new DateConverter());

@@ -207,7 +207,7 @@ public class YamlCodec extends Codec
                 else
                 {
                     writer.append(LINE_BREAK);
-                    convertMapNode(writer, ((MapNode)entry.getValue()), offset + 1, false);
+                    convertMapNode(writer, (MapNode)entry.getValue(), offset + 1, false);
                 }
                 endOfMapOrList = true;
             }
@@ -338,7 +338,7 @@ public class YamlCodec extends Codec
              || s.startsWith("[") || s.startsWith("]") || s.startsWith("{") || s.startsWith("}") || s.startsWith("|")
              || s.startsWith(">") || s.startsWith("!") || s.startsWith("%") || s.endsWith(":") || s.contains(": ")
              || s.startsWith("- ") || s.startsWith(",") || s.contains("&") || s.matches("[0-9]+:[0-9]+"))
-             || isEmpty(s) || s.equals("*")
+             || isEmpty(s) || "*".equals(s)
              || s.matches("[0][0-9]+");
     }
 }

@@ -203,11 +203,8 @@ public abstract class Codec
      */
     private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected reflected)
     {
-        if (defaultSection == null) // Special case for Section in Maps
-        {
-            defaultSection = section;
-        }
-        if (!defaultSection.getClass().equals(section.getClass()))
+        Section dSection = defaultSection == null ? section : defaultSection;
+        if (!dSection.getClass().equals(section.getClass()))
         {
             throw new IllegalArgumentException("defaultSection and section have to be the same type of section!");
         }
@@ -227,15 +224,15 @@ public abstract class Codec
                     {
                         if (fieldNode instanceof NullNode)
                         {
-                            errorNodes.addAll(dumpDefaultIntoField(defaultSection, section, field, reflected));
-                            if (section != defaultSection)
+                            errorNodes.addAll(dumpDefaultIntoField(dSection, section, field, reflected));
+                            if (section != dSection)
                             {
                                 reflected.addInheritedField(field);
                             }
                         }
                         else
                         {
-                            errorNodes.addAll(dumpIntoField(defaultSection, section, field, fieldNode, reflected));
+                            errorNodes.addAll(dumpIntoField(dSection, section, field, fieldNode, reflected));
                         }
                     }
                     catch (InvalidReflectedObjectException e) // rethrow
@@ -281,12 +278,9 @@ public abstract class Codec
     @SuppressWarnings("unchecked")
     private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Reflected reflected) throws ConversionException, IllegalAccessException
     {
-        if (parentSection != section)
+        if (parentSection != section && getFieldType(field) == FieldType.SECTION_COLLECTION)
         {
-            if (getFieldType(field) == FieldType.SECTION_COLLECTION)
-            {
-                throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
-            }
+            throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
         }
         return dumpIntoField(parentSection, section, field, convertField(field, parentSection, parentSection, reflected), reflected); // convert parent in node and dump back in
     }
@@ -385,10 +379,7 @@ public abstract class Codec
                 fieldValue = MapConverter.getMapFor((ParameterizedType)type);
                 if (((MapNode)fieldNode).isEmpty())
                 {
-                    if (((MapNode)fieldNode).isEmpty())
-                    {
-                        break;
-                    }
+                   break;
                 }
                 Map<Object, Section> mappedParentSections = (Map<Object, Section>)field.get(defaultSection);
                 Class<? extends Section> subSectionClass = (Class<? extends Section>)((ParameterizedType)type).getActualTypeArguments()[1];
@@ -417,6 +408,7 @@ public abstract class Codec
             {
                 throw ConversionException.of(this, fieldNode, "Node for mapped Sections is not a MapNode!");
             }
+            break;
         default:
             throw new IllegalArgumentException("Invalid FieldType!");
         }
@@ -570,6 +562,7 @@ public abstract class Codec
                     throw new UnsupportedReflectedException("Key-Node is not supported for mapped Sections: " + keyNode);
                 }
             }
+            break;
         default:
             throw new IllegalArgumentException("Invalid FieldType!");
         }
