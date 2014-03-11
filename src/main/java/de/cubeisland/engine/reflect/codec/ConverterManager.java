@@ -188,7 +188,6 @@ public final class ConverterManager
             return (Converter<T>)converter;
         }
         if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass) || Map.class.isAssignableFrom(objectClass))
-         || Map.class.isAssignableFrom(objectClass))
         {
             return null;
         }
