@@ -25,12 +25,12 @@ package de.cubeisland.engine.reflect.codec;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.cubeisland.engine.reflect.exception.ConfigInstantiationException;
+import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
 public class CodecManager
 {
     private final ConverterManager defaultManager = ConverterManager.defaultManager();
-    private final Map<Class<? extends ConfigurationCodec>, ConfigurationCodec> codecs = new HashMap<Class<? extends ConfigurationCodec>, ConfigurationCodec>();
+    private final Map<Class<? extends Codec>, Codec> codecs = new HashMap<Class<? extends Codec>, Codec>();
 
     /**
      * Gets the instance of given <code>codecClass</code>
@@ -41,7 +41,7 @@ public class CodecManager
      * @return the codec instance
      */
     @SuppressWarnings("unchecked")
-    public <Codec extends ConfigurationCodec> Codec getCodec(Class<Codec> codecClass)
+    public <Codec extends de.cubeisland.engine.reflect.codec.Codec> Codec getCodec(Class<Codec> codecClass)
     {
         Codec codec = (Codec)this.codecs.get(codecClass);
         if (codec == null) // Codec not registered yet! Try to auto-register...
@@ -53,11 +53,11 @@ public class CodecManager
             }
             catch (InstantiationException e)
             {
-                throw new ConfigInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
+                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
             }
             catch (IllegalAccessException e)
             {
-                throw new ConfigInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
+                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
             }
         }
         return codec;
@@ -68,7 +68,7 @@ public class CodecManager
      *
      * @param codec the codec to register
      */
-    public <Codec extends ConfigurationCodec> void registerCodec(Codec codec)
+    public <Codec extends de.cubeisland.engine.reflect.codec.Codec> void registerCodec(Codec codec)
     {
         this.codecs.put(codec.getClass(), codec);
         codec.setConverterManager(ConverterManager.emptyManager(this.defaultManager));

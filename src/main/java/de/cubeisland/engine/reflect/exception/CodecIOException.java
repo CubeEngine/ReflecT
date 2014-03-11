@@ -23,10 +23,10 @@
 package de.cubeisland.engine.reflect.exception;
 
 /**
- * This exception is only thrown if {@link de.cubeisland.engine.reflect.Configuration#useStrictExceptionPolicy()} is true
+ * This exception is only thrown if {@link de.cubeisland.engine.reflect.Reflected#useStrictExceptionPolicy()} is true
  * <p>when loading from an InputStream or saving into an OutputStream caused a ConversionException
  */
-public class CodecIOException extends InvalidConfigurationException
+public class CodecIOException extends InvalidReflectedObjectException
 {
     public CodecIOException(String s, ConversionException ex)
     {

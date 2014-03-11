@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import de.cubeisland.engine.reflect.Configuration;
+import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.FieldType;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.SectionFactory;
@@ -48,7 +48,7 @@ import de.cubeisland.engine.reflect.convert.converter.generic.MapConverter;
 import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.exception.FieldAccessException;
-import de.cubeisland.engine.reflect.exception.InvalidConfigurationException;
+import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.UnsupportedConfigurationException;
 import de.cubeisland.engine.reflect.node.ConfigPath;
 import de.cubeisland.engine.reflect.node.ErrorNode;
@@ -63,7 +63,7 @@ import static de.cubeisland.engine.reflect.FieldType.*;
 /**
  * This abstract Codec can be implemented to read and write configurations that allow child-configs
  */
-public abstract class ConfigurationCodec
+public abstract class Codec
 {
     private ConverterManager converterManager = null;
 
@@ -102,7 +102,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    public final Collection<ErrorNode> loadConfig(Configuration config, InputStream is)
+    public final Collection<ErrorNode> loadConfig(Reflected config, InputStream is)
     {
         try
         {
@@ -136,7 +136,7 @@ public abstract class ConfigurationCodec
      * @param config the Configuration to save
      * @param os     the OutputStream to save into
      */
-    public final void saveConfig(Configuration config, OutputStream os)
+    public final void saveConfig(Reflected config, OutputStream os)
     {
         try
         {
@@ -179,7 +179,7 @@ public abstract class ConfigurationCodec
      * @param os     the File to save into
      * @param config the Configuration
      */
-    protected abstract void save(MapNode node, OutputStream os, Configuration config) throws ConversionException;
+    protected abstract void save(MapNode node, OutputStream os, Reflected config) throws ConversionException;
 
     /**
      * Converts the <code>InputStream</code> into a <code>MapNode</code>
@@ -187,7 +187,7 @@ public abstract class ConfigurationCodec
      * @param is     the InputStream to load from
      * @param config the Configuration
      */
-    protected abstract MapNode load(InputStream is, Configuration config) throws ConversionException;
+    protected abstract MapNode load(InputStream is, Reflected config) throws ConversionException;
 
     // Configuration loading Methods
 
@@ -201,7 +201,7 @@ public abstract class ConfigurationCodec
      *
      * @return a collection of all erroneous Nodes
      */
-    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Configuration config)
+    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected config)
     {
         if (defaultSection == null) // Special case for Section in Maps
         {
@@ -238,7 +238,7 @@ public abstract class ConfigurationCodec
                             errorNodes.addAll(dumpIntoField(defaultSection, section, field, fieldNode, config));
                         }
                     }
-                    catch (InvalidConfigurationException e) // rethrow
+                    catch (InvalidReflectedObjectException e) // rethrow
                     {
                         throw e;
                     }
@@ -248,7 +248,9 @@ public abstract class ConfigurationCodec
                     }
                     catch (ConversionException e) // non-fatal ConversionException
                     {
-                        InvalidConfigurationException ex = InvalidConfigurationException.of("Error while converting Node to dump into field!", getPathFor(field), section.getClass(), field, e);
+                        InvalidReflectedObjectException ex = InvalidReflectedObjectException
+                            .of("Error while converting Node to dump into field!", getPathFor(field), section
+                                .getClass(), field, e);
                         if (config.useStrictExceptionPolicy())
                         {
                             throw ex;
@@ -257,7 +259,9 @@ public abstract class ConfigurationCodec
                     }
                     catch (RuntimeException e)
                     {
-                        throw InvalidConfigurationException.of("Unknown Error while dumping loaded config into fields", getPathFor(field), section.getClass(), field, e);
+                        throw InvalidReflectedObjectException
+                            .of("Unknown Error while dumping loaded config into fields", getPathFor(field), section
+                                .getClass(), field, e);
                     }
                 }
             }
@@ -275,7 +279,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Configuration config) throws ConversionException, IllegalAccessException
+    private Collection<ErrorNode> dumpDefaultIntoField(Section parentSection, Section section, Field field, Reflected config) throws ConversionException, IllegalAccessException
     {
         if (parentSection != section)
         {
@@ -299,7 +303,7 @@ public abstract class ConfigurationCodec
      * @return a collection of all erroneous Nodes
      */
     @SuppressWarnings("unchecked")
-    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Configuration config) throws ConversionException, IllegalAccessException
+    private Collection<ErrorNode> dumpIntoField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected config) throws ConversionException, IllegalAccessException
     {
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         Type type = field.getGenericType();
@@ -426,7 +430,7 @@ public abstract class ConfigurationCodec
      * @param defaultSection the parent config
      * @param section        the config
      */
-    final MapNode convertSection(Section defaultSection, Section section, Configuration config) // this is only package private as it is used for testing
+    final MapNode convertSection(Section defaultSection, Section section, Reflected config) // this is only package private as it is used for testing
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
@@ -461,7 +465,7 @@ public abstract class ConfigurationCodec
                         baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, config));
                     }
                 }
-                catch (InvalidConfigurationException e) // rethrow
+                catch (InvalidReflectedObjectException e) // rethrow
                 {
                     throw e;
                 }
@@ -471,11 +475,13 @@ public abstract class ConfigurationCodec
                 }
                 catch (ConversionException e) // fatal ConversionException
                 {
-                    throw InvalidConfigurationException.of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
+                    throw InvalidReflectedObjectException
+                        .of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
                 }
                 catch (RuntimeException e)
                 {
-                    throw InvalidConfigurationException.of("Unknown Error while converting Section!", getPathFor(field), section.getClass(), field, e);
+                    throw InvalidReflectedObjectException
+                        .of("Unknown Error while converting Section!", getPathFor(field), section.getClass(), field, e);
                 }
             }
         }
@@ -497,7 +503,7 @@ public abstract class ConfigurationCodec
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private Node convertField(Field field, Section defaultSection, Section section, Configuration config) throws ConversionException, IllegalAccessException
+    private Node convertField(Field field, Section defaultSection, Section section, Reflected config) throws ConversionException, IllegalAccessException
     {
         Object fieldValue = field.get(section);
         Object defaultValue = section == defaultSection ? fieldValue : field.get(defaultSection);

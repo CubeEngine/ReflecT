@@ -27,6 +27,6 @@ import de.cubeisland.engine.reflect.codec.YamlCodec;
 /**
  * A Configuration using YAML
  */
-public abstract class YamlConfiguration extends Configuration<YamlCodec>
+public abstract class YamlConfiguration extends Reflected<YamlCodec>
 {
 }

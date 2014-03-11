@@ -22,18 +22,37 @@
  */
 package de.cubeisland.engine.reflect.exception;
 
+import java.lang.reflect.Field;
+
+import de.cubeisland.engine.reflect.Section;
+import de.cubeisland.engine.reflect.node.ConfigPath;
+
 /**
- * This exception is thrown when a class needed for the configuration could not be instantiated
+ * This exception is thrown when a configuration is invalid.
  */
-public class ConfigInstantiationException extends InvalidConfigurationException
+public class InvalidReflectedObjectException extends RuntimeException
 {
-    public ConfigInstantiationException(Class clazz, Throwable t)
+    private static final long serialVersionUID = -492268712863444129L;
+
+    public InvalidReflectedObjectException(String message)
     {
-        super("Failed to create an instance of " + clazz.getName(), t);
+        super(message);
     }
 
-    public ConfigInstantiationException(String message, Throwable t)
+    public InvalidReflectedObjectException(String msg, Throwable t)
     {
-        super(message, t);
+        super(msg, t);
+    }
+
+    public static InvalidReflectedObjectException of(String msg, ConfigPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    {
+        msg += "\nField: " + field.getName();
+        msg += "\nSection: " + clazz.toString();
+        msg += "\nPath: " + path;
+        if (t == null)
+        {
+            return new InvalidReflectedObjectException(msg);
+        }
+        return new InvalidReflectedObjectException(msg, t);
     }
 }

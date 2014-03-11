@@ -30,7 +30,7 @@ import de.cubeisland.engine.reflect.node.ConfigPath;
 /**
  * This exception is thrown when field.get(...) or field.set(...) caused an IllegalAccessException
  */
-public class FieldAccessException extends InvalidConfigurationException
+public class FieldAccessException extends InvalidReflectedObjectException
 {
     private FieldAccessException(String message)
     {

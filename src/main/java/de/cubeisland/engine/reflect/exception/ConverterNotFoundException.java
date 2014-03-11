@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect.exception;
 /**
  * This Exception is thrown when there is no converter registered for a certain class
  */
-public class ConverterNotFoundException extends InvalidConfigurationException
+public class ConverterNotFoundException extends InvalidReflectedObjectException
 {
     public ConverterNotFoundException(String string)
     {

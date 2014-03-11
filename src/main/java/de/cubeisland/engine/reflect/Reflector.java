@@ -28,19 +28,19 @@ import java.util.logging.Logger;
 
 import de.cubeisland.engine.reflect.codec.CodecManager;
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.exception.ConfigInstantiationException;
+import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
-public class ConfigurationFactory
+public class Reflector
 {
     private CodecManager codecManager = new CodecManager();
     Logger logger; // package private
 
-    public ConfigurationFactory()
+    public Reflector()
     {
         this.logger = Logger.getLogger("ConfigurationAPI");
     }
 
-    public ConfigurationFactory(Logger logger)
+    public Reflector(Logger logger)
     {
         this.logger = logger;
     }
@@ -54,7 +54,7 @@ public class ConfigurationFactory
      *
      * @return the loaded Configuration
      */
-    public <T extends Configuration> T load(Class<T> clazz, File file, boolean save)
+    public <T extends Reflected> T load(Class<T> clazz, File file, boolean save)
     {
         T config = create(clazz); // loading
         config.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
@@ -70,7 +70,7 @@ public class ConfigurationFactory
      *
      * @return the loaded Configuration
      */
-    public <T extends Configuration> T load(Class<T> clazz, File file)
+    public <T extends Reflected> T load(Class<T> clazz, File file)
     {
         return load(clazz, file, true);
     }
@@ -83,7 +83,7 @@ public class ConfigurationFactory
      *
      * @return the loaded configuration
      */
-    public <T extends Configuration> T load(Class<T> clazz, InputStream is)
+    public <T extends Reflected> T load(Class<T> clazz, InputStream is)
     {
         T config = create(clazz);
         config.loadFrom(is);
@@ -99,7 +99,7 @@ public class ConfigurationFactory
      *
      * @return the created configuration
      */
-    public <T extends Configuration> T create(Class<T> clazz) throws ConfigInstantiationException
+    public <T extends Reflected> T create(Class<T> clazz) throws ReflectedInstantiationException
     {
         try
         {
@@ -109,11 +109,11 @@ public class ConfigurationFactory
         }
         catch (IllegalAccessException e)
         {
-            throw new ConfigInstantiationException(clazz, e);
+            throw new ReflectedInstantiationException(clazz, e);
         }
         catch (InstantiationException e)
         {
-            throw new ConfigInstantiationException(clazz, e);
+            throw new ReflectedInstantiationException(clazz, e);
         }
     }
 

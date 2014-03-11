@@ -34,7 +34,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.exception.ConfigInstantiationException;
+import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.Node;
@@ -124,11 +124,11 @@ public class CollectionConverter
         }
         catch (InstantiationException e)
         {
-            throw new ConfigInstantiationException((Class)ptype.getRawType(), e);
+            throw new ReflectedInstantiationException((Class)ptype.getRawType(), e);
         }
         catch (IllegalAccessException e)
         {
-            throw new ConfigInstantiationException((Class)ptype.getRawType(), e);
+            throw new ReflectedInstantiationException((Class)ptype.getRawType(), e);
         }
     }
 }

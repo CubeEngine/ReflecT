@@ -22,12 +22,12 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
-import de.cubeisland.engine.reflect.Configuration;
+import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.node.MapNode;
 
 public class TestCodec extends YamlCodec
 {
-    public MapNode convertConfiguration(Configuration config)
+    public MapNode convertConfiguration(Reflected config)
     {
         return convertSection(config, config, config);
     }

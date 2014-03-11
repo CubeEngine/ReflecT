@@ -38,22 +38,22 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.cubeisland.engine.reflect.codec.ConfigurationCodec;
-import de.cubeisland.engine.reflect.exception.InvalidConfigurationException;
+import de.cubeisland.engine.reflect.codec.Codec;
+import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
 import de.cubeisland.engine.reflect.node.ErrorNode;
 
-import static de.cubeisland.engine.reflect.codec.ConfigurationCodec.getFieldType;
-import static de.cubeisland.engine.reflect.codec.ConfigurationCodec.isConfigField;
+import static de.cubeisland.engine.reflect.codec.Codec.getFieldType;
+import static de.cubeisland.engine.reflect.codec.Codec.isConfigField;
 
 /**
  * This abstract class represents a configuration.
  */
-public abstract class Configuration<Codec extends ConfigurationCodec> implements Section
+public abstract class Reflected<C extends Codec> implements Section
 {
-    private transient ConfigurationFactory factory;
-    private transient Configuration defaultConfig = this;
-    private transient final Class<Codec> defaultCodec = getCodecClass(this.getClass());
+    private transient Reflector factory;
+    private transient Reflected defaultConfig = this;
+    private transient final Class<C> defaultCodec = getCodecClass(this.getClass());
     protected transient File file;
 
     /**
@@ -61,18 +61,18 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      */
     private transient HashSet<Field> inheritedFields;
 
-    public final void init(ConfigurationFactory factory)
+    public final void init(Reflector factory)
     {
         this.factory = factory;
         this.onInit();
     }
 
-    public final Configuration getDefault()
+    public final Reflected getDefault()
     {
         return this.defaultConfig;
     }
 
-    public final void setDefault(Configuration config)
+    public final void setDefault(Reflected config)
     {
         if (config == null)
         {
@@ -155,9 +155,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * @return the loaded child-configuration
      */
     @SuppressWarnings("unchecked")
-    public <T extends Configuration> T loadChild(File sourceFile)
+    public <T extends Reflected> T loadChild(File sourceFile)
     {
-        Configuration<Codec> childConfig = factory.create(this.getClass());
+        Reflected<C> childConfig = factory.create(this.getClass());
         childConfig.setFile(sourceFile);
         childConfig.setDefault(this);
         try
@@ -165,7 +165,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             childConfig.reload(true);
             return (T)childConfig;
         }
-        catch (InvalidConfigurationException ex)
+        catch (InvalidReflectedObjectException ex)
         {
             throw ex;
         }
@@ -183,12 +183,12 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      * @return the Codec
      */
     @SuppressWarnings("unchecked")
-    private Class<Codec> getCodecClass(Class clazz)
+    private Class<C> getCodecClass(Class clazz)
     {
         Type genericSuperclass = clazz.getGenericSuperclass(); // Get generic superclass
         try
         {
-            if (genericSuperclass.equals(Configuration.class))
+            if (genericSuperclass.equals(Reflected.class))
             {
                 // superclass is this class -> No Codec set as GenericType Missing Codec!
                 return null;
@@ -197,9 +197,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
             {
                 Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // get First gType
                 // check if it is codec
-                if (gType instanceof Class && ConfigurationCodec.class.isAssignableFrom((Class<?>)gType))
+                if (gType instanceof Class && Codec.class.isAssignableFrom((Class<?>)gType))
                 {
-                    return (Class<Codec>)gType;
+                    return (Class<C>)gType;
                 }
             }
             if (genericSuperclass instanceof Class)
@@ -244,7 +244,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
         }
         catch (FileNotFoundException ex)
         {
-            throw new InvalidConfigurationException("File to save into cannot be accessed!", ex);
+            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", ex);
         }
     }
 
@@ -276,9 +276,9 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @return true when a new file got created while saving
      *
-     * @throws InvalidConfigurationException if an error occurs while loading
+     * @throws de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException if an error occurs while loading
      */
-    public final boolean reload(boolean save) throws InvalidConfigurationException
+    public final boolean reload(boolean save) throws InvalidReflectedObjectException
     {
         boolean result = false;
         if (!this.loadFrom(this.file) && save)
@@ -355,7 +355,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
      *
      * @throws MissingCodecException when no codec was set via genericType
      */
-    public final Codec getCodec() throws MissingCodecException
+    public final C getCodec() throws MissingCodecException
     {
         if (defaultCodec == null)
         {
@@ -401,7 +401,7 @@ public abstract class Configuration<Codec extends ConfigurationCodec> implements
     {}
 
     /**
-     * Gets called after {@link #init(ConfigurationFactory)} was called
+     * Gets called after {@link #init(Reflector)} was called
      */
     public void onInit()
     {}

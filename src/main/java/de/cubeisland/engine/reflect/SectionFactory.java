@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import de.cubeisland.engine.reflect.exception.ConfigInstantiationException;
+import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
 /**
  * This factory provides a Method to create a new Instance of a Section
@@ -53,7 +53,7 @@ public class SectionFactory
      *
      * @return the instantiated Section
      */
-    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws ConfigInstantiationException
+    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws ReflectedInstantiationException
     {
         try
         {
@@ -72,19 +72,19 @@ public class SectionFactory
         }
         catch (IllegalAccessException e)
         {
-            throw new ConfigInstantiationException(sectionClass, e);
+            throw new ReflectedInstantiationException(sectionClass, e);
         }
         catch (InstantiationException e)
         {
-            throw new ConfigInstantiationException(sectionClass, e);
+            throw new ReflectedInstantiationException(sectionClass, e);
         }
         catch (NoSuchMethodException e)
         {
-            throw new ConfigInstantiationException(sectionClass, e);
+            throw new ReflectedInstantiationException(sectionClass, e);
         }
         catch (InvocationTargetException e)
         {
-            throw new ConfigInstantiationException(sectionClass, e);
+            throw new ReflectedInstantiationException(sectionClass, e);
         }
     }
 }

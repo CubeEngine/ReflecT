@@ -32,13 +32,13 @@ public class YamlConfigurationTest extends TestCase
     private TestConfig loadConfig;
     private File file;
 
-    private ConfigurationFactory factory;
+    private Reflector factory;
 
     @Override
     public void setUp() throws Exception
     {
         this.file = new File("../testconfig.yml");
-        factory = new ConfigurationFactory();
+        factory = new Reflector();
         config = factory.create(TestConfig.class);
     }
 

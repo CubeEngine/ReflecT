@@ -29,7 +29,7 @@ import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.cubeisland.engine.reflect.Configuration;
+import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.StringUtils;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ListNode;
@@ -47,7 +47,7 @@ import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
 /**
  * A Codec for YAML-Configurations allowing child-configurations
  */
-public class YamlCodec extends ConfigurationCodec
+public class YamlCodec extends Codec
 {
     private static final String COMMENT_PREFIX = "# ";
     private static final String OFFSET = "  ";
@@ -63,7 +63,7 @@ public class YamlCodec extends ConfigurationCodec
     // Configuration loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Configuration config) throws ConversionException
+    protected final MapNode load(InputStream is, Reflected config) throws ConversionException
     {
         MapNode values;
         try
@@ -96,7 +96,7 @@ public class YamlCodec extends ConfigurationCodec
 
     // Configuration saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Configuration config) throws ConversionException
+    protected final void save(MapNode node, OutputStream os, Reflected config) throws ConversionException
     {
         try
         {
