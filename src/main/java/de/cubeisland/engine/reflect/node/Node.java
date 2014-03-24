@@ -123,7 +123,7 @@ public abstract class Node<V>
         }
         if (o instanceof Collection)
         {
-            return new ListNode((List<?>)o);
+            return new ListNode((Iterable<?>)o);
         }
         if (o.getClass().isArray())
         {

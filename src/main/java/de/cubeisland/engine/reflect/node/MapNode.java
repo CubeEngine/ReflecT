@@ -38,7 +38,10 @@ import de.cubeisland.engine.reflect.util.StringUtils;
 public class MapNode extends ParentNode<Map<String, Node>>
 {
     private Map<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
-    private Map<String, String> keys = new HashMap<String, String>(); // LowerCase trimmed -> Original
+    /**
+     * LowerCase trimmed -> Original
+     */
+    private Map<String, String> keys = new HashMap<String, String>();
     private Map<Node, String> reverseMappedNodes = new LinkedHashMap<Node, String>();
 
     /**

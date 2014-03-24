@@ -77,9 +77,10 @@ public abstract class ParentNode<V> extends Node<V>
         {
             ReflectedPath subPath = path.getSubPath();
             Node baseNode = this.getExactNode(path.getBasePath());
-            if (baseNode instanceof NullNode) // Node not found -> create new Node
+            if (baseNode instanceof NullNode)
             {
-                if (subPath.isListPath()) //  baseNode is a List!
+                // Node not found -> create new Node
+                if (subPath.isListPath())
                 {
                     baseNode = ListNode.emptyList();
                 }
@@ -119,7 +120,8 @@ public abstract class ParentNode<V> extends Node<V>
             {
                 return ((ParentNode)baseNode).removeNode(path.getSubPath());
             }
-            return null; // Node not found
+            // Node not found
+            return null;
         }
     }
 

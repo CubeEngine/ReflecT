@@ -28,14 +28,13 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.cubeisland.engine.reflect.codec.ConverterManager;
-import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.Node;
 
@@ -107,8 +106,9 @@ public class CollectionConverter
                         result = (S)new HashSet();
                     }
                 }
-                else// if (List.class.isAssignableFrom(collectionType)) // or other collection
+                else
                 {
+                    // if (List.class.isAssignableFrom(collectionType)) // or other collection
                     result = (S)new LinkedList();
                 }
             }

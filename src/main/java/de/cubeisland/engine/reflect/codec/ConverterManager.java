@@ -178,7 +178,8 @@ public final class ConverterManager
             {
                 if (entry.getKey().isAssignableFrom(objectClass))
                 {
-                    registerConverter(objectClass, converter = entry.getValue());
+                    converter = entry.getValue();
+                    registerConverter(objectClass, converter);
                     break;
                 }
             }
@@ -260,7 +261,8 @@ public final class ConverterManager
             if (this.defaultConverters == null)
             {
                 throw e;
-            } // else ignore
+            }
+            // else ignore
             return this.defaultConverters.convertFromNode0(node, type);
         }
     }

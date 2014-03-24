@@ -44,8 +44,9 @@ public class CodecManager
     public <C extends Codec> C getCodec(Class<C> codecClass)
     {
         C codec = (C)this.codecs.get(codecClass);
-        if (codec == null) // Codec not registered yet! Try to auto-register...
+        if (codec == null)
         {
+            // Codec not registered yet! Try to auto-register...
             try
             {
                 codec = codecClass.newInstance();

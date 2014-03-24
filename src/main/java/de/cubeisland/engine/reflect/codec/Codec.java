@@ -210,7 +210,8 @@ public abstract class Codec
             throw new IllegalArgumentException("defaultSection and section have to be the same type of section!");
         }
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
-        for (Field field : section.getClass().getFields()) // ONLY public fields are allowed
+        // ONLY public fields are allowed
+        for (Field field : section.getClass().getFields())
         {
             if (isReflectedField(field))
             {
@@ -236,16 +237,18 @@ public abstract class Codec
                             errorNodes.addAll(dumpIntoField(dSection, section, field, fieldNode, reflected));
                         }
                     }
-                    catch (InvalidReflectedObjectException e) // rethrow
+                    catch (InvalidReflectedObjectException e)
                     {
+                        // rethrow
                         throw e;
                     }
                     catch (IllegalAccessException e)
                     {
                         throw FieldAccessException.of(getPathFor(field), section.getClass(), field, e);
                     }
-                    catch (ConversionException e) // non-fatal ConversionException
+                    catch (ConversionException e)
                     {
+                        // non-fatal ConversionException
                         InvalidReflectedObjectException ex = InvalidReflectedObjectException
                             .of("Error while converting Node to dump into field!", getPathFor(field), section
                                 .getClass(), field, e);
@@ -435,7 +438,8 @@ public abstract class Codec
 
     private Object dumpIntoNormalField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected, Type type) throws ConversionException, IllegalAccessException
     {
-        Object fieldValue = converterManager.convertFromNode(fieldNode, type); // Convert the value
+        // Convert the value
+        Object fieldValue = converterManager.convertFromNode(fieldNode, type);
         if (fieldValue == null && !(section == defaultSection))
         {
             fieldValue = field.get(defaultSection);
@@ -452,7 +456,8 @@ public abstract class Codec
      * @param defaultSection the parent section
      * @param section        the section
      */
-    final MapNode convertSection(Section defaultSection, Section section, Reflected reflected) // this is only package private as it is used for testing
+    // this is only package private as it is used for testing :S not good
+    final MapNode convertSection(Section defaultSection, Section section, Reflected reflected)
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
@@ -487,16 +492,18 @@ public abstract class Codec
                         baseNode.setNodeAt(getPathFor(field), convertField(field, defaultSection, section, reflected));
                     }
                 }
-                catch (InvalidReflectedObjectException e) // rethrow
+                catch (InvalidReflectedObjectException e)
                 {
+                    // rethrow
                     throw e;
                 }
                 catch (IllegalAccessException e)
                 {
                     throw FieldAccessException.of(getPathFor(field), sectionClass, field, e);
                 }
-                catch (ConversionException e) // fatal ConversionException
+                catch (ConversionException e)
                 {
+                    // fatal ConversionException
                     throw InvalidReflectedObjectException
                         .of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
                 }
@@ -507,8 +514,9 @@ public abstract class Codec
                 }
             }
         }
-        if (section != defaultSection) // remove generated empty ParentNodes ONLY from child-reflected
+        if (section != defaultSection)
         {
+            // remove generated empty ParentNodes ONLY from child-reflected
             baseNode.cleanUpEmptyNodes();
         }
         return baseNode;
@@ -655,7 +663,7 @@ public abstract class Codec
         if (clazz.isAssignableFrom((Class)pType.getRawType()))
         {
             Type subType = pType.getActualTypeArguments()[i];
-            return (subType instanceof Class && SectionFactory.isSectionClass((Class)subType));
+            return subType instanceof Class && SectionFactory.isSectionClass((Class)subType);
         }
         return false;
     }

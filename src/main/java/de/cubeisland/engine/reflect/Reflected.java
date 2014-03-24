@@ -54,8 +54,10 @@ public abstract class Reflected<C extends Codec> implements Section
 {
     private transient Reflector factory;
     private transient Reflected defaultReflected = this;
-    private transient final Class<C> defaultCodec = getCodecClass(this.getClass());
+    private final transient Class<C> defaultCodec = getCodecClass(this.getClass());
     protected transient File file;
+
+    private static final String[] EMPTY = new String[0];
 
     /**
      * Saves the fields that got inherited from the parent-reflected
@@ -196,9 +198,11 @@ public abstract class Reflected<C extends Codec> implements Section
                     // superclass is this class -> No Codec set as GenericType Missing Codec!
                     return null;
                 }
-                if (genericSuperclass instanceof ParameterizedType) // check if genericSuperclass is ParametrizedType
+                // check if genericSuperclass is ParametrizedType
+                if (genericSuperclass instanceof ParameterizedType)
                 {
-                    Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0]; // get First gType
+                    // get First gType
+                    Type gType = ((ParameterizedType)genericSuperclass).getActualTypeArguments()[0];
                     // check if it is codec
                     if (gType instanceof Class && Codec.class.isAssignableFrom((Class<?>)gType))
                     {
@@ -289,7 +293,8 @@ public abstract class Reflected<C extends Codec> implements Section
         if (save)
         {
             this.updateInheritance();
-            this.save(); // save the default values
+            // save the default values
+            this.save();
         }
         return result;
     }
@@ -308,17 +313,21 @@ public abstract class Reflected<C extends Codec> implements Section
         {
             throw new IllegalArgumentException("The file must not be null in order to load the reflected!");
         }
-        try
+        if (file.exists())
         {
-            this.loadFrom(new FileInputStream(this.file));
+            try
+            {
+                this.loadFrom(new FileInputStream(this.file));
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new IllegalArgumentException("File to load from cannot be accessed!", e);
+            }
             this.onLoaded(file);
+            return true;
         }
-        catch (FileNotFoundException ex)
-        {
-            this.factory.logger.log(Level.INFO, "Could not load reflected from file! Using default...", ex);
-            return false;
-        }
-        return true;
+        this.factory.logger.log(Level.INFO, "Could not load reflected from file! Using default...");
+        return false;
     }
 
     /**
@@ -436,7 +445,7 @@ public abstract class Reflected<C extends Codec> implements Section
      */
     public String[] head()
     {
-        return null;
+        return EMPTY;
     }
 
     /**
@@ -447,7 +456,7 @@ public abstract class Reflected<C extends Codec> implements Section
      */
     public String[] tail()
     {
-        return null;
+        return EMPTY;
     }
 
     public Logger getLogger()
@@ -459,7 +468,8 @@ public abstract class Reflected<C extends Codec> implements Section
     {
         if (this.defaultReflected == null || this.defaultReflected == this)
         {
-            return; // Default is this reflected anyways
+            // Default is this reflected anyways
+            return;
         }
         this.inheritedFields = new HashSet<Field>();
         this.updateInheritance(this, defaultReflected);
@@ -479,26 +489,25 @@ public abstract class Reflected<C extends Codec> implements Section
                     if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
                     {
                         this.addInheritedField(field);
-                        continue;
                     }
-                    else if (value == null || defaultValue == null)
+                    else if (value != null && defaultValue != null)
                     {
-                        continue;
-                    }
-                    switch (getFieldType(field))
-                    {
-                    case NORMAL: // Already handled
-                        break;
-                    case SECTION:
-                        this.updateInheritance((Section)value, (Section)defaultValue);
-                        break;
-                    case SECTION_COLLECTION:
-                        throw new IllegalStateException("Collections in child reflected are not allowed!");
-                    case SECTION_MAP:
-                        updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Illegal FieldType");
+                        switch (getFieldType(field))
+                        {
+                        case NORMAL:
+                            // Already handled
+                            break;
+                        case SECTION:
+                            this.updateInheritance((Section)value, (Section)defaultValue);
+                            break;
+                        case SECTION_COLLECTION:
+                            throw new IllegalStateException("Collections in child reflected are not allowed!");
+                        case SECTION_MAP:
+                            updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Illegal FieldType");
+                        }
                     }
                 }
             }

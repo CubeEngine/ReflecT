@@ -81,7 +81,7 @@ public class ReflectedPath
      *
      * @return the ReflectedPath
      */
-    public final static ReflectedPath forName(String name)
+    public static ReflectedPath forName(String name)
     {
         return new ReflectedPath(name);
     }

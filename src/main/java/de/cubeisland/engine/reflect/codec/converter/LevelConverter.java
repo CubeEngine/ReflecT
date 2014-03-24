@@ -51,7 +51,8 @@ public class LevelConverter implements Converter<Level>
             }
         }
         else if (node instanceof BooleanNode && !((BooleanNode)node).getValue())
-        { // OFF is interpreted as a boolean false, ALL as a boolean true
+        {
+            // OFF is interpreted as a boolean false, ALL as a boolean true
             if ((Boolean)node.getValue())
             {
                 return Level.ALL;

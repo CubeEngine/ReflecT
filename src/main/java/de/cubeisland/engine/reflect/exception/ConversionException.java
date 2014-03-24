@@ -27,6 +27,16 @@ package de.cubeisland.engine.reflect.exception;
  */
 public class ConversionException extends Exception
 {
+    private ConversionException(String message)
+    {
+        super(message);
+    }
+
+    private ConversionException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
     public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
     {
         String msg = message + "\nConverter: " + converter.getClass().getName();
@@ -45,15 +55,5 @@ public class ConversionException extends Exception
             msg += "\nConverting: " + toConvert.toString();
         }
         return new ConversionException(msg);
-    }
-
-    private ConversionException(String message)
-    {
-        super(message);
-    }
-
-    private ConversionException(String message, Throwable cause)
-    {
-        super(message, cause);
     }
 }

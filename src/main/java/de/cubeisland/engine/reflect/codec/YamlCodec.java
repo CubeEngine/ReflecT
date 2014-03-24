@@ -70,13 +70,15 @@ public class YamlCodec extends Codec
         {
             if (is == null)
             {
-                values = MapNode.emptyMap(); // InputStream null -> reflected was not existent
+                values = MapNode.emptyMap();
+                // InputStream null -> reflected was not existent
                 return values;
             }
             Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(is);
             if (map == null)
             {
-                values = MapNode.emptyMap(); // loadValues null -> reflected exists but was empty
+                values = MapNode.emptyMap();
+                // loadValues null -> reflected exists but was empty
             }
             else
             {
@@ -184,21 +186,24 @@ public class YamlCodec extends Codec
             String comment = buildComment(entry.getValue().getComments(), offset);
             if (!isEmpty(comment))
             {
-                if (!hasLine && !first) // if not already one line free
+                // if not already one line free
+                if (!hasLine && !first)
                 {
-                    sb.append(LINE_BREAK); // add free line before comment
+                    sb.append(LINE_BREAK);
+                    // add free line before comment
                 }
                 sb.append(comment);
             }
 
             if (!(first && inList))
             {
-                sb.append(getOffset(offset)); // Map in collection first does not get offset
+                // Map in collection first does not get offset
+                sb.append(getOffset(offset));
             }
             sb.append(value.getOriginalKey(entry.getKey())).append(": ");
             writer.append(sb.toString());
             // Now convert the value
-            if (entry.getValue() instanceof MapNode) // Map-Node?
+            if (entry.getValue() instanceof MapNode)
             {
                 if (((MapNode)entry.getValue()).isEmpty())
                 {
@@ -211,7 +216,7 @@ public class YamlCodec extends Codec
                 }
                 endOfMapOrList = true;
             }
-            else if (entry.getValue() instanceof ListNode) // List-Node? -> list the nodes
+            else if (entry.getValue() instanceof ListNode)
             {
                 if (((ListNode)entry.getValue()).isEmpty())
                 {
@@ -223,8 +228,9 @@ public class YamlCodec extends Codec
                 }
                 endOfMapOrList = true;
             }
-            else // Other Node (list / normal)
+            else
             {
+                // Other Node (list / normal)
                 convertValue(writer, entry.getValue(), offset);
                 endOfMapOrList = false;
             }
@@ -243,7 +249,8 @@ public class YamlCodec extends Codec
     {
         writer.append(LINE_BREAK);
         boolean endOfMapOrList = false;
-        for (Node listedNode : value.getValue()) //Convert Collection
+        //Convert Collection
+        for (Node listedNode : value.getValue())
         {
             if (endOfMapOrList)
             {
@@ -306,7 +313,8 @@ public class YamlCodec extends Codec
     {
         if (comments == null || comments.length == 0)
         {
-            return ""; //No Comment
+            //No Comment
+            return "";
         }
         String off = getOffset(offset);
         StringBuilder sb = new StringBuilder();
@@ -318,7 +326,8 @@ public class YamlCodec extends Codec
             }
             if (comment.contains("\n"))
             {
-                comment = comment.replace(LINE_BREAK, LINE_BREAK + off + COMMENT_PREFIX); // multi line
+                // multi line
+                comment = comment.replace(LINE_BREAK, LINE_BREAK + off + COMMENT_PREFIX);
             }
             sb.append(off).append(COMMENT_PREFIX).append(comment).append(LINE_BREAK);
         }
