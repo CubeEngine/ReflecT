@@ -27,6 +27,6 @@ import de.cubeisland.engine.reflect.codec.YamlCodec;
 /**
  * A Reflected Object de/serializing from/to YAML
  */
-public abstract class ReflectedYaml extends FileReflected<YamlCodec>
+public abstract class ReflectedYaml extends ReflectedFile<YamlCodec>
 {
 }

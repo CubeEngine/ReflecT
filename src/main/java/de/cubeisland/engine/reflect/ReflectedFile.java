@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 
-public abstract class FileReflected<C extends FileCodec> extends Reflected<C, File>
+public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, File>
 {
     public final void save(File target)
     {

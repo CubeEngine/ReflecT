@@ -28,8 +28,8 @@ import junit.framework.TestCase;
 
 public class YamlReflectedTest extends TestCase
 {
-    private TestReflected config;
-    private TestReflected loadConfig;
+    private ReflectedTest config;
+    private ReflectedTest loadConfig;
     private File file;
 
     private Reflector factory;
@@ -39,13 +39,13 @@ public class YamlReflectedTest extends TestCase
     {
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        config = factory.create(TestReflected.class);
+        config = factory.create(ReflectedTest.class);
     }
 
     public void testReflected() throws Exception
     {
         config.save(file);
-        loadConfig = factory.load(TestReflected.class, file);
+        loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
         assertEquals(config.getCodec().convertReflected(config).toString(), config.getCodec().convertReflected(loadConfig).toString());
     }
