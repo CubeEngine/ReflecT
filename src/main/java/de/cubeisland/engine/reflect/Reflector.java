@@ -57,7 +57,7 @@ public class Reflector
     public <T extends Reflected> T load(Class<T> clazz, File file, boolean save)
     {
         T reflected = create(clazz); // loading
-        reflected.setFile(file); // IMPORTANT TO SET BEFORE LOADING!
+        reflected.setTarget(file); // IMPORTANT TO SET BEFORE LOADING!
         reflected.reload(save);
         return reflected;
     }

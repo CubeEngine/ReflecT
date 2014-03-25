@@ -35,7 +35,7 @@ import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.TestCodec;
 
-public class TestReflected extends Reflected<TestCodec>
+public class TestReflected extends FileReflected<TestCodec>
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")

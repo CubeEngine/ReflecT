@@ -22,14 +22,13 @@
  */
 package de.cubeisland.engine.reflect.util;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class StringUtilsTest extends TestCase
 {
     public void testimplode() throws Exception
     {
-        Assert.assertEquals("a.b.c", StringUtils.implode(".", new String[]{"a", "b", "c"}));
+        assertEquals("a.b.c", StringUtils.implode(".", new String[]{"a", "b", "c"}));
     }
 
     public void testfieldNameToPath() throws Exception

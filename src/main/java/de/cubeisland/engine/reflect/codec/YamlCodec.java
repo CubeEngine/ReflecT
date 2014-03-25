@@ -47,7 +47,7 @@ import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
 /**
  * A Codec for YAML-Reflected Objects allowing child-reflected
  */
-public class YamlCodec extends Codec
+public class YamlCodec extends FileCodec
 {
     private static final String COMMENT_PREFIX = "# ";
     private static final String OFFSET = "  ";
@@ -63,18 +63,18 @@ public class YamlCodec extends Codec
     // Reflected loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream is, Reflected reflected) throws ConversionException
+    protected final MapNode load(InputStream in, Reflected reflected) throws ConversionException
     {
         MapNode values;
         try
         {
-            if (is == null)
+            if (in == null)
             {
                 values = MapNode.emptyMap();
                 // InputStream null -> reflected was not existent
                 return values;
             }
-            Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(is);
+            Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(in);
             if (map == null)
             {
                 values = MapNode.emptyMap();
@@ -87,22 +87,22 @@ public class YamlCodec extends Codec
         }
         catch (ScannerException ex)
         {
-            throw ConversionException.of(this, is, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+            throw ConversionException.of(this, in, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         catch (ParserException ex)
         {
-            throw ConversionException.of(this, is, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
+            throw ConversionException.of(this, in, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
         return values;
     }
 
     // Reflected saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream os, Reflected reflected) throws ConversionException
+    protected final void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException
     {
         try
         {
-            OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
+            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
             if (reflected.head() != null)
             {
                 writer.append("# ").append(StringUtils.implode("\n# ", reflected.head())).append(LINE_BREAK)

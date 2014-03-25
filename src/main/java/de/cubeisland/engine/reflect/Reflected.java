@@ -22,12 +22,6 @@
  */
 package de.cubeisland.engine.reflect;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -50,12 +44,13 @@ import static de.cubeisland.engine.reflect.codec.Codec.isReflectedField;
 /**
  * This abstract class represents a reflected object to be serialized using a Codec C.
  */
-public abstract class Reflected<C extends Codec> implements Section
+public abstract class Reflected<C extends Codec, SerialType> implements Section
 {
-    private transient Reflector factory;
+    protected transient Reflector factory;
     private transient Reflected defaultReflected = this;
     private final transient Class<C> defaultCodec = getCodecClass(this.getClass());
-    protected transient File file;
+
+    protected transient SerialType sertialType;
 
     private static final String[] EMPTY = new String[0];
 
@@ -149,18 +144,18 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Loads and saves a child-reflected from given path with this reflected as parent
+     * Loads and saves a child-reflected from given SerialType with this reflected as parent
      *
-     * @param sourceFile the path to the file
+     * @param source the source SerialType
      * @param <T>        the ReflectedType
      *
      * @return the loaded child-reflected
      */
     @SuppressWarnings("unchecked")
-    public <T extends Reflected> T loadChild(File sourceFile)
+    public <T extends Reflected> T loadChild(SerialType source)
     {
-        Reflected<C> childReflected = factory.create(this.getClass());
-        childReflected.setFile(sourceFile);
+        Reflected<C, SerialType> childReflected = factory.create(this.getClass());
+        childReflected.setTarget(source);
         childReflected.setDefault(this);
         try
         {
@@ -223,49 +218,23 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Saves the reflected to the set file.
+     * Saves the reflected default serialType
      */
     public final void save()
     {
-        this.save(this.file);
+        this.save(this.sertialType);
     }
 
     /**
-     * Saves this reflected into the given file
+     * Saves this reflected into the target
      *
-     * @param target the file to save into
+     * @param target the target to save to
      */
-    public final void save(File target)
-    {
-        if (target == null)
-        {
-            throw new IllegalArgumentException("A reflected cannot be saved without a valid file!");
-        }
-        try
-        {
-            this.save(new FileOutputStream(target));
-            this.onSaved(file);
-        }
-        catch (FileNotFoundException ex)
-        {
-            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", ex);
-        }
-    }
+    public abstract void save(SerialType target);
 
     /**
-     * Saves this reflected using given OutputStream
-     *
-     * @param os the OutputStream to write into
-     */
-    public final void save(OutputStream os)
-    {
-        this.onSave();
-        this.getCodec().saveReflected(this, os);
-    }
-
-    /**
-     * Reloads the reflected from file
-     * <p>This will only work if the file of the reflected got set previously
+     * Reloads the reflected from the default serialType
+     * <p>This will only work if the serialType of the reflected got set previously
      */
     public final void reload()
     {
@@ -285,9 +254,8 @@ public abstract class Reflected<C extends Codec> implements Section
     public final boolean reload(boolean save) throws InvalidReflectedObjectException
     {
         boolean result = false;
-        if (!this.loadFrom(this.file) && save)
+        if (!this.loadFrom(this.sertialType) && save)
         {
-            this.factory.logger.info("Saved reflected in new file: " + file.getAbsolutePath());
             result = true;
         }
         if (save)
@@ -300,50 +268,14 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Loads the Reflected using the given File
-     * <p>This will NOT set the file of this Reflected
+     * Loads the Reflected using the given SerialType
+     * <p>This will NOT set the SerialType of this Reflected
      *
-     * @param file the file to load from
+     * @param source the SerialType to load from
      *
-     * @return true if the Reflected was loaded from file
+     * @return true if the Reflected was loaded from the given source
      */
-    public final boolean loadFrom(File file)
-    {
-        if (this.file == null)
-        {
-            throw new IllegalArgumentException("The file must not be null in order to load the reflected!");
-        }
-        if (file.exists())
-        {
-            try
-            {
-                this.loadFrom(new FileInputStream(this.file));
-            }
-            catch (FileNotFoundException e)
-            {
-                throw new IllegalArgumentException("File to load from cannot be accessed!", e);
-            }
-            this.onLoaded(file);
-            return true;
-        }
-        this.factory.logger.log(Level.INFO, "Could not load reflected from file! Using default...");
-        return false;
-    }
-
-    /**
-     * Loads the reflected using the given InputStream
-     *
-     * @param is the InputStream to load from
-     */
-    public final void loadFrom(InputStream is)
-    {
-        if (is == null)
-        {
-            throw new IllegalArgumentException("The input stream must not be null!");
-        }
-        this.onLoad();
-        this.showLoadErrors(this.getCodec().loadReflected(this, is));
-    }
+    public abstract boolean loadFrom(SerialType source);
 
     final void showLoadErrors(Collection<ErrorNode> errors)
     {
@@ -374,33 +306,33 @@ public abstract class Reflected<C extends Codec> implements Section
     }
 
     /**
-     * Sets the path to load from
+     * Sets the SerialType to load from
      *
-     * @param file the path the reflected will load from
+     * @param type the SerialType the reflected will load from and save to by default
      */
-    public final void setFile(File file)
+    public final void setTarget(SerialType type)
     {
-        if (file == null)
+        if (type == null)
         {
             throw new IllegalArgumentException("The file must not be null!");
         }
-        this.file = file;
+        this.sertialType = type;
     }
 
     /**
-     * Returns the path this reflected will be saved to and loaded from by default
+     * Returns the SerialType this reflected will be saved to and loaded from by default
      *
      * @return the path of this reflected
      */
-    public final File getFile()
+    public final SerialType getTarget()
     {
-        return this.file;
+        return this.sertialType;
     }
 
     /**
      * This method gets called right after the reflected got loaded.
      */
-    public void onLoaded(File loadedFrom)
+    public void onLoaded(SerialType loadedFrom)
     {
         // implement onLoaded
     }
@@ -408,7 +340,7 @@ public abstract class Reflected<C extends Codec> implements Section
     /**
      * This method gets called right after the reflected get saved.
      */
-    public void onSaved(File savedTo)
+    public void onSaved(SerialType savedTo)
     {
         // implement onSaved
     }

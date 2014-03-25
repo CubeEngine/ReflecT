@@ -22,49 +22,44 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.FieldType;
+import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.SectionFactory;
-import de.cubeisland.engine.reflect.util.StringUtils;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.converter.generic.CollectionConverter;
 import de.cubeisland.engine.reflect.codec.converter.generic.MapConverter;
-import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.exception.FieldAccessException;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.UnsupportedReflectedException;
-import de.cubeisland.engine.reflect.node.KeyNode;
-import de.cubeisland.engine.reflect.node.ReflectedPath;
 import de.cubeisland.engine.reflect.node.ErrorNode;
+import de.cubeisland.engine.reflect.node.KeyNode;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.NullNode;
+import de.cubeisland.engine.reflect.node.ReflectedPath;
 import de.cubeisland.engine.reflect.node.StringNode;
+import de.cubeisland.engine.reflect.util.StringUtils;
 
 import static de.cubeisland.engine.reflect.FieldType.*;
 
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
  */
-public abstract class Codec
+public abstract class Codec<Input, Output>
 {
     private ConverterManager converterManager = null;
 
@@ -103,33 +98,7 @@ public abstract class Codec
      *
      * @return a collection of all erroneous Nodes
      */
-    public final Collection<ErrorNode> loadReflected(Reflected reflected, InputStream is)
-    {
-        try
-        {
-            return dumpIntoSection(reflected.getDefault(), reflected, this.load(is, reflected), reflected);
-        }
-        catch (ConversionException ex)
-        {
-            if (reflected.useStrictExceptionPolicy())
-            {
-                throw new CodecIOException("Could not load reflected", ex);
-            }
-            reflected.getLogger().warning("Could not load reflected" + ex);
-            return Collections.emptyList();
-        }
-        finally
-        {
-            try
-            {
-                is.close();
-            }
-            catch (IOException e)
-            {
-                reflected.getLogger().log(Level.WARNING, "Failed to close InputStream", e);
-            }
-        }
-    }
+    public abstract Collection<ErrorNode> loadReflected(Reflected reflected, Input is);
 
     /**
      * Saves the <code>Reflected</code> using given <code>OutputStream</code>
@@ -137,58 +106,26 @@ public abstract class Codec
      * @param reflected the Reflected to save
      * @param os        the OutputStream to save into
      */
-    public final void saveReflected(Reflected reflected, OutputStream os)
-    {
-        try
-        {
-            this.save(convertSection(reflected.getDefault(), reflected, reflected), os, reflected);
-        }
-        catch (ConversionException ex)
-        {
-            if (reflected.useStrictExceptionPolicy())
-            {
-                throw new CodecIOException("Could not save reflected", ex);
-            }
-            reflected.getLogger().warning("Could not save reflected" + ex);
-        }
-        finally
-        {
-            try
-            {
-                os.close();
-            }
-            catch (IOException e)
-            {
-                reflected.getLogger().log(Level.WARNING, "Failed to close OutputStream", e);
-            }
-        }
-    }
-
-    /**
-     * Returns the FileExtension as String
-     *
-     * @return the fileExtension
-     */
-    public abstract String getExtension();
+    public abstract void saveReflected(Reflected reflected, Output os);
 
     // PROTECTED ABSTRACT Methods
 
     /**
-     * Saves the values contained in the <code>MapNode</code> using given <code>OutputStream</code>
+     * Saves the values contained in the <code>MapNode</code> using given <code>Output</code>
      *
      * @param node      the Node containing all data to save
-     * @param os        the File to save into
+     * @param out        the Output to save to
      * @param reflected the reflected
      */
-    protected abstract void save(MapNode node, OutputStream os, Reflected reflected) throws ConversionException;
+    protected abstract void save(MapNode node, Output out, Reflected reflected) throws ConversionException;
 
     /**
-     * Converts the <code>InputStream</code> into a <code>MapNode</code>
+     * Converts the <code>Input</code> into a <code>MapNode</code>
      *
-     * @param is        the InputStream to load from
+     * @param in        the Input to load from
      * @param reflected the reflected
      */
-    protected abstract MapNode load(InputStream is, Reflected reflected) throws ConversionException;
+    protected abstract MapNode load(Input in, Reflected reflected) throws ConversionException;
 
     // Reflected loading Methods
 
@@ -202,7 +139,7 @@ public abstract class Codec
      *
      * @return a collection of all erroneous Nodes
      */
-    private Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected reflected)
+    protected final Collection<ErrorNode> dumpIntoSection(Section defaultSection, Section section, MapNode currentNode, Reflected reflected)
     {
         Section dSection = defaultSection == null ? section : defaultSection;
         if (!dSection.getClass().equals(section.getClass()))
@@ -456,8 +393,7 @@ public abstract class Codec
      * @param defaultSection the parent section
      * @param section        the section
      */
-    // this is only package private as it is used for testing :S not good
-    final MapNode convertSection(Section defaultSection, Section section, Reflected reflected)
+    protected final MapNode convertSection(Section defaultSection, Section section, Reflected reflected)
     {
         MapNode baseNode = MapNode.emptyMap();
         if (!defaultSection.getClass().equals(section.getClass()))
