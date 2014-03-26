@@ -22,7 +22,6 @@
  */
 package de.cubeisland.engine.reflect;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
@@ -49,15 +48,15 @@ public class Reflector
      * Loads the reflected from given file and optionally saves it afterwards
      *
      * @param clazz the reflected class
-     * @param file  the file to load from and save to
+     * @param source  the file to load from and save to
      * @param save  whether to save the reflected or not
      *
      * @return the loaded reflected
      */
-    public <T extends Reflected> T load(Class<T> clazz, File file, boolean save)
+    public <T extends Reflected<?, S>, S> T load(Class<T> clazz, S source, boolean save)
     {
         T reflected = create(clazz); // loading
-        reflected.setTarget(file); // IMPORTANT TO SET BEFORE LOADING!
+        reflected.setTarget(source); // IMPORTANT TO SET BEFORE LOADING!
         reflected.reload(save);
         return reflected;
     }
@@ -66,13 +65,13 @@ public class Reflector
      * Loads the reflected from given file and saves it afterwards
      *
      * @param clazz the reflected class
-     * @param file  the file to load from and save to
+     * @param source  the file to load from and save to
      *
      * @return the loaded reflected
      */
-    public <T extends Reflected> T load(Class<T> clazz, File file)
+    public <T extends Reflected<?, S>, S> T load(Class<T> clazz, S source)
     {
-        return load(clazz, file, true);
+        return load(clazz, source, true);
     }
 
     /**
@@ -83,7 +82,7 @@ public class Reflector
      *
      * @return the loaded reflected
      */
-    public <T extends Reflected> T load(Class<T> clazz, InputStream is)
+    public <T extends ReflectedFile> T load(Class<T> clazz, InputStream is)
     {
         T reflected = create(clazz);
         reflected.loadFrom(is);
