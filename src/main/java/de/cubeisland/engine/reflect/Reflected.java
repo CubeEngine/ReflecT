@@ -203,6 +203,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
                     {
                         return (Class<C>)gType;
                     }
+                    genericSuperclass = ((ParameterizedType)genericSuperclass).getRawType();
                 }
             }
             throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
