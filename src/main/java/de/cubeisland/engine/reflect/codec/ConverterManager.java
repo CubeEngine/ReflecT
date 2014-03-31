@@ -56,20 +56,22 @@ import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.NullNode;
 
+import static java.util.Map.Entry;
+
 /**
  * This Class manages all Converter for a CodecManager or a Codec
  */
 public final class ConverterManager
 {
-    private Map<Class, Converter> converters = new ConcurrentHashMap<Class, Converter>();
+    private Map<Class<?>, Converter> converters = new ConcurrentHashMap<Class<?>, Converter>();
     private MapConverter mapConverter;
     private ArrayConverter arrayConverter;
     private CollectionConverter collectionConverter;
-    private ConverterManager defaultConverters;
+    private ConverterManager defaultManager;
 
     private ConverterManager(ConverterManager defaultConverters)
     {
-        this.defaultConverters = defaultConverters;
+        this.defaultManager = defaultConverters;
         this.mapConverter = new MapConverter();
         this.arrayConverter = new ArrayConverter();
         this.collectionConverter = new CollectionConverter();
@@ -152,8 +154,8 @@ public final class ConverterManager
      */
     public final void removeConverter(Class clazz)
     {
-        Iterator<Map.Entry<Class, Converter>> iter = converters.entrySet().iterator();
-        Map.Entry<Class, Converter> entry;
+        Iterator<Entry<Class<?>, Converter>> iter = converters.entrySet().iterator();
+        Entry<Class<?>, Converter> entry;
         while (iter.hasNext())
         {
             entry = iter.next();
@@ -186,28 +188,44 @@ public final class ConverterManager
         {
             return null;
         }
-        Converter converter = converters.get(clazz);
+        Converter converter = this.getConverter(clazz);
         if (converter == null)
         {
-            for (Map.Entry<Class, Converter> entry : converters.entrySet())
-            {
-                if (entry.getKey().isAssignableFrom(clazz))
-                {
-                    converter = entry.getValue();
-                    registerConverter(clazz, converter);
-                    break;
-                }
-            }
+            converter = this.findConverter(clazz);
         }
         if (converter != null)
         {
             return (Converter<T>)converter;
         }
-        if (clazz.isArray() || Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz))
-        {
-            return null;
-        }
         throw new ConverterNotFoundException("Converter not found for: " + clazz.getName());
+    }
+
+    private Converter getConverter(Class<?> clazz)
+    {
+        Converter converter = this.converters.get(clazz);
+        if (converter == null && this.defaultManager != null)
+        {
+            converter = this.defaultManager.getConverter(clazz);
+        }
+        return converter;
+    }
+
+    private Converter findConverter(Class clazz)
+    {
+        for (Entry<Class<?>, Converter> entry : converters.entrySet())
+        {
+            if (entry.getKey().isAssignableFrom(clazz))
+            {
+                Converter converter = entry.getValue();
+                registerConverter(clazz, converter);
+                return converter;
+            }
+        }
+        if (this.defaultManager != null)
+        {
+            return this.defaultManager.findConverter(clazz);
+        }
+        return null;
     }
 
 
@@ -219,30 +237,6 @@ public final class ConverterManager
      * @return the serialized Node
      */
     public final <T> Node convertToNode(T object) throws ConversionException
-    {
-        try
-        {
-            return this.convertToNode0(object);
-        }
-        catch (ConverterNotFoundException e)
-        {
-            if (this.defaultConverters == null)
-            {
-                throw e;
-            }
-            return this.defaultConverters.convertToNode(object);
-        }
-    }
-
-    /**
-     * Converts given object into a node
-     *
-     * @param object the object to convert
-     *
-     * @return the object converted into a Node
-     */
-    @SuppressWarnings("unchecked")
-    private <T> Node convertToNode0(T object) throws ConversionException
     {
         if (object == null)
         {
@@ -260,33 +254,7 @@ public final class ConverterManager
         {
             return mapConverter.toNode((Map)object, this);
         }
-        Converter<T> converter = (Converter<T>)matchConverter(object.getClass());
-        return converter.toNode(object, this);
-    }
-
-    /**
-     * Converts a Node into an Object of given Type
-     *
-     * @param node the node
-     * @param type the type of the object
-     *
-     * @return the converted Node
-     */
-    public final <T> T convertFromNode(Node node, Type type) throws ConversionException
-    {
-        try
-        {
-            return this.convertFromNode0(node, type);
-        }
-        catch (ConverterNotFoundException e)
-        {
-            if (this.defaultConverters == null)
-            {
-                throw e;
-            }
-            // else ignore
-            return this.defaultConverters.convertFromNode0(node, type);
-        }
+        return matchConverter(object.getClass()).toNode(object, this);
     }
 
     /**
@@ -298,7 +266,7 @@ public final class ConverterManager
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
-    private <T> T convertFromNode0(Node node, Type type) throws ConversionException
+    public final <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
         if (node == null || node instanceof NullNode || type == null)
         {
@@ -317,8 +285,7 @@ public final class ConverterManager
                     throw ConversionException.of(arrayConverter, node, "Cannot convert to Array! Node is not a ListNode!");
                 }
             }
-            Converter<T> converter = matchConverter((Class<T>)type);
-            return converter.fromNode(node, this);
+            return matchConverter((Class<T>)type).fromNode(node, this);
         }
         else if (type instanceof ParameterizedType)
         {

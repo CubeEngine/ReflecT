@@ -27,6 +27,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,6 +62,12 @@ import static de.cubeisland.engine.reflect.codec.FieldType.*;
  */
 public abstract class Codec<Input, Output>
 {
+    private static final String[] NO_COMMENT = new String[0];
+
+    private final Map<Class<? extends Section>, Field[]> cachedFields = new HashMap<Class<? extends Section>, Field[]>();
+    private final Map<Field, ReflectedPath> paths = new HashMap<Field, ReflectedPath>();
+    private final Map<Field, String[]> comments = new HashMap<Field, String[]>();
+
     private ConverterManager converterManager = null;
 
     /**
@@ -148,7 +155,7 @@ public abstract class Codec<Input, Output>
         }
         Collection<ErrorNode> errorNodes = new HashSet<ErrorNode>();
         // ONLY public fields are allowed
-        for (Field field : section.getClass().getFields())
+        for (Field field : this.getSectionFields(section.getClass()))
         {
             if (isReflectedField(field))
             {
@@ -451,7 +458,8 @@ public abstract class Codec<Input, Output>
             throw new IllegalArgumentException("defaultSection and section have to be the same type of section!");
         }
         Class<? extends Section> sectionClass = section.getClass();
-        for (Field field : sectionClass.getFields())
+
+        for (Field field : this.getSectionFields(sectionClass))
         {
             if (section != defaultSection && reflected.isInheritedField(field))
             {
@@ -504,6 +512,17 @@ public abstract class Codec<Input, Output>
             baseNode.cleanUpEmptyNodes();
         }
         return baseNode;
+    }
+
+    private Field[] getSectionFields(Class<? extends Section> clazz)
+    {
+        Field[] fields = this.cachedFields.get(clazz);
+        if (fields == null)
+        {
+            fields = clazz.getFields();
+            this.cachedFields.put(clazz, fields);
+        }
+        return fields;
     }
 
     /**
@@ -635,9 +654,22 @@ public abstract class Codec<Input, Output>
      */
     private void addComment(Node node, Field field)
     {
-        if (field.isAnnotationPresent(Comment.class))
+        String[] comment = comments.get(field);
+        if (comment == null)
         {
-            node.setComments(field.getAnnotation(Comment.class).value());
+            if (field.isAnnotationPresent(Comment.class))
+            {
+                comment = field.getAnnotation(Comment.class).value();
+            }
+            else
+            {
+                comment = NO_COMMENT;
+            }
+            this.comments.put(field, comment);
+        }
+        if (comment.length != 0)
+        {
+            node.setComments(comment);
         }
     }
 
@@ -711,12 +743,21 @@ public abstract class Codec<Input, Output>
      *
      * @return the ReflectedPath
      */
-    protected static ReflectedPath getPathFor(Field field)
+    protected ReflectedPath getPathFor(Field field)
     {
-        if (field.isAnnotationPresent(Name.class))
+        ReflectedPath path = this.paths.get(field);
+        if (path == null)
         {
-            return ReflectedPath.forName(field.getAnnotation(Name.class).value());
+            if (field.isAnnotationPresent(Name.class))
+            {
+                path = ReflectedPath.forName(field.getAnnotation(Name.class).value());
+            }
+            else
+            {
+                path = ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName()));
+            }
+            this.paths.put(field, path);
         }
-        return ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName()));
+        return path;
     }
 }
