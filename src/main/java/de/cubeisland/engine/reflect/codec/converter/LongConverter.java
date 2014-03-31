@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.LongNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * A Converter for {@link java.lang.Long}
+ */
 public class LongConverter extends BasicConverter<Long>
 {
     public Long fromNode(Node node, ConverterManager manager) throws ConversionException

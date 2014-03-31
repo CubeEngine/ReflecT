@@ -56,6 +56,9 @@ import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.NullNode;
 
+/**
+ * This Class manages all Converter for a CodecManager or a Codec
+ */
 public final class ConverterManager
 {
     private Map<Class, Converter> converters = new ConcurrentHashMap<Class, Converter>();
@@ -72,6 +75,11 @@ public final class ConverterManager
         this.collectionConverter = new CollectionConverter();
     }
 
+    /**
+     * Returns a ConverterManager with the default converters
+     *
+     * @return the manager
+     */
     static ConverterManager defaultManager()
     {
         // Register Default Converters
@@ -80,9 +88,16 @@ public final class ConverterManager
         return convert;
     }
 
-    static ConverterManager emptyManager(ConverterManager defaultConverters)
+    /**
+     * Returns an empty ConverterManager using the given Manager as fallback
+     *
+     * @param fallback the fallback Manager
+     *
+     * @return the manager
+     */
+    static ConverterManager emptyManager(ConverterManager fallback)
     {
-        return new ConverterManager(defaultConverters);
+        return new ConverterManager(fallback);
     }
 
     private void registerDefaultConverters()
@@ -116,7 +131,7 @@ public final class ConverterManager
     }
 
     /**
-     * registers a converter to check for when converting
+     * Registers a Converter for given Class
      *
      * @param clazz     the class
      * @param converter the converter
@@ -131,7 +146,7 @@ public final class ConverterManager
     }
 
     /**
-     * Removes a converter from this manager
+     * Removes a Converter from this manager
      *
      * @param clazz the class of the converter to remove
      */
@@ -158,28 +173,28 @@ public final class ConverterManager
     }
 
     /**
-     * Searches matching Converter
+     * Matches a registered Converter
      *
-     * @param objectClass the class to search for
+     * @param clazz the class to match for
      *
-     * @return a matching converter or null if not found
+     * @return a matching converter
      */
     @SuppressWarnings("unchecked")
-    public final <T> Converter<T> matchConverter(Class<? extends T> objectClass) throws ConverterNotFoundException
+    public final <T> Converter<T> matchConverter(Class<? extends T> clazz) throws ConverterNotFoundException
     {
-        if (objectClass == null)
+        if (clazz == null)
         {
             return null;
         }
-        Converter converter = converters.get(objectClass);
+        Converter converter = converters.get(clazz);
         if (converter == null)
         {
             for (Map.Entry<Class, Converter> entry : converters.entrySet())
             {
-                if (entry.getKey().isAssignableFrom(objectClass))
+                if (entry.getKey().isAssignableFrom(clazz))
                 {
                     converter = entry.getValue();
-                    registerConverter(objectClass, converter);
+                    registerConverter(clazz, converter);
                     break;
                 }
             }
@@ -188,11 +203,11 @@ public final class ConverterManager
         {
             return (Converter<T>)converter;
         }
-        if (objectClass.isArray() || Collection.class.isAssignableFrom(objectClass) || Map.class.isAssignableFrom(objectClass))
+        if (clazz.isArray() || Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz))
         {
             return null;
         }
-        throw new ConverterNotFoundException("Converter not found for: " + objectClass.getName());
+        throw new ConverterNotFoundException("Converter not found for: " + clazz.getName());
     }
 
 
@@ -219,6 +234,13 @@ public final class ConverterManager
         }
     }
 
+    /**
+     * Converts given object into a node
+     *
+     * @param object the object to convert
+     *
+     * @return the object converted into a Node
+     */
     @SuppressWarnings("unchecked")
     private <T> Node convertToNode0(T object) throws ConversionException
     {
@@ -243,12 +265,12 @@ public final class ConverterManager
     }
 
     /**
-     * Converts a Node back into the original Object
+     * Converts a Node into an Object of given Type
      *
      * @param node the node
      * @param type the type of the object
      *
-     * @return the original object
+     * @return the converted Node
      */
     public final <T> T convertFromNode(Node node, Type type) throws ConversionException
     {
@@ -267,6 +289,14 @@ public final class ConverterManager
         }
     }
 
+    /**
+     * Converts a Node into an Object of given Type
+     *
+     * @param node the node
+     * @param type the type of the object
+     *
+     * @return the converted Node
+     */
     @SuppressWarnings("unchecked")
     private <T> T convertFromNode0(Node node, Type type) throws ConversionException
     {

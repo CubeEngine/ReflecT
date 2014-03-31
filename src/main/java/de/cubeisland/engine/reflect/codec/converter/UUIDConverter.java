@@ -29,6 +29,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * A Converter for {@link java.util.UUID}
+ */
 public class UUIDConverter implements Converter<UUID>
 {
     public Node toNode(UUID object, ConverterManager manager) throws ConversionException

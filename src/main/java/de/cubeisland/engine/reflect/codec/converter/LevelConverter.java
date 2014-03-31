@@ -30,6 +30,9 @@ import de.cubeisland.engine.reflect.node.BooleanNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * A Converter for {@link java.util.logging.Level}
+ */
 public class LevelConverter implements Converter<Level>
 {
     public Node toNode(Level object, ConverterManager manager) throws ConversionException

@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.IntNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * A Converter for {@link java.lang.Integer}
+ */
 public class IntegerConverter extends BasicConverter<Integer>
 {
     public Integer fromNode(Node node, ConverterManager manager) throws ConversionException

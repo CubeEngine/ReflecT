@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect;
 import de.cubeisland.engine.reflect.codec.YamlCodec;
 
 /**
- * A Reflected Object de/serializing from/to YAML
+ * A Reflected using {@link YamlCodec} to save/load into/from Files
  */
 public abstract class ReflectedYaml extends ReflectedFile<YamlCodec>
 {

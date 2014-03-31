@@ -29,43 +29,56 @@ import de.cubeisland.engine.reflect.codec.CodecManager;
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
+/**
+ * This Class creates new Reflected Objects and provides them with a CodecManger containing the Converters
+ */
 public class Reflector
 {
+    // package private
+    Logger logger;
     private CodecManager codecManager = new CodecManager();
-    Logger logger; // package private
 
+    /**
+     * Creates a Reflector with a default Logger
+     */
     public Reflector()
     {
         this.logger = Logger.getLogger("ReflecT");
     }
 
+    /**
+     * Creates a Reflector with the given Logger
+     *
+     * @param logger the logger to use
+     */
     public Reflector(Logger logger)
     {
         this.logger = logger;
     }
 
     /**
-     * Loads the reflected from given file and optionally saves it afterwards
+     * Loads the reflected from given source and optionally saves it afterwards
      *
-     * @param clazz the reflected class
-     * @param source  the file to load from and save to
-     * @param save  whether to save the reflected or not
+     * @param clazz  the reflected class
+     * @param source the file to load from and save to
+     * @param save   whether to save the reflected or not
      *
      * @return the loaded reflected
      */
     public <T extends Reflected<?, S>, S> T load(Class<T> clazz, S source, boolean save)
     {
-        T reflected = create(clazz); // loading
-        reflected.setTarget(source); // IMPORTANT TO SET BEFORE LOADING!
+        T reflected = create(clazz);
+        // IMPORTANT TO SET BEFORE LOADING!
+        reflected.setTarget(source);
         reflected.reload(save);
         return reflected;
     }
 
     /**
-     * Loads the reflected from given file and saves it afterwards
+     * Loads the reflected from given source and saves it afterwards
      *
-     * @param clazz the reflected class
-     * @param source  the file to load from and save to
+     * @param clazz  the reflected class
+     * @param source the source to load from and save to
      *
      * @return the loaded reflected
      */
@@ -75,7 +88,7 @@ public class Reflector
     }
 
     /**
-     * Loads the reflected from the InputStream
+     * Loads the reflected from given InputStream
      *
      * @param clazz the reflected class
      * @param is    the InputStream to load from
@@ -90,7 +103,7 @@ public class Reflector
     }
 
     /**
-     * Creates an instance of given reflected-class.
+     * Creates an instance of given Reflected Class.
      * <p>The reflected has to have the default Constructor for this to work!
      *
      * @param clazz the reflected class
@@ -116,11 +129,21 @@ public class Reflector
         }
     }
 
+    /**
+     * Returns the CodecManager
+     *
+     * @return the CodecManager
+     */
     public CodecManager getCodecManager()
     {
         return this.codecManager;
     }
 
+    /**
+     * Returns the default ConverterManager
+     *
+     * @return the default ConverterManager
+     */
     public ConverterManager getDefaultConverterManager()
     {
         return this.codecManager.getDefaultConverterManager();

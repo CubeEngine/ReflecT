@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.BooleanNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * A Converter for {@link Boolean}
+ */
 public class BooleanConverter extends BasicConverter<Boolean>
 {
     public Boolean fromNode(Node node, ConverterManager manager) throws ConversionException

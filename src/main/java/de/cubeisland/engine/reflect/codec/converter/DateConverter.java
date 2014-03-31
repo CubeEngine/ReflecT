@@ -29,6 +29,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * A Converter for {@link java.sql.Date}
+ */
 public class DateConverter implements Converter<Date>
 {
     public Node toNode(Date object, ConverterManager manager) throws ConversionException

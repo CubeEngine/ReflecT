@@ -34,13 +34,16 @@ import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ErrorNode;
 
+/**
+ * A Codec using {@link InputStream} and {@link OutputStream} to save/load into/from a File
+ */
 public abstract class FileCodec extends Codec<InputStream, OutputStream>
 {
-    public final Collection<ErrorNode> loadReflected(Reflected reflected, InputStream is)
+    public final Collection<ErrorNode> loadReflected(Reflected reflected, InputStream input)
     {
         try
         {
-            return dumpIntoSection(reflected.getDefault(), reflected, this.load(is, reflected), reflected);
+            return dumpIntoSection(reflected.getDefault(), reflected, this.load(input, reflected), reflected);
         }
         catch (ConversionException ex)
         {
@@ -55,7 +58,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
         {
             try
             {
-                is.close();
+                input.close();
             }
             catch (IOException e)
             {
@@ -64,11 +67,11 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
         }
     }
 
-    public final void saveReflected(Reflected reflected, OutputStream os)
+    public final void saveReflected(Reflected reflected, OutputStream output)
     {
         try
         {
-            this.save(convertSection(reflected.getDefault(), reflected, reflected), os, reflected);
+            this.save(convertSection(reflected.getDefault(), reflected, reflected), output, reflected);
         }
         catch (ConversionException ex)
         {
@@ -82,7 +85,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
         {
             try
             {
-                os.close();
+                output.close();
             }
             catch (IOException e)
             {

@@ -46,30 +46,43 @@ import static de.cubeisland.engine.reflect.codec.Codec.isReflectedField;
  */
 public abstract class Reflected<C extends Codec, SerialType> implements Section
 {
-    protected transient Reflector factory;
-    private transient Reflected defaultReflected = this;
     private final transient Class<C> defaultCodec = getCodecClass(this.getClass());
-
-    protected transient SerialType sertialType;
-
-    private static final String[] EMPTY = new String[0];
-
+    protected transient Reflector reflector;
+    protected transient SerialType serialType;
+    private transient Reflected defaultReflected = this;
     /**
      * Saves the fields that got inherited from the parent-reflected
      */
     private transient Set<Field> inheritedFields;
 
-    public final void init(Reflector factory)
+    /**
+     * Initializes the Reflected with a Reflector
+     * <p>This needs to be called before using any save or load method
+     *
+     * @param reflector the Reflector
+     */
+    public final void init(Reflector reflector)
     {
-        this.factory = factory;
+        this.reflector = reflector;
         this.onInit();
     }
 
+    /**
+     * Returns the default Reflected
+     * <p>If not a child Reflected the default is <code>this</code>
+     *
+     * @return the default Reflected
+     */
     public final Reflected getDefault()
     {
         return this.defaultReflected;
     }
 
+    /**
+     * Sets the default Reflected
+     *
+     * @param reflected the Reflected
+     */
     public final void setDefault(Reflected reflected)
     {
         if (reflected == null)
@@ -101,8 +114,8 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Marks a field as being inherited from the parent reflected and thus not being saved
-     * <p>if this reflectd is not a child-reflected nothing happens
+     * Marks a field as being inherited from the default Reflected and thus not being saved
+     * <p>if this Reflected is not a child Reflected nothing happens
      *
      * @param field the inherited field
      */
@@ -116,8 +129,8 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Marks a field as not being inherited from the parent reflected and thus saved into file
-     * <p>if this reflected is not a child-reflected nothing happens
+     * Marks a field as not being inherited from the default Reflected and thus saved into file
+     * <p>if this Reflected is not a child Reflected nothing happens
      *
      * @param field the not inherited field
      */
@@ -131,8 +144,8 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Returns whether the given field-value was inherited from a parent-reflected
-     * <p>Returns always false when this is not a child-reflected
+     * Returns whether the given field was inherited from an other Reflected
+     * <p>Returns always false when this is not a child Reflected
      *
      * @param field the field to check
      *
@@ -144,17 +157,17 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Loads and saves a child-reflected from given SerialType with this reflected as parent
+     * Loads and saves a child Reflected from given SerialType with this Reflected as default
      *
      * @param source the source SerialType
-     * @param <T>        the ReflectedType
+     * @param <T>    the ReflectedType
      *
-     * @return the loaded child-reflected
+     * @return the loaded child Reflected
      */
     @SuppressWarnings("unchecked")
     public <T extends Reflected> T loadChild(SerialType source)
     {
-        Reflected<C, SerialType> childReflected = factory.create(this.getClass());
+        Reflected<C, SerialType> childReflected = reflector.create(this.getClass());
         childReflected.setTarget(source);
         childReflected.setDefault(this);
         try
@@ -219,23 +232,23 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Saves the reflected default serialType
+     * Saves the Reflected default SerialType
      */
     public final void save()
     {
-        this.save(this.sertialType);
+        this.save(this.serialType);
     }
 
     /**
-     * Saves this reflected into the target
+     * Saves this Reflected into the target
      *
      * @param target the target to save to
      */
     public abstract void save(SerialType target);
 
     /**
-     * Reloads the reflected from the default serialType
-     * <p>This will only work if the serialType of the reflected got set previously
+     * Reloads the Reflected from the default SerialType
+     * <p>This will only work if the SerialType got set previously
      */
     public final void reload()
     {
@@ -243,19 +256,17 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Reloads the reflected from file
-     * <p>This will only work if the file of the reflected got set previously
+     * Reloads the Reflected from the default SerialType
+     * <p>This will only work if the SerialType got set previously
      *
-     * @param save true if the reflected should be saved after loading
+     * @param save true if the Reflected should be saved after loading
      *
-     * @return true when a new file got created while saving
-     *
-     * @throws de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException if an error occurs while loading
+     * @return false when the reflected did not get loaded
      */
     public final boolean reload(boolean save) throws InvalidReflectedObjectException
     {
         boolean result = false;
-        if (!this.loadFrom(this.sertialType) && save)
+        if (!this.loadFrom(this.serialType) && save)
         {
             result = true;
         }
@@ -282,10 +293,10 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     {
         if (!errors.isEmpty())
         {
-            this.factory.logger.warning(errors.size() + " ErrorNodes were encountered while loading the reflected!");
+            this.reflector.logger.warning(errors.size() + " ErrorNodes were encountered while loading the reflected!");
             for (ErrorNode error : errors)
             {
-                this.factory.logger.log(Level.WARNING, error.getErrorMessage());
+                this.reflector.logger.log(Level.WARNING, error.getErrorMessage());
             }
         }
     }
@@ -303,7 +314,17 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
         {
             throw new MissingCodecException("Reflected has no Codec set! A reflected object needs to have a codec defined in its GenericType");
         }
-        return this.factory.getCodecManager().getCodec(this.defaultCodec);
+        return this.reflector.getCodecManager().getCodec(this.defaultCodec);
+    }
+
+    /**
+     * Returns the SerialType this reflected will be saved to and loaded from by default
+     *
+     * @return the path of this reflected
+     */
+    public final SerialType getTarget()
+    {
+        return this.serialType;
     }
 
     /**
@@ -315,19 +336,9 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     {
         if (type == null)
         {
-            throw new IllegalArgumentException("The file must not be null!");
+            throw new IllegalArgumentException("The SerialType must not be null!");
         }
-        this.sertialType = type;
-    }
-
-    /**
-     * Returns the SerialType this reflected will be saved to and loaded from by default
-     *
-     * @return the path of this reflected
-     */
-    public final SerialType getTarget()
-    {
-        return this.sertialType;
+        this.serialType = type;
     }
 
     /**
@@ -371,32 +382,19 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Returns the lines to be added in front of the Reflected.
-     * <p>not every Codec may be able to use this
+     * Returns the logger of the Reflector
      *
-     * @return the head
+     * @return the Logger
      */
-    public String[] head()
+    public Logger getLogger()
     {
-        return EMPTY;
+        return this.reflector.logger;
     }
 
     /**
-     * Returns the lines to be added at the end of the reflected.
-     * <p>not every Codec may be able to use this
-     *
-     * @return the head
+     * Updates the inheritance of Fields
+     * <p>This doesn't do anything if the Reflected has no other default set
      */
-    public String[] tail()
-    {
-        return EMPTY;
-    }
-
-    public Logger getLogger()
-    {
-        return this.factory.logger;
-    }
-
     public final void updateInheritance()
     {
         if (this.defaultReflected == null || this.defaultReflected == this)
@@ -408,6 +406,12 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
         this.updateInheritance(this, defaultReflected);
     }
 
+    /**
+     * Updates the inheritance of the Sections
+     *
+     * @param section        the Section
+     * @param defaultSection the default Section
+     */
     @SuppressWarnings("unchecked")
     private void updateInheritance(Section section, Section defaultSection)
     {
@@ -451,6 +455,12 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
         }
     }
 
+    /**
+     * Updates the inheritance of the SectionMaps
+     *
+     * @param value        the value
+     * @param defaultValue the default value
+     */
     private void updateSectionMapInheritance(Map<?, Section> value, Map<?, Section> defaultValue)
     {
         for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())

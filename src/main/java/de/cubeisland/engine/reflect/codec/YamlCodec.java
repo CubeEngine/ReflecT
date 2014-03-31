@@ -30,22 +30,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.util.StringUtils;
+import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.NullNode;
 import de.cubeisland.engine.reflect.node.StringNode;
+import de.cubeisland.engine.reflect.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
+import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 
 /**
- * A Codec for YAML-Reflected Objects allowing child-reflected
+ * A Codec using the YAML format
  */
 public class YamlCodec extends FileCodec
 {
@@ -103,15 +104,20 @@ public class YamlCodec extends FileCodec
         try
         {
             OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
-            if (reflected.head() != null)
+            ReflectedFile fRef = null;
+            if (reflected instanceof ReflectedFile)
             {
-                writer.append("# ").append(StringUtils.implode("\n# ", reflected.head())).append(LINE_BREAK)
+                fRef = (ReflectedFile)reflected;
+            }
+            if (fRef != null && fRef.head() != null && fRef.head().length != 0)
+            {
+                writer.append("# ").append(StringUtils.implode("\n# ", fRef.head())).append(LINE_BREAK)
                       .append(LINE_BREAK);
             }
             convertMapNode(writer, node, 0, false);
-            if (reflected.tail() != null)
+            if (fRef != null && fRef.tail() != null && fRef.head().length != 0)
             {
-                writer.append("# ").append(StringUtils.implode("\n# ", reflected.tail()));
+                writer.append("# ").append(StringUtils.implode("\n# ", fRef.tail()));
             }
             writer.flush();
             writer.close();
@@ -184,7 +190,7 @@ public class YamlCodec extends FileCodec
             }
             StringBuilder sb = new StringBuilder();
             String comment = buildComment(entry.getValue().getComments(), offset);
-            if (!isEmpty(comment))
+            if (!isEmpty(comment.trim()))
             {
                 // if not already one line free
                 if (!hasLine && !first)

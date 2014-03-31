@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.ShortNode;
 
+/**
+ * A Converter for {@link java.lang.Short}
+ */
 public class ShortConverter extends BasicConverter<Short>
 {
     public Short fromNode(Node node, ConverterManager manager) throws ConversionException

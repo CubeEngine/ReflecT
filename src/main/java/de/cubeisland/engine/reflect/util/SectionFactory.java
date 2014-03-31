@@ -20,11 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect;
+package de.cubeisland.engine.reflect.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
 /**
@@ -37,11 +38,11 @@ public class SectionFactory
     }
 
     /**
-     * Returns true if the {@link Section} class <code>isAssignableFrom</code> the given class
+     * Returns true if the {@link de.cubeisland.engine.reflect.Section} class <code>isAssignableFrom</code> the given class
      *
      * @param clazz the class to check
      *
-     * @return true if the given class implements {@link Section}
+     * @return true if the given class implements {@link de.cubeisland.engine.reflect.Section}
      */
     public static boolean isSectionClass(Class clazz)
     {

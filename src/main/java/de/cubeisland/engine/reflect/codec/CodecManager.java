@@ -27,45 +27,48 @@ import java.util.Map;
 
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 
+/**
+ * This Class manages Codec for a Reflector
+ */
 public class CodecManager
 {
     private final ConverterManager defaultManager = ConverterManager.defaultManager();
     private final Map<Class<? extends Codec>, Codec> codecs = new HashMap<Class<? extends Codec>, Codec>();
 
     /**
-     * Gets the instance of given <code>codecClass</code>
+     * Gets the instance of given {@link Codec} class
      *
-     * @param codecClass the class of the codec
-     * @param <C>        the type of the returned codec
+     * @param clazz the class of the Codec
+     * @param <C>   the type of the returned codec
      *
      * @return the codec instance
      */
     @SuppressWarnings("unchecked")
-    public <C extends Codec> C getCodec(Class<C> codecClass)
+    public <C extends Codec> C getCodec(Class<C> clazz)
     {
-        C codec = (C)this.codecs.get(codecClass);
+        C codec = (C)this.codecs.get(clazz);
         if (codec == null)
         {
             // Codec not registered yet! Try to auto-register...
             try
             {
-                codec = codecClass.newInstance();
+                codec = clazz.newInstance();
                 this.registerCodec(codec);
             }
             catch (InstantiationException e)
             {
-                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
+                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + clazz.getName(), e);
             }
             catch (IllegalAccessException e)
             {
-                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + codecClass.getName(), e);
+                throw new ReflectedInstantiationException("Could not instantiate unregistered Codec! " + clazz.getName(), e);
             }
         }
         return codec;
     }
 
     /**
-     * Registeres a new Codec
+     * Registers a new Codec
      *
      * @param codec the codec to register
      */
@@ -76,7 +79,7 @@ public class CodecManager
     }
 
     /**
-     * Returns the default ConverterManager for all codecs managed by this CodecManager
+     * Returns the default ConverterManager for all Codec managed by this CodecManager
      *
      * @return the default ConverterManager
      */

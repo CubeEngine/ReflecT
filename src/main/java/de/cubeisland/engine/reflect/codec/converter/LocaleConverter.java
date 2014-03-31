@@ -29,6 +29,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * A Converter for {@link java.util.Locale}
+ */
 public class LocaleConverter implements Converter<Locale>
 {
     public Node toNode(Locale locale, ConverterManager manager) throws ConversionException

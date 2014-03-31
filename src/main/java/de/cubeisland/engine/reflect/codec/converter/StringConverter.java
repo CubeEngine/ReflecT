@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * A Converter for {@link java.lang.String}
+ */
 public class StringConverter extends BasicConverter<String>
 {
     public String fromNode(Node node, ConverterManager manager) throws ConversionException

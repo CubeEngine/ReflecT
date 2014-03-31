@@ -33,8 +33,13 @@ import java.util.logging.Level;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 
+/**
+ * A Reflected saving into a {@link File} using a {@link FileCodec}
+ */
 public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, File>
 {
+    private static final String[] EMPTY = new String[0];
+
     public final void save(File target)
     {
         if (target == null)
@@ -65,7 +70,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
 
     public final boolean loadFrom(File source)
     {
-        if (this.sertialType == null)
+        if (this.serialType == null)
         {
             throw new IllegalArgumentException("The file must not be null in order to load the reflected!");
         }
@@ -73,7 +78,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         {
             try
             {
-                this.loadFrom(new FileInputStream(this.sertialType));
+                this.loadFrom(new FileInputStream(this.serialType));
             }
             catch (FileNotFoundException e)
             {
@@ -82,7 +87,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
             this.onLoaded(source);
             return true;
         }
-        this.factory.logger.log(Level.INFO, "Could not load reflected from file! Using default...");
+        this.reflector.logger.log(Level.INFO, "Could not load reflected from file! Using default...");
         return false;
     }
 
@@ -101,13 +106,45 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         this.showLoadErrors(this.getCodec().loadReflected(this, is));
     }
 
+    /**
+     * Returns the File
+     *
+     * @return the file
+     */
     public File getFile()
     {
         return this.getTarget();
     }
 
+    /**
+     * Sets the file
+     *
+     * @param file the file to set
+     */
     public void setFile(File file)
     {
         this.setTarget(file);
+    }
+
+    /**
+     * Returns the lines to be added in front of the Reflected.
+     * <p>not every Codec may be able to use this
+     *
+     * @return the head
+     */
+    public String[] head()
+    {
+        return EMPTY;
+    }
+
+    /**
+     * Returns the lines to be added at the end of the reflected.
+     * <p>not every Codec may be able to use this
+     *
+     * @return the head
+     */
+    public String[] tail()
+    {
+        return EMPTY;
     }
 }

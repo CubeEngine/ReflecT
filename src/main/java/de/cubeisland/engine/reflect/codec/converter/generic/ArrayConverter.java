@@ -31,6 +31,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * Converts ListNode to Array and vice versa
+ */
 public class ArrayConverter
 {
     public ListNode toNode(Object[] array, ConverterManager manager) throws ConversionException

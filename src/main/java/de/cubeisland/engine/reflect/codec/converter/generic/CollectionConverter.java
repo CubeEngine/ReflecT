@@ -38,6 +38,9 @@ import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * Converts ListNode to Collection and vice versa
+ */
 public class CollectionConverter
 {
     /**

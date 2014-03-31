@@ -28,6 +28,9 @@ import de.cubeisland.engine.reflect.node.Node;
 
 import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
 
+/**
+ * Implements basic conversion of Strings, Numbers or Primitives to Node
+ */
 public abstract class BasicConverter<T> implements Converter<T>
 {
     @SuppressWarnings("unchecked")

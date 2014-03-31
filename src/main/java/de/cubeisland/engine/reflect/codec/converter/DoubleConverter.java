@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.DoubleNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * A Converter for {@link java.lang.Double}
+ */
 public class DoubleConverter extends BasicConverter<Double>
 {
     public Double fromNode(Node node, ConverterManager manager) throws ConversionException

@@ -38,6 +38,9 @@ import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.StringNode;
 
+/**
+ * Converts MapNode to Map and vice versa
+ */
 public class MapConverter
 {
     /**

@@ -32,12 +32,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import de.cubeisland.engine.reflect.FieldType;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.SectionFactory;
+import de.cubeisland.engine.reflect.util.SectionFactory;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
+import de.cubeisland.engine.reflect.codec.converter.Converter;
 import de.cubeisland.engine.reflect.codec.converter.generic.CollectionConverter;
 import de.cubeisland.engine.reflect.codec.converter.generic.MapConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
@@ -54,7 +54,7 @@ import de.cubeisland.engine.reflect.node.ReflectedPath;
 import de.cubeisland.engine.reflect.node.StringNode;
 import de.cubeisland.engine.reflect.util.StringUtils;
 
-import static de.cubeisland.engine.reflect.FieldType.*;
+import static de.cubeisland.engine.reflect.codec.FieldType.*;
 
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
@@ -74,11 +74,11 @@ public abstract class Codec<Input, Output>
     // PUBLIC FINAL API Methods
 
     /**
-     * Returns the <code>ConverterManager</code> for this codec, allowing to register custom <code>Converter</code> for this codec only
+     * Returns the {@link ConverterManager} for this codec, allowing to register custom {@link Converter} for this codec only
      *
      * @return the ConverterManager
      *
-     * @throws IllegalStateException if the Codec was not instantiated by the Factory
+     * @throws UnsupportedOperationException if the Codec was not instantiated by the Factory
      */
     public final ConverterManager getConverterManager()
     {
@@ -90,52 +90,52 @@ public abstract class Codec<Input, Output>
     }
 
     /**
-     * Loads in the given <code>Reflected</code> using the <code>InputStream</code>
-     * <p>if the reflected object has no default set it will be saved normally!
+     * Loads in the given {@link Reflected} using the <code>Input</code>
      *
      * @param reflected the Reflected to load
-     * @param is        the InputStream to load from
+     * @param input     the Input to load from
      *
      * @return a collection of all erroneous Nodes
      */
-    public abstract Collection<ErrorNode> loadReflected(Reflected reflected, Input is);
+    public abstract Collection<ErrorNode> loadReflected(Reflected reflected, Input input);
 
     /**
-     * Saves the <code>Reflected</code> using given <code>OutputStream</code>
+     * Saves the {@link Reflected} using given <code>Output</code>
      *
      * @param reflected the Reflected to save
-     * @param os        the OutputStream to save into
+     * @param output    the Output to save into
      */
-    public abstract void saveReflected(Reflected reflected, Output os);
+    public abstract void saveReflected(Reflected reflected, Output output);
 
     // PROTECTED ABSTRACT Methods
 
     /**
-     * Saves the values contained in the <code>MapNode</code> using given <code>Output</code>
+     * Saves the values contained in the {@link MapNode} using given <code>Output</code>
      *
-     * @param node      the Node containing all data to save
-     * @param out        the Output to save to
-     * @param reflected the reflected
+     * @param node      the MapNode containing all data to save
+     * @param out       the Output to save to
+     * @param reflected the Reflected
      */
     protected abstract void save(MapNode node, Output out, Reflected reflected) throws ConversionException;
 
     /**
-     * Converts the <code>Input</code> into a <code>MapNode</code>
+     * Converts the <code>Input</code> into a {@link MapNode}
      *
      * @param in        the Input to load from
-     * @param reflected the reflected
+     * @param reflected the Reflected
      */
     protected abstract MapNode load(Input in, Reflected reflected) throws ConversionException;
 
     // Reflected loading Methods
 
     /**
-     * Dumps the contents of the MapNode into the fields of the section using the defaultSection as default if a node is not given
+     * Dumps the contents of the {@link MapNode} into the Fields of the Section
+     * <p>falling back to using the default Section if a node is not given
      *
-     * @param defaultSection the parent reflected-section
-     * @param section        the reflected-section
+     * @param defaultSection the default Section
+     * @param section        the Section
      * @param currentNode    the Node to load from
-     * @param reflected      the MultiReflected containing this section
+     * @param reflected      the Reflected containing the Section
      *
      * @return a collection of all erroneous Nodes
      */
@@ -186,9 +186,7 @@ public abstract class Codec<Input, Output>
                     catch (ConversionException e)
                     {
                         // non-fatal ConversionException
-                        InvalidReflectedObjectException ex = InvalidReflectedObjectException
-                            .of("Error while converting Node to dump into field!", getPathFor(field), section
-                                .getClass(), field, e);
+                        InvalidReflectedObjectException ex = InvalidReflectedObjectException.of("Error while converting Node to dump into field!", getPathFor(field), section.getClass(), field, e);
                         if (reflected.useStrictExceptionPolicy())
                         {
                             throw ex;
@@ -197,9 +195,7 @@ public abstract class Codec<Input, Output>
                     }
                     catch (RuntimeException e)
                     {
-                        throw InvalidReflectedObjectException
-                            .of("Unknown Error while dumping loaded reflected into fields", getPathFor(field), section
-                                .getClass(), field, e);
+                        throw InvalidReflectedObjectException.of("Unknown Error while dumping loaded reflected into fields", getPathFor(field), section.getClass(), field, e);
                     }
                 }
             }
@@ -208,11 +204,11 @@ public abstract class Codec<Input, Output>
     }
 
     /**
-     * Copy the contents of the parent section into a field of the section
+     * Copy the contents of the default Section into a field of the Section
      *
-     * @param parentSection the parent reflected-section
-     * @param section       the reflected-section
-     * @param field         the Field to load into
+     * @param parentSection the default Section
+     * @param section       the Section
+     * @param field         the Field to write the value into
      *
      * @return a collection of all erroneous Nodes
      */
@@ -227,13 +223,13 @@ public abstract class Codec<Input, Output>
     }
 
     /**
-     * Dumps the contents of the Node into a field of the section
+     * Dumps the contents of the {@link Node} into a Field of the Section
      *
-     * @param defaultSection the parent reflected-section
-     * @param section        the reflected-section
-     * @param field          the Field to load into
-     * @param fieldNode      the Node to load from
-     * @param reflected      the MultiReflected containing this section
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param field          the Field to write the value into
+     * @param fieldNode      the Node to get the value from
+     * @param reflected      the Reflected containing the Section
      *
      * @return a collection of all erroneous Nodes
      */
@@ -246,13 +242,13 @@ public abstract class Codec<Input, Output>
         Object defaultValue = field.get(defaultSection);
         if (fieldType == FieldType.NORMAL)
         {
-            fieldValue = dumpIntoNormalField(defaultSection, section, field, fieldNode, reflected, type);
+            fieldValue = getNormalFieldValue(defaultSection, section, field, fieldNode, reflected, type);
         }
         else if (fieldType == FieldType.SECTION)
         {
             if (fieldNode instanceof MapNode)
             {
-                fieldValue = dumpIntoSectionField(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, defaultValue);
+                fieldValue = getSectionFieldValue(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, defaultValue);
             }
             else
             {
@@ -267,7 +263,7 @@ public abstract class Codec<Input, Output>
             }
             if (fieldNode instanceof ListNode)
             {
-                fieldValue = dumpIntoSectionCollectionField(section, (ListNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
+                fieldValue = getSectionCollectionFieldValue(section, (ListNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
             }
             else
             {
@@ -278,7 +274,7 @@ public abstract class Codec<Input, Output>
         {
             if (fieldNode instanceof MapNode)
             {
-                fieldValue = dumpIntoSectionMapField(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
+                fieldValue = getSectionMapFieldValue(defaultSection, section, field, (MapNode)fieldNode, reflected, errorNodes, (ParameterizedType)type);
             }
             else
             {
@@ -293,8 +289,22 @@ public abstract class Codec<Input, Output>
         return errorNodes;
     }
 
+    /**
+     * Gets the converted value of the {@link MapNode} to write into the Field
+     * <p>The Field being a Map with Sections
+     *
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param field          the Field to write the value into
+     * @param fieldNode      the Node to get the value from
+     * @param reflected      the Reflected
+     * @param errorNodes     the current erroneous Nodes
+     * @param type           the ParametrizedType of given Field
+     *
+     * @return the value to write into the Field
+     */
     @SuppressWarnings("unchecked")
-    private Object dumpIntoSectionMapField(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws IllegalAccessException, ConversionException
+    private Object getSectionMapFieldValue(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws IllegalAccessException, ConversionException
     {
         Object fieldValue = MapConverter.getMapFor(type);
         if (fieldNode.isEmpty())
@@ -313,8 +323,7 @@ public abstract class Codec<Input, Output>
             }
             else if (entry.getValue() instanceof MapNode)
             {
-                errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry
-                    .getValue(), reflected));
+                errorNodes.addAll(dumpIntoSection(mappedParentSections.get(key), value, (MapNode)entry.getValue(), reflected));
             }
             else
             {
@@ -325,8 +334,20 @@ public abstract class Codec<Input, Output>
         return fieldValue;
     }
 
+    /**
+     * Gets the converted value of the {@link ListNode} to write into the Field
+     * <p>The Field being a Collection with Sections
+     *
+     * @param section    the Section
+     * @param fieldNode  the Node to get the value from
+     * @param reflected  the Reflected
+     * @param errorNodes the current erroneous Nodes
+     * @param type       the ParametrizedType of given Field
+     *
+     * @return the value to write into the Field
+     */
     @SuppressWarnings("unchecked")
-    private Object dumpIntoSectionCollectionField(Section section, ListNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws ConversionException
+    private Object getSectionCollectionFieldValue(Section section, ListNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, ParameterizedType type) throws ConversionException
     {
         Object fieldValue = CollectionConverter.getCollectionFor(type);
         if (fieldNode.isEmpty())
@@ -354,8 +375,22 @@ public abstract class Codec<Input, Output>
         return fieldValue;
     }
 
+    /**
+     * Gets the converted value of the {@link MapNode} to write into the Field
+     * <p>The Field being a Section
+     *
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param field          the Field to write the value into
+     * @param fieldNode      the Node to get the value from
+     * @param reflected      the Reflected
+     * @param errorNodes     the current erroneous Nodes
+     * @param defaultValue   the default Value
+     *
+     * @return the value to write into the Field
+     */
     @SuppressWarnings("unchecked")
-    private Object dumpIntoSectionField(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, Object defaultValue)
+    private Object getSectionFieldValue(Section defaultSection, Section section, Field field, MapNode fieldNode, Reflected reflected, Collection<ErrorNode> errorNodes, Object defaultValue)
     {
         Object fieldValue = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), section);
         if (defaultValue == null)
@@ -373,7 +408,19 @@ public abstract class Codec<Input, Output>
         return fieldValue;
     }
 
-    private Object dumpIntoNormalField(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected, Type type) throws ConversionException, IllegalAccessException
+    /**
+     * Gets the converted value of the {@link Node} to write into the Field
+     *
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param field          the Field to write the value into
+     * @param fieldNode      the Node to get the value from
+     * @param reflected      the Reflected
+     * @param type           the ParametrizedType of given Field
+     *
+     * @return the value to write into the Field
+     */
+    private Object getNormalFieldValue(Section defaultSection, Section section, Field field, Node fieldNode, Reflected reflected, Type type) throws ConversionException, IllegalAccessException
     {
         // Convert the value
         Object fieldValue = converterManager.convertFromNode(fieldNode, type);
@@ -388,10 +435,13 @@ public abstract class Codec<Input, Output>
     // Reflected saving Methods
 
     /**
-     * Fills the map with values from the Fields to save
+     * Fills a MapNode with the values of given Section
      *
-     * @param defaultSection the parent section
-     * @param section        the section
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param reflected      the Reflected
+     *
+     * @return the Section converted into a MapNode
      */
     protected final MapNode convertSection(Section defaultSection, Section section, Reflected reflected)
     {
@@ -440,13 +490,11 @@ public abstract class Codec<Input, Output>
                 catch (ConversionException e)
                 {
                     // fatal ConversionException
-                    throw InvalidReflectedObjectException
-                        .of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
+                    throw InvalidReflectedObjectException.of("Could not convert Field into Node!", getPathFor(field), section.getClass(), field, e);
                 }
                 catch (RuntimeException e)
                 {
-                    throw InvalidReflectedObjectException
-                        .of("Unknown Error while converting Section!", getPathFor(field), section.getClass(), field, e);
+                    throw InvalidReflectedObjectException.of("Unknown Error while converting Section!", getPathFor(field), section.getClass(), field, e);
                 }
             }
         }
@@ -459,14 +507,14 @@ public abstract class Codec<Input, Output>
     }
 
     /**
-     * Converts a single field of a section into a node
+     * Fills a Node with the values of Field
      *
-     * @param field          the field to convert
-     * @param defaultSection the defaultSection
-     * @param section        the section containing the fields value
-     * @param reflected      the reflected object
+     * @param field          the Field to get the value from
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param reflected      the Reflected
      *
-     * @return the converted Node
+     * @return the Field converted into a Node
      */
     @SuppressWarnings("unchecked")
     private Node convertField(Field field, Section defaultSection, Section section, Reflected reflected) throws ConversionException, IllegalAccessException
@@ -488,10 +536,10 @@ public abstract class Codec<Input, Output>
             {
                 throw new UnsupportedReflectedException("Child-reflected are not allowed for Sections in Collections");
             }
-            node = convertSectionCollectionField(reflected, (Collection<Section>)fieldValue);
+            node = convertSectionCollection(reflected, (Collection<Section>)fieldValue);
             break;
         case SECTION_MAP:
-            node = convertSectionMapField(reflected, (Map<Object, Section>)fieldValue, (Map<Object, Section>)defaultValue);
+            node = convertSectionMap(reflected, (Map<Object, Section>)fieldValue, (Map<Object, Section>)defaultValue);
             break;
         default:
             throw new IllegalArgumentException("Invalid FieldType!");
@@ -500,15 +548,24 @@ public abstract class Codec<Input, Output>
         return node;
     }
 
-    private Node convertSectionMapField(Reflected reflected, Map<Object, Section> fieldMap, Map<Object, Section> defaultFieldMap) throws ConversionException
+    /**
+     * Fills a Node with the value of given Map with Sections
+     *
+     * @param reflected         the Reflected
+     * @param fieldValue        the Map
+     * @param defaultFieldValue the default Map
+     *
+     * @return the Map converted into a Node
+     */
+    private Node convertSectionMap(Reflected reflected, Map<Object, Section> fieldValue, Map<Object, Section> defaultFieldValue) throws ConversionException
     {
         MapNode node = MapNode.emptyMap();
-        for (Entry<Object, Section> defaultEntry : defaultFieldMap.entrySet())
+        for (Entry<Object, Section> defaultEntry : defaultFieldValue.entrySet())
         {
             Node keyNode = converterManager.convertToNode(defaultEntry.getKey());
             if (keyNode instanceof KeyNode)
             {
-                node.setNode((KeyNode)keyNode, convertSection(defaultEntry.getValue(), fieldMap.get(defaultEntry.getKey()), reflected));
+                node.setNode((KeyNode)keyNode, convertSection(defaultEntry.getValue(), fieldValue.get(defaultEntry.getKey()), reflected));
             }
             else
             {
@@ -518,7 +575,15 @@ public abstract class Codec<Input, Output>
         return node;
     }
 
-    private Node convertSectionCollectionField(Reflected reflected, Collection<Section> fieldValue)
+    /**
+     * Fills a Node with the value of given Collection of Sections
+     *
+     * @param reflected  the Reflected
+     * @param fieldValue the Collection
+     *
+     * @return the Collection converted into a Node
+     */
+    private Node convertSectionCollection(Reflected reflected, Collection<Section> fieldValue)
     {
         ListNode node = ListNode.emptyList();
         for (Section subSection : fieldValue)
@@ -528,6 +593,18 @@ public abstract class Codec<Input, Output>
         return node;
     }
 
+    /**
+     * Fills a Node with the value of given Object
+     *
+     * @param field          the Field to get the value from
+     * @param defaultSection the default Section
+     * @param section        the Section
+     * @param reflected      the Reflected
+     * @param fieldValue     the Object
+     * @param defaultValue   the default Object
+     *
+     * @return the Object converted into a Node
+     */
     @SuppressWarnings("unchecked")
     private Node convertSectionField(Field field, Section defaultSection, Section section, Reflected reflected, Object fieldValue, Object defaultValue) throws IllegalAccessException, ConversionException
     {
@@ -594,11 +671,20 @@ public abstract class Codec<Input, Output>
         return fieldType;
     }
 
-    private static boolean hasSectionTypeArgument(Class<?> clazz, int i, ParameterizedType pType)
+    /**
+     * Checks if the ParameterizedType has given Class as nth TypeArgument
+     *
+     * @param clazz the Class to check
+     * @param n     the index
+     * @param pType the ParameterizedType
+     *
+     * @return true if the given class is assignable from the nth TypeArgument
+     */
+    private static boolean hasSectionTypeArgument(Class<?> clazz, int n, ParameterizedType pType)
     {
         if (clazz.isAssignableFrom((Class)pType.getRawType()))
         {
-            Type subType = pType.getActualTypeArguments()[i];
+            Type subType = pType.getActualTypeArguments()[n];
             return subType instanceof Class && SectionFactory.isSectionClass((Class)subType);
         }
         return false;
@@ -606,6 +692,7 @@ public abstract class Codec<Input, Output>
 
     /**
      * Detects if given field needs to be serialized
+     * <p>static and transient Field do not get converted
      *
      * @param field the field to check
      *
@@ -617,6 +704,13 @@ public abstract class Codec<Input, Output>
         return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
     }
 
+    /**
+     * Constructs a path for given Field
+     *
+     * @param field the field to get the path for
+     *
+     * @return the ReflectedPath
+     */
     protected static ReflectedPath getPathFor(Field field)
     {
         if (field.isAnnotationPresent(Name.class))

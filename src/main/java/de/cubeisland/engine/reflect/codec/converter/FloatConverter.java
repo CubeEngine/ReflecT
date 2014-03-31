@@ -27,6 +27,9 @@ import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.node.FloatNode;
 import de.cubeisland.engine.reflect.node.Node;
 
+/**
+ * A Converter for {@link java.lang.Float}
+ */
 public class FloatConverter extends BasicConverter<Float>
 {
     public Float fromNode(Node node, ConverterManager manager) throws ConversionException

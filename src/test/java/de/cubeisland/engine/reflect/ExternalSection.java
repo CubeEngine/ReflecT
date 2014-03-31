@@ -24,6 +24,9 @@ package de.cubeisland.engine.reflect;
 
 import java.util.Locale;
 
+/**
+ * A Section that is not a (static) inner class
+ */
 public class ExternalSection implements Section
 {
     public byte aByte = 8;

@@ -35,6 +35,9 @@ import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.TestCodec;
 
+/**
+ * A Reflected implementation for unit test
+ */
 public class ReflectedTest extends ReflectedFile<TestCodec>
 {
     @Comment("First Comment! [report here]")
