@@ -445,7 +445,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
                 }
             }
         }
-        catch (ReflectiveOperationException e)
+        catch (IllegalAccessException e)
         {
             throw new IllegalStateException(e);
         }
