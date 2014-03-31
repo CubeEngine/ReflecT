@@ -27,7 +27,6 @@ import java.lang.reflect.Type;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -300,7 +299,7 @@ public final class ConverterManager
                 {
                     if (node instanceof ListNode)
                     {
-                        return (T)collectionConverter.<Object, List>fromNode(ptype, (ListNode)node, this);
+                        return (T)collectionConverter.<Object, Collection>fromNode(ptype, (ListNode)node, this);
                     }
                     else
                     {
