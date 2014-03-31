@@ -115,7 +115,7 @@ public class YamlCodec extends FileCodec
                       .append(LINE_BREAK);
             }
             convertMapNode(writer, node, 0, false);
-            if (fRef != null && fRef.tail() != null && fRef.head().length != 0)
+            if (fRef != null && fRef.tail() != null && fRef.tail().length != 0)
             {
                 writer.append("# ").append(StringUtils.implode("\n# ", fRef.tail()));
             }
