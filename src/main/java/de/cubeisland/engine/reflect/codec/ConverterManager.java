@@ -314,6 +314,7 @@ public final class ConverterManager
                         throw ConversionException.of(mapConverter, node, "Cannot convert to Map! Node is not a MapNode!");
                     }
                 }
+                return matchConverter((Class<T>)ptype.getRawType()).fromNode(node, this);
             }
         }
         throw new IllegalArgumentException("Unknown Type: " + type);
