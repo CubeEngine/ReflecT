@@ -55,9 +55,9 @@
       </roles>
     </developer>
     <developer>
-      <id>quick_wango</id>
+      <id>pschichtel</id>
       <name>Phillip Schichtel</name>
-      <email>quick_wango@code-infection.de</email>
+      <email>phillip.public@schich.tel</email>
       <roles>
         <role>Contributor</role>
       </roles>
@@ -95,6 +95,17 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <rules>
+            <requireJavaVersion>
+              <version>1.6</version>
+            </requireJavaVersion>
+          </rules>
+      </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
