@@ -1,7 +1,7 @@
 ![Image](https://github.com/CubeEngineDev/ReflecT/blob/master/src/main/resources/ReflectT.png?raw=true)
 
-ReflecT
-================
+Reflec&lt;T&gt;
+=========
 
 Typesafe serializazion of data
 
