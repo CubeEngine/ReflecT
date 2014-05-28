@@ -92,6 +92,20 @@ public class ReflectedTest extends ReflectedFile<TestCodec>
 
     public class CollectionsStuff implements Section
     {
+        public List<List<Double>> doubleListInList = new ArrayList<List<Double>>()
+        {
+            {
+                ArrayList<Double> doubles = new ArrayList<Double>();
+                add(doubles);
+                doubles.add(0.0);
+                doubles.add(1.0);
+                doubles = new ArrayList<Double>();
+                add(doubles);
+                doubles.add(0.0);
+                doubles.add(1.0);
+            }
+        };
+
         public String[] stringArray = {
             "text1", "text2", "text3"
         };

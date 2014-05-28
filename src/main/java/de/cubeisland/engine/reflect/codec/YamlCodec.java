@@ -277,7 +277,7 @@ public class YamlCodec extends FileCodec
             }
             else if (listedNode instanceof ListNode)
             {
-                convertListNode(writer, (ListNode)listedNode, offset);
+                convertListNode(writer, (ListNode)listedNode, offset + 1);
                 endOfMapOrList = true;
             }
             else
