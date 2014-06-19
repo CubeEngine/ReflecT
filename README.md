@@ -3,7 +3,7 @@
 Reflec&lt;T&gt;
 =========
 
-Typesafe serializazion of data
+Typesafe serialization of data
 
 # Using the library
 
