@@ -16,7 +16,7 @@ To add the dependency using Maven just add the following section to your depende
 <dependency>
     <groupId>de.cubeisland.engine</groupId>
     <artifactId>reflect</artifactId>
-    <version>1.0.3</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ To add the dependency using Maven just add the following section to your depende
 
 To add the dependency using Gradle just add the following line to your dependencies:
 ```groovy
-compile 'de.cubeisland.engine:reflect:1.0.3'
+compile 'de.cubeisland.engine:reflect:2.0.3'
 ```
 
 ## Dependencies for Android
@@ -41,7 +41,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     <dependency>
         <groupId>de.cubeisland.engine</groupId>
         <artifactId>reflect</artifactId>
-        <version>1.0.3</version>
+        <version>2.0.3</version>
         <exclusions>
             <exclusion>
                 <groupId>org.yaml</groupId>
@@ -60,7 +60,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     * Gradle:
     
     ```groovy
-    compile ('de.cubeisland.engine:reflect:1.0.3')
+    compile ('de.cubeisland.engine:reflect:2.0.3')
     {
         exclude group: 'org.yaml', module: 'snakeyaml'
     }
