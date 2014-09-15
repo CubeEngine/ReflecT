@@ -85,6 +85,7 @@ public class ReflectedTest extends ReflectedFile<TestCodec>
         public String s10 = "";
         public String s11 = "*";
         public String s12 = "123:456";
+        public String s13 = "'Quoted' Not Quoted";
     }
 
     @Comment("Testing Collections & Arrays")

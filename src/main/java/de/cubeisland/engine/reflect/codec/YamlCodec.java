@@ -151,7 +151,7 @@ public class YamlCodec extends FileCodec
                 }
                 else if (needsQuote(string))
                 {
-                    sb.append(QUOTE).append(string).append(QUOTE);
+                    sb.append(QUOTE).append(string.replace(QUOTE, QUOTE + QUOTE)).append(QUOTE);
                 }
                 else
                 {
@@ -354,6 +354,6 @@ public class YamlCodec extends FileCodec
              || s.startsWith("|") || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
              || s.endsWith(":") || s.contains(": ") || s.startsWith("- ") || s.startsWith(",")
              || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || "*".equals(s)
-             || s.matches("[0][0-9]+");
+             || s.contains(QUOTE) || s.matches("[0][0-9]+");
     }
 }
