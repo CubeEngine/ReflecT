@@ -16,7 +16,7 @@ To add the dependency using Maven just add the following section to your depende
 <dependency>
     <groupId>de.cubeisland.engine</groupId>
     <artifactId>reflect</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ To add the dependency using Maven just add the following section to your depende
 
 To add the dependency using Gradle just add the following line to your dependencies:
 ```groovy
-compile 'de.cubeisland.engine:reflect:2.0.3'
+compile 'de.cubeisland.engine:reflect:2.0.4'
 ```
 
 ## Dependencies for Android
@@ -41,7 +41,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     <dependency>
         <groupId>de.cubeisland.engine</groupId>
         <artifactId>reflect</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.4</version>
         <exclusions>
             <exclusion>
                 <groupId>org.yaml</groupId>
@@ -52,7 +52,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     <dependency>
         <artifactId>org.yaml</artifactId>
         <groupId>snakeyaml</groupId>
-        <version>1.8</version>
+        <version>1.12</version>
         <scope>system</scope>
         <systemPath>${basedir}/RELATIVE_PATH_TO_SNAKEYAML_ANDROID_JAR</systemPath>
     </dependency>
@@ -60,7 +60,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     * Gradle:
     
     ```groovy
-    compile ('de.cubeisland.engine:reflect:2.0.3')
+    compile ('de.cubeisland.engine:reflect:2.0.4')
     {
         exclude group: 'org.yaml', module: 'snakeyaml'
     }
