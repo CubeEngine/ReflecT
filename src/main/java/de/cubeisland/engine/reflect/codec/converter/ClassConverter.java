@@ -20,21 +20,34 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect;
+package de.cubeisland.engine.reflect.codec.converter;
 
-import java.util.Locale;
+import de.cubeisland.engine.reflect.codec.ConverterManager;
+import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.node.Node;
+import de.cubeisland.engine.reflect.node.StringNode;
 
-import de.cubeisland.engine.reflect.annotations.Name;
-
-/**
- * A Section that is not a (static) inner class
- */
-public class ExternalSection implements Section
+public class ClassConverter implements Converter<Class<?>>
 {
-    public byte aByte = 8;
+	public Node toNode(Class<?> object, ConverterManager manager) throws ConversionException
+	{
+		return StringNode.of(object.getName());
+	}
 
-    public Locale defaultLocale = Locale.US;
+	public Class<?> fromNode(Node node, ConverterManager manager) throws ConversionException
+	{
+		if (!(node instanceof StringNode))
+		{
+			throw ConversionException.of(this, node, "The node type isn't supported for a class.");
+		}
 
-	@Name("class")
-	public Class<?> clazz = String.class;
+		try
+		{
+			return this.getClass().getClassLoader().loadClass(((StringNode) node).getValue());
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw ConversionException.of(this, node, "The class wasn't found.", e);
+		}
+	}
 }

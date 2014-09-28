@@ -35,6 +35,7 @@ import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.codec.converter.BooleanConverter;
 import de.cubeisland.engine.reflect.codec.converter.ByteConverter;
+import de.cubeisland.engine.reflect.codec.converter.ClassConverter;
 import de.cubeisland.engine.reflect.codec.converter.Converter;
 import de.cubeisland.engine.reflect.codec.converter.DateConverter;
 import de.cubeisland.engine.reflect.codec.converter.DoubleConverter;
@@ -130,6 +131,7 @@ public final class ConverterManager
         this.registerConverter(UUID.class, new UUIDConverter());
         this.registerConverter(Locale.class, new LocaleConverter());
         this.registerConverter(Level.class, new LevelConverter());
+		this.registerConverter(Class.class, new ClassConverter());
     }
 
     /**
