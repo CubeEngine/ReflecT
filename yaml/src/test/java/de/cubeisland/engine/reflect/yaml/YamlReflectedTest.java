@@ -25,9 +25,12 @@ package de.cubeisland.engine.reflect.yaml;
 import java.io.File;
 
 import de.cubeisland.engine.reflect.Reflector;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class YamlReflectedTest extends TestCase
+import static org.junit.Assert.assertEquals;
+
+public class YamlReflectedTest
 {
     private ReflectedTest config;
     private ReflectedTest loadConfig;
@@ -35,7 +38,7 @@ public class YamlReflectedTest extends TestCase
 
     private Reflector factory;
 
-    @Override
+    @Before
     public void setUp() throws Exception
     {
         this.file = new File("../testReflected.yml");
@@ -43,7 +46,8 @@ public class YamlReflectedTest extends TestCase
         config = factory.create(ReflectedTest.class);
     }
 
-    public void testReflected() throws Exception
+    @Test
+    public void testReflectedYaml() throws Exception
     {
         config.save(file);
         loadConfig = factory.load(ReflectedTest.class, file);

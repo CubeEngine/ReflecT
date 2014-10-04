@@ -22,16 +22,20 @@
  */
 package de.cubeisland.engine.reflect.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class StringUtilsTest extends TestCase
+import static org.junit.Assert.assertEquals;
+
+public class StringUtilsTest
 {
-    public void testimplode() throws Exception
+    @Test
+    public void implodeTest() throws Exception
     {
         assertEquals("a.b.c", StringUtils.implode(".", new String[]{"a", "b", "c"}));
     }
 
-    public void testfieldNameToPath() throws Exception
+    @Test
+    public void fieldNameToPathTest() throws Exception
     {
         assertEquals("camel-casing", StringUtils.fieldNameToPath("CamelCasing"));
         assertEquals("camel.casing", StringUtils.fieldNameToPath("Camel_Casing"));
