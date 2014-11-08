@@ -206,6 +206,11 @@ public class MapNode extends ParentNode<Map<String, Node>>
         return sb.toString();
     }
 
+    /**
+     * Returns the first key of this MapNode or null if the map is empty
+     *
+     * @return the first key or null
+     */
     public String getFirstKey()
     {
         if (this.mappedNodes.isEmpty())

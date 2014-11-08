@@ -22,7 +22,6 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Date;

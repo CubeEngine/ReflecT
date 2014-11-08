@@ -25,14 +25,11 @@ package de.cubeisland.engine.reflect.codec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.ErrorNode;
 
 /**
  * A Codec using {@link InputStream} and {@link OutputStream} to save/load into/from a File

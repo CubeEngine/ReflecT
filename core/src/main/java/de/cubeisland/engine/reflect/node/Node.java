@@ -23,7 +23,6 @@
 package de.cubeisland.engine.reflect.node;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
