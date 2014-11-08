@@ -103,7 +103,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
             throw new IllegalArgumentException("The input stream must not be null!");
         }
         this.onLoad();
-        this.showLoadErrors(this.getCodec().loadReflected(this, is));
+        this.getCodec().loadReflected(this, is);
     }
 
     /**

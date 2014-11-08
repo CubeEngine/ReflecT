@@ -29,12 +29,13 @@ import de.cubeisland.engine.reflect.node.Node;
 /**
  * Provides Methods to convert a <code>T</code> into a <code>Node</code> and back
  */
-public interface Converter<T extends Object>
+public interface Converter<T>
 {
     /**
      * Converts the object into a serializable Node
      *
-     * @param object the object to convert
+     * @param object    the object to convert
+     * @param manager   the ConverterManager
      *
      * @return the converted object
      */

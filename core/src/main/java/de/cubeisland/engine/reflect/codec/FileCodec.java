@@ -39,11 +39,11 @@ import de.cubeisland.engine.reflect.node.ErrorNode;
  */
 public abstract class FileCodec extends Codec<InputStream, OutputStream>
 {
-    public final Collection<ErrorNode> loadReflected(Reflected reflected, InputStream input)
+    public final void loadReflected(Reflected reflected, InputStream input)
     {
         try
         {
-            return dumpIntoSection(reflected.getDefault(), reflected, this.load(input, reflected), reflected);
+            this.fillReflected(reflected, this.load(input, reflected));
         }
         catch (ConversionException ex)
         {
@@ -52,7 +52,6 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
                 throw new CodecIOException("Could not load reflected", ex);
             }
             reflected.getLogger().warning("Could not load reflected" + ex);
-            return Collections.emptyList();
         }
         finally
         {
@@ -71,7 +70,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
     {
         try
         {
-            this.save(convertSection(reflected.getDefault(), reflected, reflected), output, reflected);
+            this.save(convertReflected(reflected), output, reflected);
         }
         catch (ConversionException ex)
         {

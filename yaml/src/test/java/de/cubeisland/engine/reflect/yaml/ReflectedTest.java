@@ -24,22 +24,26 @@ package de.cubeisland.engine.reflect.yaml;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
+import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
 
 /**
  * A Reflected implementation for unit test
  */
-public class ReflectedTest extends ReflectedFile<TestCodec>
+public class ReflectedTest extends ReflectedFile<YamlCodec>
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
@@ -60,6 +64,12 @@ public class ReflectedTest extends ReflectedFile<TestCodec>
     @Comment("This comments a section")
     @Name("subsection-using.section")
     public SubSection section = new SubSection();
+
+    @Comment("Set of SubSections:")
+    public Set<SubSection> subsections = new HashSet<SubSection>();
+    {
+        subsections.add(new SubSection());
+    }
 
     public class SubSection implements Section
     {
@@ -131,7 +141,6 @@ public class ReflectedTest extends ReflectedFile<TestCodec>
 
         @Comment("map in collection")
         public Collection<Map<String, String>> mapInCollection;
-
         {
             Map<String, String> map = new HashMap<String, String>();
             map.put("abc", "123");
@@ -178,4 +187,23 @@ public class ReflectedTest extends ReflectedFile<TestCodec>
     }
 
     public ExternalSection externalSection = new ExternalSection();
+
+    public SubSection2 subsection = new SubSection2();
+
+    public class SubSection2 implements Section
+    {
+        public Set<SubSubSection> subsubsections = new HashSet<SubSubSection>();
+
+        public class SubSubSection implements Section
+        {
+            public String something = "something else";
+        }
+    }
+
+    public Map<String, SubSection> mappedSections = new HashMap<String, SubSection>()
+    {
+        {
+            put("key", new SubSection());
+        }
+    };
 }

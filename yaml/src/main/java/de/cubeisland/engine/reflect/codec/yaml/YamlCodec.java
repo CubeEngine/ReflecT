@@ -194,7 +194,7 @@ public class YamlCodec extends FileCodec
             if (!isEmpty(comment.trim()))
             {
                 // if not already one line free
-                if (!hasLine && !first)
+                if ((!hasLine && !first) || inList)
                 {
                     sb.append(LINE_BREAK);
                     // add free line before comment
@@ -202,7 +202,7 @@ public class YamlCodec extends FileCodec
                 sb.append(comment);
             }
 
-            if (!(first && inList))
+            if (!(first && inList) || (!comment.isEmpty()))
             {
                 // Map in collection first does not get offset
                 sb.append(getOffset(offset));

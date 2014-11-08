@@ -25,21 +25,17 @@ package de.cubeisland.engine.reflect;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.cubeisland.engine.reflect.codec.Codec;
+import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
-import de.cubeisland.engine.reflect.node.ErrorNode;
 
-import static de.cubeisland.engine.reflect.codec.Codec.getFieldType;
-import static de.cubeisland.engine.reflect.codec.Codec.isReflectedField;
 
 /**
  * This abstract class represents a reflected object to be serialized using a Codec C.
@@ -50,6 +46,9 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     protected transient Reflector reflector;
     protected transient SerialType serialType;
     private transient Reflected defaultReflected = this;
+
+    private ConverterManager manager = ConverterManager.reflectedManager(this);
+
     /**
      * Saves the fields that got inherited from the parent-reflected
      */
@@ -289,18 +288,6 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
      */
     public abstract boolean loadFrom(SerialType source);
 
-    final void showLoadErrors(Collection<ErrorNode> errors)
-    {
-        if (!errors.isEmpty())
-        {
-            this.reflector.logger.warning(errors.size() + " ErrorNodes were encountered while loading the reflected!");
-            for (ErrorNode error : errors)
-            {
-                this.reflector.logger.log(Level.WARNING, error.getErrorMessage());
-            }
-        }
-    }
-
     /**
      * Returns the Codec
      *
@@ -417,35 +404,35 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     {
         try
         {
-            for (Field field : section.getClass().getFields())
+            for (Field field : this.getConverterManager().getSectionConverter().getReflectedFields(section.getClass()))
             {
-                if (isReflectedField(field))
+                Object value = field.get(section);
+                Object defaultValue = field.get(defaultSection);
+                if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
                 {
-                    Object value = field.get(section);
-                    Object defaultValue = field.get(defaultSection);
-                    if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
+                    this.addInheritedField(field);
+                }
+                else if (value != null && defaultValue != null)
+                {
+                    /*
+                    TODO inheritance updating
+                    switch (getFieldType(field))
                     {
-                        this.addInheritedField(field);
+                    case NORMAL:
+                        // Already handled
+                        break;
+                    case SECTION:
+                        this.updateInheritance((Section)value, (Section)defaultValue);
+                        break;
+                    case SECTION_COLLECTION:
+                        throw new IllegalStateException("Collections in child reflected are not allowed!");
+                    case SECTION_MAP:
+                        updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Illegal FieldType");
                     }
-                    else if (value != null && defaultValue != null)
-                    {
-                        switch (getFieldType(field))
-                        {
-                        case NORMAL:
-                            // Already handled
-                            break;
-                        case SECTION:
-                            this.updateInheritance((Section)value, (Section)defaultValue);
-                            break;
-                        case SECTION_COLLECTION:
-                            throw new IllegalStateException("Collections in child reflected are not allowed!");
-                        case SECTION_MAP:
-                            updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Illegal FieldType");
-                        }
-                    }
+                    */
                 }
             }
         }
@@ -471,5 +458,15 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
                 this.updateInheritance(entry.getValue(), defaulted);
             }
         }
+    }
+
+    public final ConverterManager getConverterManager()
+    {
+        return manager;
+    }
+
+    public final boolean isChild()
+    {
+        return this.getDefault() != this;
     }
 }

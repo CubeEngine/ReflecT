@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Date;
@@ -33,6 +34,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+import de.cubeisland.engine.reflect.Reflected;
+import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.codec.converter.BooleanConverter;
 import de.cubeisland.engine.reflect.codec.converter.ByteConverter;
 import de.cubeisland.engine.reflect.codec.converter.ClassConverter;
@@ -44,6 +47,7 @@ import de.cubeisland.engine.reflect.codec.converter.IntegerConverter;
 import de.cubeisland.engine.reflect.codec.converter.LevelConverter;
 import de.cubeisland.engine.reflect.codec.converter.LocaleConverter;
 import de.cubeisland.engine.reflect.codec.converter.LongConverter;
+import de.cubeisland.engine.reflect.codec.converter.SectionConverter;
 import de.cubeisland.engine.reflect.codec.converter.ShortConverter;
 import de.cubeisland.engine.reflect.codec.converter.StringConverter;
 import de.cubeisland.engine.reflect.codec.converter.UUIDConverter;
@@ -56,6 +60,7 @@ import de.cubeisland.engine.reflect.node.ListNode;
 import de.cubeisland.engine.reflect.node.MapNode;
 import de.cubeisland.engine.reflect.node.Node;
 import de.cubeisland.engine.reflect.node.NullNode;
+import de.cubeisland.engine.reflect.util.SectionFactory;
 
 import static java.util.Map.Entry;
 
@@ -68,14 +73,22 @@ public final class ConverterManager
     private MapConverter mapConverter;
     private ArrayConverter arrayConverter;
     private CollectionConverter collectionConverter;
-    private ConverterManager defaultManager;
+    private ConverterManager fallbackManager;
+    private Reflected reflected = null;
+    private SectionConverter sectionConverter;
 
     private ConverterManager(ConverterManager defaultConverters)
     {
-        this.defaultManager = defaultConverters;
+        this.fallbackManager = defaultConverters;
         this.mapConverter = new MapConverter();
         this.arrayConverter = new ArrayConverter();
         this.collectionConverter = new CollectionConverter();
+    }
+
+    public ConverterManager(Reflected reflected)
+    {
+        this((ConverterManager)null);
+        this.reflected = reflected;
     }
 
     /**
@@ -85,8 +98,8 @@ public final class ConverterManager
      */
     static ConverterManager defaultManager()
     {
+        ConverterManager convert = new ConverterManager((ConverterManager)null);
         // Register Default Converters
-        ConverterManager convert = new ConverterManager(null);
         convert.registerDefaultConverters();
         return convert;
     }
@@ -101,6 +114,11 @@ public final class ConverterManager
     static ConverterManager emptyManager(ConverterManager fallback)
     {
         return new ConverterManager(fallback);
+    }
+
+    public static ConverterManager reflectedManager(Reflected reflected)
+    {
+        return new ConverterManager(reflected);
     }
 
     private void registerDefaultConverters()
@@ -131,7 +149,9 @@ public final class ConverterManager
         this.registerConverter(UUID.class, new UUIDConverter());
         this.registerConverter(Locale.class, new LocaleConverter());
         this.registerConverter(Level.class, new LevelConverter());
-		this.registerConverter(Class.class, new ClassConverter());
+        this.registerConverter(Class.class, new ClassConverter());
+
+        this.sectionConverter = new SectionConverter();
     }
 
     /**
@@ -205,9 +225,9 @@ public final class ConverterManager
     private Converter getConverter(Class<?> clazz)
     {
         Converter converter = this.converters.get(clazz);
-        if (converter == null && this.defaultManager != null)
+        if (converter == null && this.fallbackManager != null)
         {
-            converter = this.defaultManager.getConverter(clazz);
+            converter = this.fallbackManager.getConverter(clazz);
         }
         return converter;
     }
@@ -223,9 +243,9 @@ public final class ConverterManager
                 return converter;
             }
         }
-        if (this.defaultManager != null)
+        if (this.fallbackManager != null)
         {
-            return this.defaultManager.findConverter(clazz);
+            return this.fallbackManager.findConverter(clazz);
         }
         return null;
     }
@@ -256,7 +276,27 @@ public final class ConverterManager
         {
             return mapConverter.toNode((Map)object, this);
         }
+        else if (object instanceof Section)
+        {
+            return getSectionConverter().toNode((Section)object, this);
+        }
         return matchConverter(object.getClass()).toNode(object, this);
+    }
+
+    /**
+     * Fills the section with the values from the Node
+     *
+     * @param node    the node
+     * @param section the section
+     */
+    public final void convertFromNode(MapNode node, Section section) throws ConversionException
+    {
+        MapNode defaultNode = null; // only set when child
+        if (this.getReflected().isChild())
+        {
+            defaultNode = (MapNode)this.convertToNode(this.getReflected().getDefault());
+        }
+        this.getSectionConverter().fromNode(section, node, defaultNode, this);
     }
 
     /**
@@ -276,6 +316,12 @@ public final class ConverterManager
         }
         if (type instanceof Class)
         {
+            if (Section.class.isAssignableFrom((Class<?>)type))
+            {
+                Section section = SectionFactory.newSectionInstance((Class<? extends Section>)type, null);
+                this.convertFromNode((MapNode)node, section);
+                return (T)section;
+            }
             if (((Class)type).isArray())
             {
                 if (node instanceof ListNode)
@@ -284,7 +330,8 @@ public final class ConverterManager
                 }
                 else
                 {
-                    throw ConversionException.of(arrayConverter, node, "Cannot convert to Array! Node is not a ListNode!");
+                    throw ConversionException.of(arrayConverter, node,
+                                                 "Cannot convert to Array! Node is not a ListNode!");
                 }
             }
             return matchConverter((Class<T>)type).fromNode(node, this);
@@ -302,7 +349,8 @@ public final class ConverterManager
                     }
                     else
                     {
-                        throw ConversionException.of(collectionConverter, node, "Cannot convert to Collection! Node is not a ListNode!");
+                        throw ConversionException.of(collectionConverter, node,
+                                                     "Cannot convert to Collection! Node is not a ListNode!");
                     }
                 }
                 if (Map.class.isAssignableFrom((Class)ptype.getRawType()))
@@ -313,12 +361,43 @@ public final class ConverterManager
                     }
                     else
                     {
-                        throw ConversionException.of(mapConverter, node, "Cannot convert to Map! Node is not a MapNode!");
+                        throw ConversionException.of(mapConverter, node,
+                                                     "Cannot convert to Map! Node is not a MapNode!");
                     }
                 }
                 return matchConverter((Class<T>)ptype.getRawType()).fromNode(node, this);
             }
         }
         throw new IllegalArgumentException("Unknown Type: " + type);
+    }
+
+    public ConverterManager withFallback(ConverterManager defaultManager)
+    {
+        this.fallbackManager = defaultManager;
+        return this;
+    }
+
+    /**
+     * Returns the Reflected owning this ConverterManager
+     *
+     * @return the Reflected or null if not owned
+     */
+    public Reflected getReflected()
+    {
+        return reflected;
+    }
+
+    /**
+     * Returns the SectionConverter or null if not found
+     *
+     * @return the SectionConverter
+     */
+    public SectionConverter getSectionConverter()
+    {
+        if (this.sectionConverter == null)
+        {
+            return this.fallbackManager.getSectionConverter();
+        }
+        return this.sectionConverter;
     }
 }
