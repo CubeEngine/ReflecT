@@ -33,7 +33,6 @@ import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
  */
 public class CodecManager
 {
-    private final SectionConverter sectionConverter = new SectionConverter();
     private final ConverterManager defaultManager = ConverterManager.defaultManager();
     private final Map<Class<? extends Codec>, Codec> codecs = new HashMap<Class<? extends Codec>, Codec>();
 
@@ -88,15 +87,5 @@ public class CodecManager
     public ConverterManager getDefaultConverterManager()
     {
         return this.defaultManager;
-    }
-
-    /**
-     * Returns the section Converter.
-     *
-     * @return the section converter
-     */
-    public SectionConverter getSectionConverter()
-    {
-        return sectionConverter;
     }
 }

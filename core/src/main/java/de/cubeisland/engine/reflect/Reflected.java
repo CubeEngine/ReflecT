@@ -47,7 +47,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     protected transient SerialType serialType;
     private transient Reflected defaultReflected = this;
 
-    private ConverterManager manager = ConverterManager.reflectedManager(this);
+    private transient ConverterManager manager = ConverterManager.reflectedManager(this);
 
     /**
      * Saves the fields that got inherited from the parent-reflected

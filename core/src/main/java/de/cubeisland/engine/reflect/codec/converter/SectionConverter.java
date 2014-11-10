@@ -26,9 +26,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
@@ -70,7 +73,7 @@ public class SectionConverter
     public static boolean isReflectedField(Field field)
     {
         int modifiers = field.getModifiers();
-        return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
+        return !(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers) || Modifier.isFinal(modifiers));
     }
 
     /**
@@ -267,19 +270,39 @@ public class SectionConverter
     public final Field[] getReflectedFields(Class<? extends Section> clazz)
     {
         Field[] fields = this.cachedFields.get(clazz);
-        if (fields == null)
+        if (fields != null)
         {
-            List<Field> list = new ArrayList<Field>();
-            for (Field field : clazz.getFields())
-            {
-                if (isReflectedField(field))
-                {
-                    list.add(field);
-                }
-            }
-            fields = list.toArray(new Field[list.size()]);
-            this.cachedFields.put(clazz, fields);
+            return fields;
         }
+
+        List<Field> list = new ArrayList<Field>();
+        Set<String> paths = new HashSet<String>();
+
+        Class<?> current = clazz;
+        while (current != null)
+        {
+            for (Field field : current.getDeclaredFields())
+            {
+                if (!isReflectedField(field))
+                {
+                    continue;
+                }
+
+                if (!paths.add(getPathFor(field).toString()))
+                {
+                    throw new IllegalStateException("Duplicated Path detected! " + getPathFor(field)); // TODO exception
+                }
+                if (!field.isAccessible())
+                {
+                    field.setAccessible(true);
+                }
+                list.add(field);
+            }
+            current = current.getSuperclass();
+        }
+
+        fields = list.toArray(new Field[list.size()]);
+        this.cachedFields.put(clazz, fields);
         return fields;
     }
 }

@@ -104,8 +104,7 @@ public abstract class Codec<Input, Output>
     {
         try
         {
-            return (MapNode)reflected.getConverterManager().withFallback(this.converterManager).convertToNode(
-                reflected);
+            return (MapNode)reflected.getConverterManager().withFallback(this.converterManager).convertToNode(reflected);
         }
         catch (ConversionException e)
         {

@@ -69,6 +69,7 @@ import static java.util.Map.Entry;
 public final class ConverterManager
 {
     private Map<Class<?>, Converter> converters = new ConcurrentHashMap<Class<?>, Converter>();
+    private Map<Class<? extends Converter>, Converter> annotationConverters = new ConcurrentHashMap<Class<? extends Converter>, Converter>();
     private MapConverter mapConverter;
     private ArrayConverter arrayConverter;
     private CollectionConverter collectionConverter;
@@ -249,7 +250,6 @@ public final class ConverterManager
         return null;
     }
 
-
     /**
      * Converts a convertible Object into a Node
      *
@@ -275,11 +275,21 @@ public final class ConverterManager
         {
             return mapConverter.toNode((Map)object, this);
         }
-        else if (object instanceof Section)
+        else
         {
-            return getSectionConverter().toNode((Section)object, this);
+            try
+            {
+                return matchConverter(object.getClass()).toNode(object, this);
+            }
+            catch (ConverterNotFoundException e)
+            {
+                if (object instanceof Section)
+                {
+                    return getSectionConverter().toNode((Section)object, this);
+                }
+                throw e;
+            }
         }
-        return matchConverter(object.getClass()).toNode(object, this);
     }
 
     /**
@@ -370,6 +380,13 @@ public final class ConverterManager
         throw new IllegalArgumentException("Unknown Type: " + type);
     }
 
+    /**
+     * Changes the fallback ConverterManager of this converter
+     *
+     * @param defaultManager the ConverterManager to fallback to
+     *
+     * @return fluent interface
+     */
     public ConverterManager withFallback(ConverterManager defaultManager)
     {
         this.fallbackManager = defaultManager;
