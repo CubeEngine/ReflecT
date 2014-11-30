@@ -37,12 +37,13 @@ import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
+import de.cubeisland.engine.reflect.codec.yaml.ReflectedYaml;
 import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
 
 /**
  * A Reflected implementation for unit test
  */
-public class ReflectedTest extends ReflectedFile<YamlCodec>
+public class ReflectedTest extends ReflectedYaml
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
@@ -62,7 +63,7 @@ public class ReflectedTest extends ReflectedFile<YamlCodec>
 
     @Comment("This comments a section")
     @Name("subsection-using.section")
-    public SubSection section = new SubSection();
+    public SubSection subSection = new SubSection();
 
     @Comment("Set of SubSections:")
     public Set<SubSection> subsections = new HashSet<SubSection>();

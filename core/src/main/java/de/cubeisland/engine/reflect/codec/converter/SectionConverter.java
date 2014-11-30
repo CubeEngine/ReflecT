@@ -244,7 +244,7 @@ public class SectionConverter
                 {
                     Section fillSection = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(),
                                                                             section);
-                    manager.convertFromNode(node, fillSection);
+                    manager.convertFromNode((MapNode)fieldNode, fillSection);
                     value = fillSection;
                 }
                 else

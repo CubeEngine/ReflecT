@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class YamlReflectedTest
 {
     private ReflectedTest config;
-    private ReflectedTest loadConfig;
+    private ReflectedTest2 config2;
     private File file;
 
     private Reflector factory;
@@ -44,14 +44,25 @@ public class YamlReflectedTest
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
         config = factory.create(ReflectedTest.class);
+        config2 = factory.create(ReflectedTest2.class);
     }
 
     @Test
     public void testReflectedYaml() throws Exception
     {
         config.save(file);
-        loadConfig = factory.load(ReflectedTest.class, file);
+        ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
-        assertEquals(config.getCodec().convertReflected(config).toString(), config.getCodec().convertReflected(loadConfig).toString());
+        assertEquals(config.getCodec().convertReflected(config).toString(), config.getCodec().convertReflected(
+            loadConfig).toString());
+    }
+    @Test
+    public void testReflectedYaml2() throws Exception
+    {
+        config2.save(file);
+        ReflectedTest2 loadConfig = factory.load(ReflectedTest2.class, file);
+        file.delete();
+        assertEquals(config2.getCodec().convertReflected(config2).toString(), config2.getCodec().convertReflected(
+            loadConfig).toString());
     }
 }
