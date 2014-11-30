@@ -1,4 +1,4 @@
-![Reflec&lt;T&gt;](https://github.com/CubeEngineDev/ReflecT/blob/master/ReflectT.png?raw=true)
+![Reflec<T>](https://github.com/CubeEngineDev/ReflecT/blob/master/ReflectT.png?raw=true)
 =========
 
 Typesafe serialization of data
