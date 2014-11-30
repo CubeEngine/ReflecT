@@ -1,4 +1,4 @@
-![Image](https://github.com/CubeEngineDev/ReflecT/blob/master/src/main/resources/ReflectT.png?raw=true)
+![Image](https://github.com/CubeEngineDev/ReflecT/blob/master/ReflectT.png?raw=true)
 
 Reflec&lt;T&gt;
 =========
