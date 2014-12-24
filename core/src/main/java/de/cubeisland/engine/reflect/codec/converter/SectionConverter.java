@@ -27,7 +27,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -244,7 +243,7 @@ public class SectionConverter
                 {
                     Section fillSection = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(),
                                                                             section);
-                    manager.convertFromNode((MapNode)fieldNode, fillSection);
+                    manager.convertFromNode((MapNode)fieldNode, (MapNode)defaultNode.getNodeAt(fieldPath), fillSection);
                     value = fillSection;
                 }
                 else

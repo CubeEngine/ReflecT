@@ -122,7 +122,12 @@ public abstract class Codec<Input, Output>
     {
         try
         {
-            reflected.getConverterManager().withFallback(this.converterManager).convertFromNode(node, reflected);
+            MapNode defaultNode = node;
+            if (reflected.isChild())
+            {
+                defaultNode = convertReflected(reflected.getDefault());
+            }
+            reflected.getConverterManager().withFallback(this.converterManager).convertFromNode(node, defaultNode, reflected);
         }
         catch (ConversionException e)
         {

@@ -298,13 +298,8 @@ public final class ConverterManager
      * @param node    the node
      * @param section the section
      */
-    public final void convertFromNode(MapNode node, Section section) throws ConversionException
+    public final void convertFromNode(MapNode node, MapNode defaultNode, Section section) throws ConversionException
     {
-        MapNode defaultNode = null; // only set when child
-        if (this.getReflected().isChild())
-        {
-            defaultNode = (MapNode)this.convertToNode(this.getReflected().getDefault());
-        }
         this.getSectionConverter().fromNode(section, node, defaultNode, this);
     }
 
@@ -328,7 +323,7 @@ public final class ConverterManager
             if (Section.class.isAssignableFrom((Class<?>)type))
             {
                 Section section = SectionFactory.newSectionInstance((Class<? extends Section>)type, null);
-                this.convertFromNode((MapNode)node, section);
+                this.convertFromNode((MapNode)node, (MapNode)node, section);
                 return (T)section;
             }
             if (((Class)type).isArray())
