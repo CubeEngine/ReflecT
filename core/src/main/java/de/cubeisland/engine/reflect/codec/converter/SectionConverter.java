@@ -34,6 +34,7 @@ import java.util.Set;
 
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
+import de.cubeisland.engine.reflect.annotations.Converter;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ConversionException;
@@ -94,7 +95,7 @@ public class SectionConverter
             }
             else
             {
-                path = ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName()));
+                path = ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName())); // TODO configurable Naming convention #20
             }
             this.paths.put(field, path);
         }
@@ -122,7 +123,7 @@ public class SectionConverter
             }
             try
             {
-                Node newNode = manager.convertToNode(field.get(section));
+                Node newNode = toNode(section, manager, field);
                 addComment(newNode, field);
 
                 Node prevNode = baseNode.getNodeAt(getPathFor(field));
@@ -152,6 +153,21 @@ public class SectionConverter
             baseNode.cleanUpEmptyNodes();
         }
         return baseNode;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Node toNode(Section section, ConverterManager manager, Field field) throws ConversionException, IllegalAccessException
+    {
+        Node newNode;
+        if (field.isAnnotationPresent(Converter.class))
+        {
+            newNode = manager.getAnnotationConverter(field.getAnnotation(Converter.class).value()).toNode(field.get(section), manager);
+        }
+        else
+        {
+            newNode = manager.convertToNode(field.get(section));
+        }
+        return newNode;
     }
 
     /**
@@ -212,8 +228,7 @@ public class SectionConverter
      * @param manager the manager
      */
     @SuppressWarnings("unchecked")
-    public void fromNode(Section section, MapNode node, MapNode defaultNode,
-                         ConverterManager manager) throws ConversionException
+    public void fromNode(Section section, MapNode node, MapNode defaultNode, ConverterManager manager) throws ConversionException
     {
         for (Field field : this.getReflectedFields(section.getClass()))
         {
@@ -240,10 +255,13 @@ public class SectionConverter
                     }
                 }
 
-                if (Section.class.isAssignableFrom(field.getType()))
+                if (field.isAnnotationPresent(Converter.class))
                 {
-                    Section fillSection = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(),
-                                                                            section);
+                    value = manager.getAnnotationConverter(field.getAnnotation(Converter.class).value()).fromNode(fieldNode, manager);
+                }
+                else if (Section.class.isAssignableFrom(field.getType()))
+                {
+                    Section fillSection = SectionFactory.newSectionInstance((Class<? extends Section>)field.getType(), section);
                     manager.convertFromNode((MapNode)fieldNode, (MapNode)defaultNode.getNodeAt(fieldPath), fillSection);
                     value = fillSection;
                 }

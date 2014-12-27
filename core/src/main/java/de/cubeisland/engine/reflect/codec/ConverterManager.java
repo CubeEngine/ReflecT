@@ -167,6 +167,7 @@ public final class ConverterManager
             return;
         }
         converters.put(clazz, converter);
+        annotationConverters.put(converter.getClass(), converter);
     }
 
     /**
@@ -230,6 +231,10 @@ public final class ConverterManager
             converter = this.fallbackManager.getConverter(clazz);
         }
         return converter;
+    }
+    public Converter getAnnotationConverter(Class<? extends Converter> clazz)
+    {
+        return this.annotationConverters.get(clazz);
     }
 
     private Converter findConverter(Class clazz)

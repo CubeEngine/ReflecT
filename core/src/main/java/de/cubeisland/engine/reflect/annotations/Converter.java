@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
-public @interface Converter
+public @interface Converter // TODO Unit tests!
 {
     /**
      * The class of the Converter to use for the annotated field
