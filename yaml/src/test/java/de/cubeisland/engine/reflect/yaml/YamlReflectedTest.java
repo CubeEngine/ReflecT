@@ -25,6 +25,8 @@ package de.cubeisland.engine.reflect.yaml;
 import java.io.File;
 
 import de.cubeisland.engine.reflect.Reflector;
+import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
+import de.cubeisland.engine.reflect.yaml.ReflectedFieldShadowing.ReflectedFieldShadowing2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,8 +34,9 @@ import static org.junit.Assert.assertEquals;
 
 public class YamlReflectedTest
 {
-    private ReflectedTest config;
-    private ReflectedTest2 config2;
+    private ReflectedTest test1;
+    private ReflectedTest2 test2;
+    private ReflectedFieldShadowing2 test3;
     private File file;
 
     private Reflector factory;
@@ -43,26 +46,39 @@ public class YamlReflectedTest
     {
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        config = factory.create(ReflectedTest.class);
-        config2 = factory.create(ReflectedTest2.class);
+        test1 = factory.create(ReflectedTest.class);
+        test2 = factory.create(ReflectedTest2.class);
+        test3 = factory.create(ReflectedFieldShadowing2.class);
     }
 
     @Test
-    public void testReflectedYaml() throws Exception
+    public void test1() throws Exception
     {
-        config.save(file);
+        test1.save(file);
         ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
-        assertEquals(config.getCodec().convertReflected(config).toString(), config.getCodec().convertReflected(
-            loadConfig).toString());
+        assertEquals(test1.getCodec().convertReflected(test1).toString(), test1.getCodec().convertReflected(loadConfig).toString());
     }
+
     @Test
-    public void testReflectedYaml2() throws Exception
+    public void test2() throws Exception
     {
-        config2.save(file);
+        test2.save(file);
         ReflectedTest2 loadConfig = factory.load(ReflectedTest2.class, file);
         file.delete();
-        assertEquals(config2.getCodec().convertReflected(config2).toString(), config2.getCodec().convertReflected(
-            loadConfig).toString());
+        assertEquals(test2.getCodec().convertReflected(test2).toString(), test2.getCodec().convertReflected(loadConfig).toString());
+    }
+
+    @Test(expected = DuplicatedPathException.class)
+    public void test3() throws Exception
+    {
+        try
+        {
+            test3.save(file);
+        }
+        finally
+        {
+            file.delete();
+        }
     }
 }

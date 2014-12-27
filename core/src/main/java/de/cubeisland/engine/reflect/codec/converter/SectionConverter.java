@@ -37,6 +37,7 @@ import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.ConverterManager;
 import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
 import de.cubeisland.engine.reflect.exception.FieldAccessException;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.node.ErrorNode;
@@ -289,7 +290,7 @@ public class SectionConverter
 
                 if (!paths.add(getPathFor(field).toString()))
                 {
-                    throw new IllegalStateException("Duplicated Path detected! " + getPathFor(field)); // TODO exception
+                    throw new DuplicatedPathException("Duplicated Path detected! " + getPathFor(field));
                 }
                 if (!field.isAccessible())
                 {
