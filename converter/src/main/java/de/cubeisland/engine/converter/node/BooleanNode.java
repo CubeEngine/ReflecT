@@ -20,39 +20,72 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter.node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A Boolean Node
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class BooleanNode extends Node<Boolean>
 {
-    private static final long serialVersionUID = -492268712863444129L;
+    private final boolean bool;
 
-    public InvalidReflectedObjectException(String message)
+    /**
+     * Creates a BooleanNode
+     *
+     * @param bool a boolean
+     */
+    public BooleanNode(boolean bool)
     {
-        super(message);
+        this.bool = bool;
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    @Override
+    public Boolean getValue()
     {
-        super(msg, t);
+        return this.bool;
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    @Override
+    public String asText()
     {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        return String.valueOf(bool);
+    }
+
+    /**
+     * Creates a "False" Node
+     *
+     * @return the BooleanNode
+     */
+    public static BooleanNode falseNode()
+    {
+        return new BooleanNode(false);
+    }
+
+    /**
+     * Creates a "True" Node
+     *
+     * @return the BooleanNode
+     */
+    public static BooleanNode trueNode()
+    {
+        return new BooleanNode(true);
+    }
+
+    /**
+     * Creates a BooleanNode
+     *
+     * @param bool a boolean
+     *
+     * @return the BooleanNode
+     */
+    public static BooleanNode of(boolean bool)
+    {
+        return bool ? trueNode() : falseNode();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "BooleanNode=[" + bool + "]";
     }
 }

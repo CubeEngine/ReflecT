@@ -22,6 +22,8 @@
  */
 package de.cubeisland.engine.reflect.exception;
 
+import de.cubeisland.engine.converter.ConversionException;
+
 /**
  * This exception is only thrown if {@link de.cubeisland.engine.reflect.Reflected#useStrictExceptionPolicy()} is true
  * <p>when loading from an InputStream or saving into an OutputStream caused a ConversionException

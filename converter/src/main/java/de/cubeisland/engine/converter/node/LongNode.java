@@ -20,39 +20,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter.node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A Long Node
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class LongNode extends KeyNode<Long>
 {
-    private static final long serialVersionUID = -492268712863444129L;
+    private long value;
 
-    public InvalidReflectedObjectException(String message)
+    /**
+     * Creates a LongNode
+     *
+     * @param value a long
+     */
+    public LongNode(long value)
     {
-        super(message);
+        this.value = value;
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    @Override
+    public Long getValue()
     {
-        super(msg, t);
+        return value;
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    @Override
+    public String asText()
     {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        return String.valueOf(value);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "LongNode=[" + value + "]";
     }
 }

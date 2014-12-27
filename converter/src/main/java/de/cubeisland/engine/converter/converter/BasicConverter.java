@@ -20,39 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.Node;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import static de.cubeisland.engine.converter.node.Node.wrapIntoNode;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * Implements basic conversion of Strings, Numbers or Primitives to Node
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public abstract class BasicConverter<T> extends SimpleConverter<T>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    @SuppressWarnings("unchecked")
+    public Node toNode(T object) throws ConversionException
     {
-        super(message);
-    }
-
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
+        Class<T> clazz = (Class<T>)object.getClass();
+        if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) ||
+            CharSequence.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz))
         {
-            return new InvalidReflectedObjectException(msg);
+            return wrapIntoNode(object);
         }
-        return new InvalidReflectedObjectException(msg, t);
+        throw ConversionException.of(this, object, "Object is not a primitive, Number, CharSequence or Boolean");
     }
 }

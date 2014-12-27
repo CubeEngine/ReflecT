@@ -20,39 +20,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.ConverterManager;
+import de.cubeisland.engine.converter.node.Node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * Provides Methods to convert a <code>T</code> into a <code>Node</code> and back
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public interface Converter<ConvertT, TypeT extends Type>
 {
-    private static final long serialVersionUID = -492268712863444129L;
+    /**
+     * Converts the object into a serializable Node
+     *
+     * @param object  the object to convert
+     * @param manager the ConverterManager
+     *
+     * @return the converted object
+     */
+    Node toNode(ConvertT object, ConverterManager manager) throws ConversionException;
 
-    public InvalidReflectedObjectException(String message)
-    {
-        super(message);
-    }
-
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
-    }
+    /**
+     * Converts the node back into the original object
+     *
+     * @param node    the node to convert
+     * @param type    the type to convert to
+     * @param manager the manager
+     *
+     * @return the converted node
+     */
+    ConvertT fromNode(Node node, TypeT type, ConverterManager manager) throws ConversionException;
 }

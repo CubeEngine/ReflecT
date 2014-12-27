@@ -20,39 +20,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.StringNode;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
-
-/**
- * This exception is thrown when a reflected object is invalid.
- */
-public class InvalidReflectedObjectException extends RuntimeException
+public class ClassConverter extends SimpleConverter<Class<?>>
 {
-    private static final long serialVersionUID = -492268712863444129L;
+	public Node toNode(Class<?> object) throws ConversionException
+	{
+		return StringNode.of(object.getName());
+	}
 
-    public InvalidReflectedObjectException(String message)
-    {
-        super(message);
-    }
+	public Class<?> fromNode(Node node) throws ConversionException
+	{
+		if (!(node instanceof StringNode))
+		{
+			throw ConversionException.of(this, node, "The node type isn't supported for a class.");
+		}
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
-    }
+		try
+		{
+			return this.getClass().getClassLoader().loadClass(((StringNode) node).getValue());
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw ConversionException.of(this, node, "The class wasn't found.", e);
+		}
+	}
 }

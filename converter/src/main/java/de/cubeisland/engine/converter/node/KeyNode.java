@@ -20,39 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter.node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * KeyNodes can be used as Key in MapNodes
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public abstract class KeyNode<V> extends Node<V>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    /**
+     * Converts the value of the node into a String to use as key
+     *
+     * @return the key
+     */
+    public String toKey()
     {
-        super(message);
-    }
-
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        return String.valueOf(this.getValue());
     }
 }

@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect.exception;
 import java.lang.reflect.Field;
 
 import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.node.ReflectedPath;
+import de.cubeisland.engine.converter.node.ReflectedPath;
 
 /**
  * This exception is thrown when field.get(...) or field.set(...) caused an IllegalAccessException

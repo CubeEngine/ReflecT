@@ -32,18 +32,18 @@ import java.util.Map.Entry;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.codec.FileCodec;
-import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.ListNode;
-import de.cubeisland.engine.reflect.node.MapNode;
-import de.cubeisland.engine.reflect.node.Node;
-import de.cubeisland.engine.reflect.node.NullNode;
-import de.cubeisland.engine.reflect.node.StringNode;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.ListNode;
+import de.cubeisland.engine.converter.node.MapNode;
+import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.NullNode;
+import de.cubeisland.engine.converter.node.StringNode;
 import de.cubeisland.engine.reflect.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import static de.cubeisland.engine.reflect.node.Node.wrapIntoNode;
+import static de.cubeisland.engine.converter.node.Node.wrapIntoNode;
 import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 
 /**

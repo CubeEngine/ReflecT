@@ -28,6 +28,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import de.cubeisland.engine.converter.converter.ClassedConverter;
+
 /**
  * This annotation is used to declare a special Converter for the annotated field
  */
@@ -41,5 +43,5 @@ public @interface Converter // TODO Unit tests!
      *
      * @return the Converter class
      */
-    public Class<? extends de.cubeisland.engine.reflect.codec.converter.Converter> value();
+    public Class<? extends ClassedConverter> value();
 }

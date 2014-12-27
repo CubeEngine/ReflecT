@@ -20,39 +20,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.node;
 
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
-
-/**
- * This exception is thrown when a reflected object is invalid.
- */
-public class InvalidReflectedObjectException extends RuntimeException
+public abstract class Commentable
 {
-    private static final long serialVersionUID = -492268712863444129L;
+    private String[] comments = null;
 
-    public InvalidReflectedObjectException(String message)
+    /**
+     * Gets the comments of this node
+     *
+     * @return the comments or null
+     */
+    public String[] getComments()
     {
-        super(message);
+        return this.comments == null ? null : this.comments.clone();
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    /**
+     * Sets the comments of this node
+     *
+     * @param comments the comments to set
+     */
+    public void setComments(String[] comments)
     {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        this.comments = comments == null ? null : comments.clone();
     }
 }

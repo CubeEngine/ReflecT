@@ -20,39 +20,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.ConverterManager;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.StringNode;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A converter for generic enums
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class EnumConverter implements ClassedConverter<Enum>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    public Node toNode(Enum object, ConverterManager manager) throws ConversionException
     {
-        super(message);
+        return StringNode.of(object.name());
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    public Enum fromNode(Node node, Class<? extends Enum> enumClass, ConverterManager manager) throws ConversionException
     {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
+        for (Enum enumT : enumClass.getEnumConstants())
         {
-            return new InvalidReflectedObjectException(msg);
+            if (enumT.name().equalsIgnoreCase(node.asText()))
+            {
+                return enumT;
+            }
         }
-        return new InvalidReflectedObjectException(msg, t);
+        throw ConversionException.of(this, node, "Enum value not found!");
     }
 }

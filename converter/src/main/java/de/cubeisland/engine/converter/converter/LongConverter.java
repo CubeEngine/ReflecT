@@ -20,39 +20,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.LongNode;
+import de.cubeisland.engine.converter.node.Node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A Converter for {@link java.lang.Long}
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class LongConverter extends BasicConverter<Long>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    public Long fromNode(Node node) throws ConversionException
     {
-        super(message);
-    }
-
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
+        if (node instanceof LongNode)
         {
-            return new InvalidReflectedObjectException(msg);
+            return ((LongNode)node).getValue();
         }
-        return new InvalidReflectedObjectException(msg, t);
+        String s = node.asText();
+        try
+        {
+            return Long.parseLong(s);
+        }
+        catch (NumberFormatException e)
+        {
+            throw ConversionException.of(this, node, "Node incompatible with Long!", e);
+        }
     }
 }

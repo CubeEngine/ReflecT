@@ -20,39 +20,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter.node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A Null Node
+ * <p>Represents a non-existent value
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class NullNode extends Node
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    private NullNode()
     {
-        super(message);
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    /**
+     * Creates a NullNode
+     *
+     * @return the NullNode
+     */
+    public static NullNode emptyNode()
     {
-        super(msg, t);
+        return new NullNode();
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    @Override
+    public Object getValue()
     {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        return null;
+    }
+
+    @Override
+    public String asText()
+    {
+        return "";
+    }
+
+    @Override
+    public String toString()
+    {
+        return "NullNode";
     }
 }

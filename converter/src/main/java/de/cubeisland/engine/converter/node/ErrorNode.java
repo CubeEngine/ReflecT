@@ -20,39 +20,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter.node;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * An Error Node.
+ * <p>ErrorNodes indicate that something went wrong when converting
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class ErrorNode extends Node<Void>
 {
-    private static final long serialVersionUID = -492268712863444129L;
+    private final String message;
 
-    public InvalidReflectedObjectException(String message)
+    /**
+     * Creates an ErrorNode with a Message
+     *
+     * @param message the message
+     */
+    public ErrorNode(String message)
     {
-        super(message);
+        this.message = message;
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    /**
+     * Returns the ErrorMessage of the Node
+     *
+     * @return the errorMessage
+     */
+    public String getErrorMessage()
     {
-        super(msg, t);
+        return message;
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    @Override
+    public String asText()
     {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Void getValue()
+    {
+        return null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ErrorNode=[" + message + "]";
     }
 }

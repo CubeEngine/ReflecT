@@ -20,39 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter.generic;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.converter.ClassedConverter;
+import de.cubeisland.engine.converter.converter.Converter;
 
-/**
- * This exception is thrown when a reflected object is invalid.
- */
-public class InvalidReflectedObjectException extends RuntimeException
+public interface GenericConverter<ConverterT> extends Converter<ConverterT, ParameterizedType>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
-    {
-        super(message);
-    }
-
-    public InvalidReflectedObjectException(String msg, Throwable t)
-    {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
-        {
-            return new InvalidReflectedObjectException(msg);
-        }
-        return new InvalidReflectedObjectException(msg, t);
-    }
 }

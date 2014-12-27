@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import de.cubeisland.engine.reflect.codec.Codec;
-import de.cubeisland.engine.reflect.codec.ConverterManager;
+import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
 
@@ -47,7 +47,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     protected transient SerialType serialType;
     private transient Reflected defaultReflected = this;
 
-    private transient ConverterManager manager = ConverterManager.reflectedManager(this);
+    private transient ReflectedConverterManager manager = new ReflectedConverterManager(this);
 
     /**
      * Saves the fields that got inherited from the parent-reflected
@@ -404,7 +404,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     {
         try
         {
-            for (Field field : this.getConverterManager().getSectionConverter().getReflectedFields(section.getClass()))
+            for (Field field : this.getConverterManager().getConverterByClass(SectionConverter.class).getReflectedFields(section.getClass()))
             {
                 Object value = field.get(section);
                 Object defaultValue = field.get(defaultSection);
@@ -460,7 +460,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
         }
     }
 
-    public final ConverterManager getConverterManager()
+    public final ReflectedConverterManager getConverterManager()
     {
         return manager;
     }

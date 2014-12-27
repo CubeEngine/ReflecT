@@ -29,7 +29,7 @@ import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.exception.CodecIOException;
-import de.cubeisland.engine.reflect.exception.ConversionException;
+import de.cubeisland.engine.converter.ConversionException;
 
 /**
  * A Codec using {@link InputStream} and {@link OutputStream} to save/load into/from a File

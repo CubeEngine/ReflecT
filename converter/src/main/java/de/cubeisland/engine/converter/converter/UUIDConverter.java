@@ -20,39 +20,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
+package de.cubeisland.engine.converter.converter;
 
-import java.lang.reflect.Field;
+import java.util.UUID;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.StringNode;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * A Converter for {@link java.util.UUID}
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class UUIDConverter extends SimpleConverter<UUID>
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    public Node toNode(UUID object) throws ConversionException
     {
-        super(message);
+        return StringNode.of(object.toString());
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    public UUID fromNode(Node node) throws ConversionException
     {
-        super(msg, t);
-    }
-
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
-    {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
+        if (node instanceof StringNode)
         {
-            return new InvalidReflectedObjectException(msg);
+            return UUID.fromString(node.asText());
         }
-        return new InvalidReflectedObjectException(msg, t);
+        throw ConversionException.of(this, node, "Node incompatible with UUID!");
     }
 }

@@ -20,39 +20,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.exception;
-
-import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+package de.cubeisland.engine.converter;
 
 /**
- * This exception is thrown when a reflected object is invalid.
+ * This Exception is thrown when a conversion was not successful
  */
-public class InvalidReflectedObjectException extends RuntimeException
+public class ConversionException extends Exception
 {
-    private static final long serialVersionUID = -492268712863444129L;
-
-    public InvalidReflectedObjectException(String message)
+    private ConversionException(String message)
     {
         super(message);
     }
 
-    public InvalidReflectedObjectException(String msg, Throwable t)
+    private ConversionException(String message, Throwable cause)
     {
-        super(msg, t);
+        super(message, cause);
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    public static ConversionException of(Object converter, Object toConvert, String message, Throwable cause)
     {
-        String msg = message + "\nField: " + field.getName();
-        msg += "\nSection: " + clazz.toString();
-        msg += "\nPath: " + path;
-        if (t == null)
+        String msg = message + "\nConverter: " + converter.getClass().getName();
+        if (toConvert != null)
         {
-            return new InvalidReflectedObjectException(msg);
+            msg += "\nConverting: " + toConvert.toString();
         }
-        return new InvalidReflectedObjectException(msg, t);
+        return new ConversionException(msg, cause);
+    }
+
+    public static ConversionException of(Object converter, Object toConvert, String message)
+    {
+        String msg = message + "\nConverter: " + converter.getClass().getName();
+        if (toConvert != null)
+        {
+            msg += "\nConverting: " + toConvert.toString();
+        }
+        return new ConversionException(msg);
     }
 }

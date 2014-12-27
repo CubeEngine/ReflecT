@@ -22,10 +22,10 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
+import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.codec.converter.Converter;
-import de.cubeisland.engine.reflect.exception.ConversionException;
-import de.cubeisland.engine.reflect.node.MapNode;
+import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.MapNode;
 
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
@@ -43,7 +43,7 @@ public abstract class Codec<Input, Output>
     }
 
     /**
-     * Returns the {@link ConverterManager} for this codec, allowing to register custom {@link Converter} for this codec only
+     * Returns the {@link ConverterManager} for this codec, allowing to register custom {@link de.cubeisland.engine.converter.converter.ClassedConverter} for this codec only
      *
      * @return the ConverterManager
      *
@@ -104,7 +104,8 @@ public abstract class Codec<Input, Output>
     {
         try
         {
-            return (MapNode)reflected.getConverterManager().withFallback(this.converterManager).convertToNode(reflected);
+            reflected.getConverterManager().withFallback(converterManager);
+            return (MapNode)reflected.getConverterManager().convertReflected(reflected);
         }
         catch (ConversionException e)
         {
@@ -122,12 +123,8 @@ public abstract class Codec<Input, Output>
     {
         try
         {
-            MapNode defaultNode = node;
-            if (reflected.isChild())
-            {
-                defaultNode = convertReflected(reflected.getDefault());
-            }
-            reflected.getConverterManager().withFallback(this.converterManager).convertFromNode(node, defaultNode, reflected);
+            reflected.getConverterManager().withFallback(this.converterManager);
+            reflected.getConverterManager().fillReflected(node, reflected);
         }
         catch (ConversionException e)
         {
