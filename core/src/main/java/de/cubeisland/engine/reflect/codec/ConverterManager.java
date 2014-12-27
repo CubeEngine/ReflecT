@@ -52,6 +52,7 @@ import de.cubeisland.engine.reflect.codec.converter.StringConverter;
 import de.cubeisland.engine.reflect.codec.converter.UUIDConverter;
 import de.cubeisland.engine.reflect.codec.converter.generic.ArrayConverter;
 import de.cubeisland.engine.reflect.codec.converter.generic.CollectionConverter;
+import de.cubeisland.engine.reflect.codec.converter.generic.EnumConverter;
 import de.cubeisland.engine.reflect.codec.converter.generic.MapConverter;
 import de.cubeisland.engine.reflect.exception.ConversionException;
 import de.cubeisland.engine.reflect.exception.ConverterNotFoundException;
@@ -76,6 +77,7 @@ public final class ConverterManager
     private ConverterManager fallbackManager;
     private Reflected reflected = null;
     private SectionConverter sectionConverter;
+    private EnumConverter enumConverter;
 
     private ConverterManager(ConverterManager defaultConverters)
     {
@@ -152,6 +154,7 @@ public final class ConverterManager
         this.registerConverter(Class.class, new ClassConverter());
 
         this.sectionConverter = new SectionConverter();
+        this.enumConverter = new EnumConverter();
     }
 
     /**
@@ -288,6 +291,10 @@ public final class ConverterManager
             }
             catch (ConverterNotFoundException e)
             {
+                if (object instanceof Enum)
+                {
+                    return getEnumConverter().toNode((Enum)object);
+                }
                 if (object instanceof Section)
                 {
                     return getSectionConverter().toNode((Section)object, this);
@@ -325,25 +332,34 @@ public final class ConverterManager
         }
         if (type instanceof Class)
         {
-            if (Section.class.isAssignableFrom((Class<?>)type))
+            try
             {
-                Section section = SectionFactory.newSectionInstance((Class<? extends Section>)type, null);
-                this.convertFromNode((MapNode)node, (MapNode)node, section);
-                return (T)section;
+                return matchConverter((Class<T>)type).fromNode(node, this);
             }
-            if (((Class)type).isArray())
+            catch (ConverterNotFoundException e)
             {
-                if (node instanceof ListNode)
+                if (((Class<?>)type).isEnum())
                 {
-                    return (T)arrayConverter.fromNode((Class<T[]>)type, (ListNode)node, this);
+                    return (T)this.getEnumConverter().fromNode((Class<? extends Enum>)type, node);
                 }
-                else
+                if (Section.class.isAssignableFrom((Class<?>)type))
                 {
-                    throw ConversionException.of(arrayConverter, node,
-                                                 "Cannot convert to Array! Node is not a ListNode!");
+                    Section section = SectionFactory.newSectionInstance((Class<? extends Section>)type, null);
+                    this.convertFromNode((MapNode)node, (MapNode)node, section);
+                    return (T)section;
+                }
+                if (((Class)type).isArray())
+                {
+                    if (node instanceof ListNode)
+                    {
+                        return (T)arrayConverter.fromNode((Class<T[]>)type, (ListNode)node, this);
+                    }
+                    else
+                    {
+                        throw ConversionException.of(arrayConverter, node, "Cannot convert to Array! Node is not a ListNode!");
+                    }
                 }
             }
-            return matchConverter((Class<T>)type).fromNode(node, this);
         }
         else if (type instanceof ParameterizedType)
         {
@@ -415,5 +431,14 @@ public final class ConverterManager
             return this.fallbackManager.getSectionConverter();
         }
         return this.sectionConverter;
+    }
+
+    public EnumConverter getEnumConverter()
+    {
+        if (enumConverter == null)
+        {
+            return this.fallbackManager.getEnumConverter();
+        }
+        return enumConverter;
     }
 }
