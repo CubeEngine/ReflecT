@@ -355,6 +355,6 @@ public class YamlCodec extends FileCodec
              || s.startsWith("|") || s.startsWith(">") || s.startsWith("!") || s.startsWith("%")
              || s.endsWith(":") || s.contains(": ") || s.startsWith("- ") || s.startsWith(",")
              || s.contains("&") || s.matches("[0-9]+:[0-9]+")) || isEmpty(s) || "*".equals(s)
-             || s.contains(QUOTE) || s.matches("[0][0-9]+");
+             || s.startsWith(" ") || s.contains(QUOTE) || s.matches("[0][0-9]+");
     }
 }
