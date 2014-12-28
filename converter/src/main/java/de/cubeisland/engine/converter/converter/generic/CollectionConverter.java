@@ -42,29 +42,23 @@ import de.cubeisland.engine.converter.node.Node;
  */
 public class CollectionConverter implements GenericConverter<Collection>
 {
-    public static Collection getCollectionFor(
-        ParameterizedType ptype) throws IllegalAccessException, InstantiationException
+    public static Collection getCollectionFor(ParameterizedType ptype) throws IllegalAccessException, InstantiationException
     {
         Class collectionType = (Class)ptype.getRawType();
-        Collection result;
         if (!collectionType.isInterface() && !Modifier.isAbstract(collectionType.getModifiers()))
         {
-            result = (Collection)collectionType.newInstance();
+            return (Collection)collectionType.newInstance();
         }
-        else if (!Set.class.isAssignableFrom(collectionType))
+        if (!Set.class.isAssignableFrom(collectionType))
         {
             // if (List.class.isAssignableFrom(collectionType)) // or other collection
-            result = new LinkedList();
+            return new LinkedList();
         }
-        else if (SortedSet.class.isAssignableFrom(collectionType))
+        if (SortedSet.class.isAssignableFrom(collectionType))
         {
-            result = new TreeSet();
+            return new TreeSet();
         }
-        else
-        {
-            result = new HashSet();
-        }
-        return result;
+        return new HashSet();
     }
 
     public ListNode toNode(Collection collection, ConverterManager manager) throws ConversionException
@@ -83,31 +77,30 @@ public class CollectionConverter implements GenericConverter<Collection>
 
     public Collection fromNode(Node node, ParameterizedType pType, ConverterManager manager) throws ConversionException
     {
-        if (node instanceof ListNode)
+        if (!(node instanceof ListNode))
         {
-            if (pType.getRawType() instanceof Class)
-            {
-                try
-                {
-                    return fillCollection(getCollectionFor(pType), pType, (ListNode)node, manager);
-                }
-                catch (IllegalAccessException e)
-                {
-                    throw ConversionException.of(this, node, "Could not create Collection", e);
-                }
-                catch (InstantiationException e)
-                {
-                    throw ConversionException.of(this, node, "Could not create Collection", e);
-                }
-            }
+            throw ConversionException.of(this, node, "Cannot convert to Collection! Node is not a ListNode!");
+        }
+        if (!(pType.getRawType() instanceof Class))
+        {
             throw new IllegalArgumentException("Unknown Collection-Type: " + pType);
         }
-        throw ConversionException.of(this, node, "Cannot convert to Collection! Node is not a ListNode!");
+        try
+        {
+            return fillCollection(getCollectionFor(pType), pType, (ListNode)node, manager);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw ConversionException.of(this, node, "Could not create Collection", e);
+        }
+        catch (InstantiationException e)
+        {
+            throw ConversionException.of(this, node, "Could not create Collection", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private Collection fillCollection(Collection result, ParameterizedType pType, ListNode listNode,
-                                      ConverterManager manager) throws ConversionException
+    private Collection fillCollection(Collection result, ParameterizedType pType, ListNode listNode, ConverterManager manager) throws ConversionException
     {
         Type subType = pType.getActualTypeArguments()[0];
 

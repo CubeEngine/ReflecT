@@ -219,6 +219,8 @@ public class ConverterManager
 
     private Converter findConverter(Class clazz)
     {
+        // TODO get for each superclass instead
+
         for (Entry<Class<?>, Converter> entry : converters.entrySet())
         {
             if (entry.getKey().isAssignableFrom(clazz))

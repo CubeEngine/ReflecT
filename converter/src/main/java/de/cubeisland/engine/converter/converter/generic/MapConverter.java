@@ -85,26 +85,26 @@ public class MapConverter implements GenericConverter<Map>
 
     public Map fromNode(Node node, ParameterizedType ptype, ConverterManager manager) throws ConversionException
     {
-        if ((node instanceof MapNode))
+        if (!(node instanceof MapNode))
         {
-            if (ptype.getRawType() instanceof Class)
-            {
-                try
-                {
-                    return fillMap(getMapFor(ptype), ptype, (MapNode)node, manager);
-                }
-                catch (IllegalAccessException e)
-                {
-                    throw ConversionException.of(this, node, "Could not create Map", e);
-                }
-                catch (InstantiationException e)
-                {
-                    e.printStackTrace();
-                }
-            }
+            throw ConversionException.of(this, node, "Cannot convert to Map! Node is not a MapNode!");
+        }
+        if (!(ptype.getRawType() instanceof Class))
+        {
             throw new IllegalArgumentException("Unknown Map-Type: " + ptype);
         }
-        throw ConversionException.of(this, node, "Cannot convert to Map! Node is not a MapNode!");
+        try
+        {
+            return fillMap(getMapFor(ptype), ptype, (MapNode)node, manager);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw ConversionException.of(this, node, "Could not create Map", e);
+        }
+        catch (InstantiationException e)
+        {
+            throw ConversionException.of(this, node, "Could not create Map", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
