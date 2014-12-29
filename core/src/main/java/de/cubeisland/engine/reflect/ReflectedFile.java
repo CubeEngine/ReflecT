@@ -72,7 +72,8 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
 
     public final boolean loadFrom(File source)
     {
-        if (this.serialType == null)
+        File target = getTarget();
+        if (target == null)
         {
             throw new IllegalArgumentException("The file must not be null in order to load the reflected!");
         }
@@ -80,7 +81,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         {
             try
             {
-                this.loadFrom(new FileInputStream(this.serialType));
+                this.loadFrom(new FileInputStream(target));
             }
             catch (FileNotFoundException e)
             {

@@ -40,10 +40,10 @@ import de.cubeisland.engine.reflect.exception.MissingCodecException;
  */
 public abstract class Reflected<CodecT extends Codec, SerialType> implements Section
 {
-    private final transient Class<CodecT> defaultCodec = getCodecClass(this.getClass());
-    protected transient Reflector reflector;
-    protected transient SerialType serialType;
-    private transient Reflected defaultReflected = this;
+    private final transient Class<CodecT> defaultCodec = getCodecClass(getClass());
+    private transient Reflector reflector;
+    private transient SerialType serialType;
+    private transient Reflected defaults = this;
 
     private transient ReflectedConverterManager manager = new ReflectedConverterManager(this);
 
@@ -65,6 +65,16 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     }
 
     /**
+     * Returns the reflector used for this reflected
+     *
+     * @return the reflector
+     */
+    public Reflector getReflector()
+    {
+        return reflector;
+    }
+
+    /**
      * Returns the default Reflected
      * <p>If not a child Reflected the default is <code>this</code>
      *
@@ -72,7 +82,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
      */
     public final Reflected getDefault()
     {
-        return this.defaultReflected;
+        return this.defaults;
     }
 
     /**
@@ -84,15 +94,15 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     {
         if (reflected == null)
         {
-            this.defaultReflected = this;
+            this.defaults = this;
             this.inheritedFields = null;
             return;
         }
-        if (!this.getClass().equals(reflected.getClass()))
+        if (!getClass().equals(reflected.getClass()))
         {
             throw new IllegalArgumentException("Parent and child-reflected have to be the same type of reflected!");
         }
-        this.defaultReflected = reflected;
+        this.defaults = reflected;
         this.inheritedFields = new HashSet<Field>();
     }
 
@@ -114,7 +124,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
      *
      * @param field the inherited field
      */
-    public final void addInheritedField(Field field)
+    protected final void addInheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -129,7 +139,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
      *
      * @param field the not inherited field
      */
-    public final void removeInheritedField(Field field)
+    protected final void removeInheritedField(Field field)
     {
         if (inheritedFields == null)
         {
@@ -146,7 +156,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
      *
      * @return true if the field got inherited
      */
-    public final boolean isInheritedField(Field field)
+    protected final boolean isInheritedField(Field field)
     {
         return inheritedFields != null && inheritedFields.contains(field);
     }
@@ -326,6 +336,14 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     }
 
     /**
+     * Gets called right before loading
+     */
+    public void onLoad()
+    {
+        // implement onLoad
+    }
+
+    /**
      * This method gets called right after the reflected got loaded.
      */
     public void onLoaded(SerialType loadedFrom)
@@ -358,20 +376,12 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     }
 
     /**
-     * Gets called right before loading
-     */
-    public void onLoad()
-    {
-        // implement onLoad
-    }
-
-    /**
      * Updates the inheritance of Fields
      * <p>This does nothing if the Reflected has no other default set
      */
     public final void updateInheritance()
     {
-        if (this.defaultReflected == null || this.defaultReflected == this)
+        if (this.defaults == null || this.defaults == this)
         {
             return;
         }
@@ -379,7 +389,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
         SectionConverter sectionConverter = this.getConverterManager().getConverterByClass(SectionConverter.class);
         try
         {
-            this.updateInheritance(this, defaultReflected, sectionConverter);
+            this.updateInheritance(this, defaults, sectionConverter);
         }
         catch (IllegalAccessException e)
         {
@@ -391,18 +401,17 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
      * Updates the inheritance of the Sections
      *
      * @param section          the Section
-     * @param defaultSection   the default Section
-     * @param sectionConverter the SectionConverter
+     * @param defaults   the default Section
+     * @param converter the SectionConverter
      */
-    private void updateInheritance(Section section, Section defaultSection,
-                                   SectionConverter sectionConverter) throws IllegalAccessException
+    private void updateInheritance(Section section, Section defaults, SectionConverter converter) throws IllegalAccessException
     {
-        for (Field field : sectionConverter.getReflectedFields(section.getClass()))
+        for (Field field : converter.getReflectedFields(section.getClass()))
         {
             Type type = field.getGenericType();
 
             Object value = field.get(section);
-            Object defaultValue = field.get(defaultSection);
+            Object defaultValue = field.get(defaults);
             if (value == null && defaultValue == null)
             {
                 this.addInheritedField(field);
@@ -416,11 +425,11 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
                 }
                 else if (value instanceof Section && defaultValue instanceof Section)
                 {
-                    this.updateInheritance((Section)value, (Section)defaultValue, sectionConverter);
+                    this.updateInheritance((Section)value, (Section)defaultValue, converter);
                 }
                 else if (type instanceof ParameterizedType)
                 {
-                    updateSectionMapInheritance(sectionConverter, (ParameterizedType)type, value, defaultValue);
+                    updateSectionMapInheritance(converter, (ParameterizedType)type, value, defaultValue);
                 }
             }
         }

@@ -33,10 +33,10 @@ public class ReflectedConverterManager extends ConverterManager
 {
     private final Reflected reflected;
 
-    public ReflectedConverterManager(Reflected reflected1)
+    public ReflectedConverterManager(Reflected reflected)
     {
         super(null);
-        reflected = reflected1;
+        this.reflected = reflected;
     }
 
     /**
@@ -52,7 +52,6 @@ public class ReflectedConverterManager extends ConverterManager
 
     public void fillReflected(MapNode node, Reflected reflected) throws ConversionException
     {
-
         if (reflected.isChild())
         {
             node.inheritFrom(convertReflected(reflected.getDefault()));

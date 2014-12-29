@@ -21,6 +21,7 @@
     <modules>
         <module>core</module>
         <module>yaml</module>
+        <module>mongo</module>
         <module>converter</module>
     </modules>
 

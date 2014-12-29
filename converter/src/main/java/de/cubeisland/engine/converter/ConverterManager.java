@@ -38,7 +38,6 @@ import de.cubeisland.engine.converter.converter.ByteConverter;
 import de.cubeisland.engine.converter.converter.ClassConverter;
 import de.cubeisland.engine.converter.converter.Converter;
 import de.cubeisland.engine.converter.converter.EnumConverter;
-import de.cubeisland.engine.converter.converter.ClassedConverter;
 import de.cubeisland.engine.converter.converter.DateConverter;
 import de.cubeisland.engine.converter.converter.DoubleConverter;
 import de.cubeisland.engine.converter.converter.FloatConverter;
@@ -63,14 +62,14 @@ import static java.util.Map.Entry;
  */
 public class ConverterManager
 {
-    private ConverterManager fallbackManager;
+    private ConverterManager parent;
 
     private Map<Class<?>, Converter> converters = new ConcurrentHashMap<Class<?>, Converter>();
     private Map<Class, Converter> convertersByClass = new ConcurrentHashMap<Class, Converter>();
 
     protected ConverterManager(ConverterManager fallbackManager)
     {
-        this.fallbackManager = fallbackManager;
+        this.parent = fallbackManager;
     }
 
     /**
@@ -98,27 +97,13 @@ public class ConverterManager
 
     private void registerDefaultConverters()
     {
-        ClassedConverter converter = new IntegerConverter();
-        this.registerConverter(converter, Integer.class);
-        this.registerConverter(converter, int.class);
-        converter = new ShortConverter();
-        this.registerConverter(converter, Short.class);
-        this.registerConverter(converter, short.class);
-        converter = new ByteConverter();
-        this.registerConverter(converter, Byte.class);
-        this.registerConverter(converter, byte.class);
-        converter = new DoubleConverter();
-        this.registerConverter(converter, Double.class);
-        this.registerConverter(converter, double.class);
-        converter = new FloatConverter();
-        this.registerConverter(converter, Float.class);
-        this.registerConverter(converter, float.class);
-        converter = new LongConverter();
-        this.registerConverter(converter, Long.class);
-        this.registerConverter(converter, long.class);
-        converter = new BooleanConverter();
-        this.registerConverter(converter, Boolean.class);
-        this.registerConverter(converter, boolean.class);
+        this.registerConverter(new IntegerConverter(), Integer.class, int.class);
+        this.registerConverter(new ShortConverter(), Short.class, short.class);
+        this.registerConverter(new ByteConverter(), Byte.class, byte.class);
+        this.registerConverter(new DoubleConverter(), Double.class, double.class);
+        this.registerConverter(new FloatConverter(), Float.class, float.class);
+        this.registerConverter(new LongConverter(), Long.class, long.class);
+        this.registerConverter(new BooleanConverter(), Boolean.class, boolean.class);
         this.registerConverter(new StringConverter(), String.class);
         this.registerConverter(new DateConverter(), Date.class);
         this.registerConverter(new UUIDConverter(), UUID.class);
@@ -139,17 +124,18 @@ public class ConverterManager
      * @param converter the converter
      * @param classes   the class
      */
-    public final void registerConverter(Converter converter, Class... classes)
+    public final ConverterManager registerConverter(Converter converter, Class... classes)
     {
         if (classes == null || converter == null)
         {
-            return;
+            return this;
         }
         for (Class aClass : classes)
         {
             converters.put(aClass, converter);
         }
         convertersByClass.put(converter.getClass(), converter);
+        return this;
     }
 
     /**
@@ -157,28 +143,30 @@ public class ConverterManager
      *
      * @param clazz the class of the converter to remove
      */
-    public final void removeConverter(Class clazz)
+    public final ConverterManager removeConverter(Class clazz)
     {
-        Iterator<Entry<Class<?>, Converter>> iter = converters.entrySet().iterator();
+        Iterator<Entry<Class<?>, Converter>> it = converters.entrySet().iterator();
         Entry<Class<?>, Converter> entry;
-        while (iter.hasNext())
+        while (it.hasNext())
         {
-            entry = iter.next();
+            entry = it.next();
             if (entry.getKey() == clazz || entry.getValue().getClass() == clazz)
             {
-                iter.remove();
+                it.remove();
                 convertersByClass.remove(entry.getValue().getClass());
             }
         }
+        return this;
     }
 
     /**
      * Removes all registered converters
      */
-    public final void removeConverters()
+    public final ConverterManager removeConverters()
     {
         converters.clear();
         convertersByClass.clear();
+        return this;
     }
 
     /**
@@ -210,9 +198,9 @@ public class ConverterManager
     private Converter getConverter(Class clazz)
     {
         Converter converter = this.converters.get(clazz);
-        if (converter == null && this.fallbackManager != null)
+        if (converter == null && this.parent != null)
         {
-            converter = this.fallbackManager.getConverter(clazz);
+            converter = this.parent.getConverter(clazz);
         }
         return converter;
     }
@@ -230,9 +218,9 @@ public class ConverterManager
                 return converter;
             }
         }
-        if (this.fallbackManager != null)
+        if (this.parent != null)
         {
-            return this.fallbackManager.findConverter(clazz);
+            return this.parent.findConverter(clazz);
         }
         return null;
     }
@@ -316,7 +304,7 @@ public class ConverterManager
             }
             return (T)converter.fromNode(node, type, this);
         }
-        catch (ConverterNotFoundException e)
+        catch (ConverterNotFoundException ignored)
         {
             return (T)fromNode(node, type);
         }
@@ -333,12 +321,9 @@ public class ConverterManager
      */
     protected Object fromNode(Node node, Type type) throws ConversionException
     {
-        if (type instanceof Class)
+        if (type instanceof Class && ((Class)type).isArray())
         {
-            if (((Class)type).isArray())
-            {
-                return getConverterByClass(ArrayConverter.class).fromNode(node, (Class)type, this);
-            }
+            return getConverterByClass(ArrayConverter.class).fromNode(node, (Class)type, this);
         }
         return null;
     }
@@ -352,7 +337,7 @@ public class ConverterManager
      */
     public ConverterManager withFallback(ConverterManager defaultManager)
     {
-        this.fallbackManager = defaultManager;
+        this.parent = defaultManager;
         return this;
     }
 
@@ -368,9 +353,9 @@ public class ConverterManager
     public final <ConverterT> ConverterT getConverterByClass(Class<ConverterT> clazz)
     {
         ConverterT converter = (ConverterT)this.convertersByClass.get(clazz);
-        if (converter == null && fallbackManager != null)
+        if (converter == null && parent != null)
         {
-            return fallbackManager.getConverterByClass(clazz);
+            return parent.getConverterByClass(clazz);
         }
         return converter;
     }

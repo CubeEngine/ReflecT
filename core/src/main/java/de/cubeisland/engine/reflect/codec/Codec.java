@@ -39,8 +39,16 @@ public abstract class Codec<InputT, OutputT>
      */
     final void init(ConverterManager converterManager)
     {
+        if (converterManager == null)
+        {
+            throw new IllegalArgumentException("The converter manager may not be null!");
+        }
         this.converterManager = converterManager;
+        onInit();
     }
+
+    protected void onInit()
+    {}
 
     /**
      * Returns the {@link ConverterManager} for this codec, allowing to register custom {@link de.cubeisland.engine.converter.converter.ClassedConverter} for this codec only
