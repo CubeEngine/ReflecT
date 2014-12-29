@@ -66,9 +66,16 @@ public class Reference<T extends ReflectedDBObject>
         return fetched;
     }
 
-    public boolean equals(Reference<T> other)
+    @Override
+    public boolean equals(Object obj)
     {
-        return this.dbRef.equals(other.dbRef);
+        return obj instanceof Reference && this.dbRef.equals(((Reference)obj).dbRef);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return this.dbRef.hashCode();
     }
 
     public DBRefBase getDBRef()
