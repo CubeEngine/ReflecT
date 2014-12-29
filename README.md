@@ -3,6 +3,8 @@
 
 Typesafe serialization of data
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.cubeisland.engine/reflect/badge.svg?style=flat)](http://mvnrepository.com/artifact/de.cubeisland.engine/reflect) (replace ```${reflectVersion}``` with this version)
+
 # Using the library
 
 ## Dependencies
@@ -14,7 +16,7 @@ To add the dependency using Maven just add the following section to your depende
 <dependency>
     <groupId>de.cubeisland.engine</groupId>
     <artifactId>reflect</artifactId>
-    <version>2.0.4</version>
+    <version>${reflectVersion}</version>
 </dependency>
 ```
 
@@ -22,7 +24,7 @@ To add the dependency using Maven just add the following section to your depende
 
 To add the dependency using Gradle just add the following line to your dependencies:
 ```groovy
-compile 'de.cubeisland.engine:reflect:2.0.4'
+compile 'de.cubeisland.engine:reflect:${reflectVersion}'
 ```
 
 ## Dependencies for Android
@@ -39,7 +41,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     <dependency>
         <groupId>de.cubeisland.engine</groupId>
         <artifactId>reflect</artifactId>
-        <version>2.0.4</version>
+        <version>${reflectVersion}</version>
         <exclusions>
             <exclusion>
                 <groupId>org.yaml</groupId>
@@ -50,7 +52,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     <dependency>
         <artifactId>org.yaml</artifactId>
         <groupId>snakeyaml</groupId>
-        <version>1.12</version>
+        <version>1.14</version>
         <scope>system</scope>
         <systemPath>${basedir}/RELATIVE_PATH_TO_SNAKEYAML_ANDROID_JAR</systemPath>
     </dependency>
@@ -58,7 +60,7 @@ doesn't work with Android. Nevertheless you can use it by following these steps:
     * Gradle:
     
     ```groovy
-    compile ('de.cubeisland.engine:reflect:2.0.4')
+    compile ('de.cubeisland.engine:reflect:${reflectVersion}')
     {
         exclude group: 'org.yaml', module: 'snakeyaml'
     }
