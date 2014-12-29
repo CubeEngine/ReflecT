@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 
+import static de.cubeisland.engine.reflect.Reflector.LOGGER;
+
 /**
  * A Reflected saving into a {@link File} using a {@link FileCodec}
  */
@@ -87,7 +89,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
             this.onLoaded(source);
             return true;
         }
-        this.reflector.logger.log(Level.INFO, "Could not load reflected from file! Using default...");
+        LOGGER.log(Level.INFO, "Could not load reflected from file! Using default...");
         return false;
     }
 

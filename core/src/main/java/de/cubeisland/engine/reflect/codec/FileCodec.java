@@ -28,8 +28,11 @@ import java.io.OutputStream;
 import java.util.logging.Level;
 
 import de.cubeisland.engine.reflect.Reflected;
+import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.converter.ConversionException;
+
+import static de.cubeisland.engine.reflect.Reflector.LOGGER;
 
 /**
  * A Codec using {@link InputStream} and {@link OutputStream} to save/load into/from a File
@@ -48,7 +51,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             {
                 throw new CodecIOException("Could not load reflected", ex);
             }
-            reflected.getLogger().warning("Could not load reflected" + ex);
+            LOGGER.warning("Could not load reflected" + ex);
         }
         finally
         {
@@ -58,7 +61,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             }
             catch (IOException e)
             {
-                reflected.getLogger().log(Level.WARNING, "Failed to close InputStream", e);
+                LOGGER.log(Level.WARNING, "Failed to close InputStream", e);
             }
         }
     }
@@ -75,7 +78,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             {
                 throw new CodecIOException("Could not save reflected", ex);
             }
-            reflected.getLogger().warning("Could not save reflected" + ex);
+            LOGGER.warning("Could not save reflected" + ex);
         }
         finally
         {
@@ -85,7 +88,7 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             }
             catch (IOException e)
             {
-                reflected.getLogger().log(Level.WARNING, "Failed to close OutputStream", e);
+                LOGGER.log(Level.WARNING, "Failed to close OutputStream", e);
             }
         }
     }

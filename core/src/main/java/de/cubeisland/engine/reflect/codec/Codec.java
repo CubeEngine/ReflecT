@@ -30,7 +30,7 @@ import de.cubeisland.engine.converter.node.MapNode;
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
  */
-public abstract class Codec<Input, Output>
+public abstract class Codec<InputT, OutputT>
 {
     private ConverterManager converterManager;
 
@@ -65,7 +65,7 @@ public abstract class Codec<Input, Output>
      * @param reflected the Reflected to load
      * @param input     the Input to load from
      */
-    public abstract void loadReflected(Reflected reflected, Input input);
+    public abstract void loadReflected(Reflected reflected, InputT input);
 
     /**
      * Saves the {@link Reflected} using given <code>Output</code>
@@ -73,7 +73,7 @@ public abstract class Codec<Input, Output>
      * @param reflected the Reflected to save
      * @param output    the Output to save into
      */
-    public abstract void saveReflected(Reflected reflected, Output output);
+    public abstract void saveReflected(Reflected reflected, OutputT output);
 
     /**
      * Saves the values contained in the {@link MapNode} using given <code>Output</code>
@@ -82,7 +82,7 @@ public abstract class Codec<Input, Output>
      * @param out       the Output to save to
      * @param reflected the Reflected
      */
-    protected abstract void save(MapNode node, Output out, Reflected reflected) throws ConversionException;
+    protected abstract void save(MapNode node, OutputT out, Reflected reflected) throws ConversionException;
 
     /**
      * Converts the <code>Input</code> into a {@link MapNode}
@@ -90,7 +90,7 @@ public abstract class Codec<Input, Output>
      * @param in        the Input to load from
      * @param reflected the Reflected
      */
-    protected abstract MapNode load(Input in, Reflected reflected) throws ConversionException;
+    protected abstract MapNode load(InputT in, Reflected reflected) throws ConversionException;
 
 
     /**

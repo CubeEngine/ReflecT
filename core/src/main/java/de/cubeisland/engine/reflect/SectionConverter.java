@@ -48,6 +48,7 @@ import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.util.SectionFactory;
 import de.cubeisland.engine.reflect.util.StringUtils;
 
+import static de.cubeisland.engine.reflect.Reflector.LOGGER;
 import static java.util.logging.Level.FINE;
 
 /**
@@ -103,6 +104,10 @@ public class SectionConverter implements ClassedConverter<Section>
 
     public Node toNode(Section section, ConverterManager manager) throws ConversionException
     {
+        if (!(manager instanceof ReflectedConverterManager))
+        {
+            throw new IllegalArgumentException("provided ConverterManager is not a ReflectedConverterManager");
+        }
         ReflectedConverterManager rManager = (ReflectedConverterManager)manager;
 
         MapNode baseNode = MapNode.emptyMap();
@@ -217,9 +222,15 @@ public class SectionConverter implements ClassedConverter<Section>
     @SuppressWarnings("unchecked")
     public Section fromNode(Node aNode, Class<? extends Section> clazz, ConverterManager manager) throws ConversionException
     {
+        if (!(manager instanceof ReflectedConverterManager))
+        {
+            throw new IllegalArgumentException("provided ConverterManager is not a ReflectedConverterManager");
+        }
+        ReflectedConverterManager rManager = (ReflectedConverterManager)manager;
+
         Section section = SectionFactory.newSectionInstance(clazz, null);
         MapNode mapNode = (MapNode)aNode;
-        ReflectedConverterManager rManager = (ReflectedConverterManager)manager;
+
         for (Field field : this.getReflectedFields(clazz))
         {
             try
@@ -233,7 +244,7 @@ public class SectionConverter implements ClassedConverter<Section>
                 Object value;
                 if (fieldNode instanceof NullNode)
                 {
-                    rManager.getReflected().getLogger().log(FINE, fieldPath + " is NULL! Ignoring missing value");
+                    LOGGER.log(FINE, fieldPath + " is NULL! Ignoring missing value");
                     continue; // Take existing field Value
                 }
 

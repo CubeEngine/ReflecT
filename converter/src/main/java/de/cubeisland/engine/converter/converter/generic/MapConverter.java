@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
@@ -68,12 +69,15 @@ public class MapConverter implements GenericConverter<Map>
         {
             return result;
         }
-        for (Object key : map.keySet())
+
+        @SuppressWarnings("unchecked")
+        Set<Entry> entrySet = map.entrySet();
+        for (Entry entry : entrySet)
         {
-            Node keyNode = manager.convertToNode(key);
+            Node keyNode = manager.convertToNode(entry.getKey());
             if (keyNode instanceof KeyNode)
             {
-                result.setNode((KeyNode)keyNode, manager.convertToNode(map.get(key)));
+                result.setNode((KeyNode)keyNode, manager.convertToNode(entry.getValue()));
             }
             else
             {

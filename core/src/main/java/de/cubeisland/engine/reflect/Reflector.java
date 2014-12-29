@@ -34,27 +34,8 @@ import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
  */
 public class Reflector
 {
-    // package private
-    Logger logger;
+    public static final Logger LOGGER = Logger.getLogger("ReflecT");
     private CodecManager codecManager = new CodecManager();
-
-    /**
-     * Creates a Reflector with a default Logger
-     */
-    public Reflector()
-    {
-        this.logger = Logger.getLogger("ReflecT");
-    }
-
-    /**
-     * Creates a Reflector with the given Logger
-     *
-     * @param logger the logger to use
-     */
-    public Reflector(Logger logger)
-    {
-        this.logger = logger;
-    }
 
     /**
      * Loads the reflected from given source and optionally saves it afterwards
@@ -147,15 +128,5 @@ public class Reflector
     public ConverterManager getDefaultConverterManager()
     {
         return this.codecManager.getDefaultConverterManager();
-    }
-
-    /**
-     * Sets the logger for all reflected created by this factory
-     *
-     * @param logger the logger
-     */
-    public void setLogger(Logger logger)
-    {
-        this.logger = logger;
     }
 }

@@ -223,18 +223,18 @@ public class MapNode extends ParentNode<Map<String, Node>>
         if (node instanceof MapNode)
         {
             Map<String, Node> inheritFrom = ((MapNode)node).getMappedNodes();
-            for (String key : inheritFrom.keySet())
+            for (Entry<String, Node> entry : inheritFrom.entrySet())
             {
-                Node mapped = mappedNodes.get(key);
+                Node mapped = mappedNodes.get(entry.getKey());
                 if (mapped == null || mapped instanceof NullNode)
                 {
-                    Node inherited = inheritFrom.get(key);
+                    Node inherited = entry.getValue();
                     inherited.setInherited(true);
-                    this.mappedNodes.put(key, inherited);
+                    this.mappedNodes.put(entry.getKey(), inherited);
                 }
                 if (mapped instanceof MapNode)
                 {
-                    ((MapNode)mapped).inheritFrom(inheritFrom.get(key));
+                    ((MapNode)mapped).inheritFrom(entry.getValue());
                 }
             }
         }

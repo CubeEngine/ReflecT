@@ -29,10 +29,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import de.cubeisland.engine.reflect.codec.Codec;
-import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
 
@@ -40,9 +38,9 @@ import de.cubeisland.engine.reflect.exception.MissingCodecException;
 /**
  * This abstract class represents a reflected object to be serialized using a Codec C.
  */
-public abstract class Reflected<C extends Codec, SerialType> implements Section
+public abstract class Reflected<CodecT extends Codec, SerialType> implements Section
 {
-    private final transient Class<C> defaultCodec = getCodecClass(this.getClass());
+    private final transient Class<CodecT> defaultCodec = getCodecClass(this.getClass());
     protected transient Reflector reflector;
     protected transient SerialType serialType;
     private transient Reflected defaultReflected = this;
@@ -88,16 +86,14 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
         {
             this.defaultReflected = this;
             this.inheritedFields = null;
+            return;
         }
-        else
+        if (!this.getClass().equals(reflected.getClass()))
         {
-            if (!this.getClass().equals(reflected.getClass()))
-            {
-                throw new IllegalArgumentException("Parent and child-reflected have to be the same type of reflected!");
-            }
-            this.defaultReflected = reflected;
-            this.inheritedFields = new HashSet<Field>();
+            throw new IllegalArgumentException("Parent and child-reflected have to be the same type of reflected!");
         }
+        this.defaultReflected = reflected;
+        this.inheritedFields = new HashSet<Field>();
     }
 
     /**
@@ -166,7 +162,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     @SuppressWarnings("unchecked")
     public <T extends Reflected> T loadChild(SerialType source)
     {
-        Reflected<C, SerialType> childReflected = reflector.create(this.getClass());
+        Reflected<CodecT, SerialType> childReflected = reflector.create(this.getClass());
         childReflected.setTarget(source);
         childReflected.setDefault(this);
         try
@@ -192,7 +188,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
      * @return the Codec
      */
     @SuppressWarnings("unchecked")
-    private Class<C> getCodecClass(Class clazz)
+    private Class<CodecT> getCodecClass(Class clazz)
     {
         Type genericSuperclass = clazz;
         try
@@ -213,7 +209,7 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
                     // check if it is codec
                     if (gType instanceof Class && Codec.class.isAssignableFrom((Class<?>)gType))
                     {
-                        return (Class<C>)gType;
+                        return (Class<CodecT>)gType;
                     }
                     genericSuperclass = ((ParameterizedType)genericSuperclass).getRawType();
                 }
@@ -295,11 +291,12 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
      *
      * @throws MissingCodecException when no codec was set via genericType
      */
-    public final C getCodec() throws MissingCodecException
+    public final CodecT getCodec() throws MissingCodecException
     {
         if (defaultCodec == null)
         {
-            throw new MissingCodecException("Reflected has no Codec set! A reflected object needs to have a codec defined in its GenericType");
+            throw new MissingCodecException(
+                "Reflected has no Codec set! A reflected object needs to have a codec defined in its GenericType");
         }
         return this.reflector.getCodecManager().getCodec(this.defaultCodec);
     }
@@ -369,72 +366,20 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Returns the logger of the Reflector
-     *
-     * @return the Logger
-     */
-    public Logger getLogger()
-    {
-        return this.reflector.logger;
-    }
-
-    /**
      * Updates the inheritance of Fields
-     * <p>This doesn't do anything if the Reflected has no other default set
+     * <p>This does nothing if the Reflected has no other default set
      */
     public final void updateInheritance()
     {
         if (this.defaultReflected == null || this.defaultReflected == this)
         {
-            // Default is this reflected anyways
             return;
         }
         this.inheritedFields = new HashSet<Field>();
-        this.updateInheritance(this, defaultReflected);
-    }
-
-    /**
-     * Updates the inheritance of the Sections
-     *
-     * @param section        the Section
-     * @param defaultSection the default Section
-     */
-    @SuppressWarnings("unchecked")
-    private void updateInheritance(Section section, Section defaultSection)
-    {
+        SectionConverter sectionConverter = this.getConverterManager().getConverterByClass(SectionConverter.class);
         try
         {
-            for (Field field : this.getConverterManager().getConverterByClass(SectionConverter.class).getReflectedFields(section.getClass()))
-            {
-                Object value = field.get(section);
-                Object defaultValue = field.get(defaultSection);
-                if ((value == null && defaultValue == null) || (value != null && defaultValue != null && value.equals(defaultValue)))
-                {
-                    this.addInheritedField(field);
-                }
-                else if (value != null && defaultValue != null)
-                {
-                    /*
-                    TODO inheritance updating
-                    switch (getFieldType(field))
-                    {
-                    case NORMAL:
-                        // Already handled
-                        break;
-                    case SECTION:
-                        this.updateInheritance((Section)value, (Section)defaultValue);
-                        break;
-                    case SECTION_COLLECTION:
-                        throw new IllegalStateException("Collections in child reflected are not allowed!");
-                    case SECTION_MAP:
-                        updateSectionMapInheritance((Map<?, Section>)value, (Map<?, Section>)defaultValue);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Illegal FieldType");
-                    }
-                    */
-                }
-            }
+            this.updateInheritance(this, defaultReflected, sectionConverter);
         }
         catch (IllegalAccessException e)
         {
@@ -443,28 +388,72 @@ public abstract class Reflected<C extends Codec, SerialType> implements Section
     }
 
     /**
-     * Updates the inheritance of the SectionMaps
+     * Updates the inheritance of the Sections
      *
-     * @param value        the value
-     * @param defaultValue the default value
+     * @param section          the Section
+     * @param defaultSection   the default Section
+     * @param sectionConverter the SectionConverter
      */
-    private void updateSectionMapInheritance(Map<?, Section> value, Map<?, Section> defaultValue)
+    private void updateInheritance(Section section, Section defaultSection,
+                                   SectionConverter sectionConverter) throws IllegalAccessException
     {
-        for (Entry<?, Section> entry : ((Map<?, Section>)value).entrySet())
+        for (Field field : sectionConverter.getReflectedFields(section.getClass()))
         {
-            Section defaulted = defaultValue.get(entry.getKey());
-            if (defaulted != null)
+            Type type = field.getGenericType();
+
+            Object value = field.get(section);
+            Object defaultValue = field.get(defaultSection);
+            if (value == null && defaultValue == null)
             {
-                this.updateInheritance(entry.getValue(), defaulted);
+                this.addInheritedField(field);
+                return;
+            }
+            if (value != null && defaultValue != null)
+            {
+                if (value.equals(defaultValue))
+                {
+                    this.addInheritedField(field);
+                }
+                else if (value instanceof Section && defaultValue instanceof Section)
+                {
+                    this.updateInheritance((Section)value, (Section)defaultValue, sectionConverter);
+                }
+                else if (type instanceof ParameterizedType)
+                {
+                    updateSectionMapInheritance(sectionConverter, (ParameterizedType)type, value, defaultValue);
+                }
             }
         }
     }
 
+    private void updateSectionMapInheritance(SectionConverter sectionConverter, ParameterizedType pType, Object value,
+                                             Object defaultValue) throws IllegalAccessException
+    {
+        if (Map.class.isAssignableFrom((Class<?>)pType.getRawType()) && Section.class.isAssignableFrom(
+            (Class<?>)pType.getActualTypeArguments()[1]))
+        {
+            @SuppressWarnings("unchecked") Map<?, Section> valueMap = (Map<?, Section>)value;
+            @SuppressWarnings("unchecked") Map<?, Section> defaultValueMap = (Map<?, Section>)defaultValue;
+            for (Entry<?, Section> entry : valueMap.entrySet())
+            {
+                this.updateInheritance(entry.getValue(), defaultValueMap.get(entry.getKey()), sectionConverter);
+            }
+        }
+    }
+
+    /**
+     * Returns the ConverterManager
+     *
+     * @return the ConverterManager
+     */
     public final ReflectedConverterManager getConverterManager()
     {
         return manager;
     }
 
+    /**
+     * Returns true if this Reflected has an other default Reflected than itself
+     */
     public final boolean isChild()
     {
         return this.getDefault() != this;
