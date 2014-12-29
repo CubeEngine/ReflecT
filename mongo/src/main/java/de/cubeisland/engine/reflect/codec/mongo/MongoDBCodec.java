@@ -26,11 +26,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.DBRefBase;
+import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
+import de.cubeisland.engine.converter.node.ListNode;
+import de.cubeisland.engine.converter.node.MapNode;
+import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.NullNode;
+import de.cubeisland.engine.converter.node.ParentNode;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.ReflectedConverterManager;
 import de.cubeisland.engine.reflect.Reflector;
@@ -39,12 +44,6 @@ import de.cubeisland.engine.reflect.codec.mongo.node.DBRefBaseNode;
 import de.cubeisland.engine.reflect.codec.mongo.node.DateNode;
 import de.cubeisland.engine.reflect.codec.mongo.node.ObjectIdNode;
 import de.cubeisland.engine.reflect.exception.CodecIOException;
-import de.cubeisland.engine.converter.ConversionException;
-import de.cubeisland.engine.converter.node.ListNode;
-import de.cubeisland.engine.converter.node.MapNode;
-import de.cubeisland.engine.converter.node.Node;
-import de.cubeisland.engine.converter.node.NullNode;
-import de.cubeisland.engine.converter.node.ParentNode;
 import org.bson.types.ObjectId;
 
 public class MongoDBCodec extends Codec<DBObject, DBObject>
@@ -143,9 +142,9 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
         }
     }
 
-    private List convertListNode(ListNode listNode)
+    private List<Object> convertListNode(ListNode listNode)
     {
-        ArrayList<Object> list = new ArrayList<Object>();
+        List<Object> list = new ArrayList<Object>();
         if (listNode.isEmpty())
         {
             return list;

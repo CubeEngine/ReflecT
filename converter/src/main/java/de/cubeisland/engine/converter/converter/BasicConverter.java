@@ -33,6 +33,7 @@ import static de.cubeisland.engine.converter.node.Node.wrapIntoNode;
 public abstract class BasicConverter<T> extends SimpleConverter<T>
 {
     @SuppressWarnings("unchecked")
+    @Override
     public Node toNode(T object) throws ConversionException
     {
         Class<T> clazz = (Class<T>)object.getClass();

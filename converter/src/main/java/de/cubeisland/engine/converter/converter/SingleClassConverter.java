@@ -33,8 +33,7 @@ import de.cubeisland.engine.converter.node.Node;
  */
 public abstract class SingleClassConverter<ConvertT> implements ClassedConverter<ConvertT>
 {
-    public final ConvertT fromNode(Node node, Class<? extends ConvertT> type,
-                                   ConverterManager manager) throws ConversionException
+    public final ConvertT fromNode(Node node, Class<? extends ConvertT> type, ConverterManager manager) throws ConversionException
     {
         return fromNode(node, manager);
     }

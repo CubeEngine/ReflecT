@@ -28,11 +28,13 @@ import de.cubeisland.engine.converter.node.StringNode;
 
 public class ClassConverter extends SimpleConverter<Class<?>>
 {
+	@Override
 	public Node toNode(Class<?> object) throws ConversionException
 	{
 		return StringNode.of(object.getName());
 	}
 
+	@Override
 	public Class<?> fromNode(Node node) throws ConversionException
 	{
 		if (!(node instanceof StringNode))

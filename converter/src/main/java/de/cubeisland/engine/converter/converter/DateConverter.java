@@ -23,7 +23,6 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.sql.Date;
-
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.StringNode;
@@ -33,11 +32,13 @@ import de.cubeisland.engine.converter.node.StringNode;
  */
 public class DateConverter extends SimpleConverter<Date>
 {
+    @Override
     public Node toNode(Date object) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
+    @Override
     public Date fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

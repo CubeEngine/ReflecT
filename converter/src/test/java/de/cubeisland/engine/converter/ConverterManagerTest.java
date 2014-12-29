@@ -25,7 +25,6 @@ package de.cubeisland.engine.converter;
 import java.sql.Date;
 import java.util.UUID;
 import java.util.logging.Level;
-
 import de.cubeisland.engine.converter.node.Node;
 import org.junit.Before;
 import org.junit.Test;

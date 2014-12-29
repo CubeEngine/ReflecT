@@ -32,14 +32,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-
 import de.cubeisland.engine.converter.converter.BooleanConverter;
 import de.cubeisland.engine.converter.converter.ByteConverter;
 import de.cubeisland.engine.converter.converter.ClassConverter;
 import de.cubeisland.engine.converter.converter.Converter;
-import de.cubeisland.engine.converter.converter.EnumConverter;
 import de.cubeisland.engine.converter.converter.DateConverter;
 import de.cubeisland.engine.converter.converter.DoubleConverter;
+import de.cubeisland.engine.converter.converter.EnumConverter;
 import de.cubeisland.engine.converter.converter.FloatConverter;
 import de.cubeisland.engine.converter.converter.IntegerConverter;
 import de.cubeisland.engine.converter.converter.LevelConverter;

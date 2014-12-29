@@ -31,6 +31,7 @@ import de.cubeisland.engine.converter.node.ShortNode;
  */
 public class ShortConverter extends BasicConverter<Short>
 {
+    @Override
     public Short fromNode(Node node) throws ConversionException
     {
         if (node instanceof ShortNode)

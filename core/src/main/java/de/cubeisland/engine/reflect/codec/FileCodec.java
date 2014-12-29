@@ -26,11 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
-
-import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.Reflector;
-import de.cubeisland.engine.reflect.exception.CodecIOException;
 import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.reflect.Reflected;
+import de.cubeisland.engine.reflect.exception.CodecIOException;
 
 import static de.cubeisland.engine.reflect.Reflector.LOGGER;
 

@@ -31,6 +31,7 @@ import de.cubeisland.engine.converter.node.Node;
  */
 public class FloatConverter extends BasicConverter<Float>
 {
+    @Override
     public Float fromNode(Node node) throws ConversionException
     {
         if (node instanceof FloatNode)

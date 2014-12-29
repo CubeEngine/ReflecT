@@ -31,6 +31,7 @@ import de.cubeisland.engine.converter.node.Node;
  */
 public class IntegerConverter extends BasicConverter<Integer>
 {
+    @Override
     public Integer fromNode(Node node) throws ConversionException
     {
         if (node instanceof IntNode)

@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.converter.ClassedConverter;
@@ -288,7 +287,7 @@ public class SectionConverter implements ClassedConverter<Section>
         }
 
         List<Field> list = new ArrayList<Field>();
-        Set<String> paths = new HashSet<String>();
+        Set<String> resolvedPaths = new HashSet<String>();
 
         Class<?> current = clazz;
         while (current != null)
@@ -300,7 +299,7 @@ public class SectionConverter implements ClassedConverter<Section>
                     continue;
                 }
 
-                if (!paths.add(getPathFor(field).toString()))
+                if (!resolvedPaths.add(getPathFor(field).toString()))
                 {
                     throw new DuplicatedPathException("Duplicated Path detected! " + getPathFor(field));
                 }

@@ -23,7 +23,6 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.util.UUID;
-
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.StringNode;
@@ -33,11 +32,13 @@ import de.cubeisland.engine.converter.node.StringNode;
  */
 public class UUIDConverter extends SimpleConverter<UUID>
 {
+    @Override
     public Node toNode(UUID object) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
+    @Override
     public UUID fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

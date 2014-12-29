@@ -22,10 +22,10 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
-import de.cubeisland.engine.converter.ConverterManager;
-import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.node.MapNode;
+import de.cubeisland.engine.reflect.Reflected;
 
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected

@@ -24,7 +24,6 @@ package de.cubeisland.engine.reflect.codec;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.SectionConverter;

@@ -135,7 +135,7 @@ public class ListNode extends ParentNode
         {
             try
             {
-                int pos = Integer.valueOf(key.substring(1));
+                int pos = Integer.parseInt(key.substring(1));
                 return this.listedNodes.get(pos);
             }
             catch (NumberFormatException ex)

@@ -23,7 +23,6 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.util.Locale;
-
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.StringNode;
@@ -33,12 +32,14 @@ import de.cubeisland.engine.converter.node.StringNode;
  */
 public class LocaleConverter extends SimpleConverter<Locale>
 {
+    @Override
     public Node toNode(Locale locale) throws ConversionException
     {
         return StringNode.of(locale.getLanguage().toLowerCase(Locale.ENGLISH) + '_' +
                                  locale.getCountry().toUpperCase(Locale.ENGLISH));
     }
 
+    @Override
     public Locale fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

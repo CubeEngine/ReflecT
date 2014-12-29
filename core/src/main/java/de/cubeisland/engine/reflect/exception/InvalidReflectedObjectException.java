@@ -23,9 +23,8 @@
 package de.cubeisland.engine.reflect.exception;
 
 import java.lang.reflect.Field;
-
-import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.reflect.Section;
 
 /**
  * This exception is thrown when a reflected object is invalid.

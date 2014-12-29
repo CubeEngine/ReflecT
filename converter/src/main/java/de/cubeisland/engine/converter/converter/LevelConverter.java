@@ -23,7 +23,6 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.util.logging.Level;
-
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.BooleanNode;
 import de.cubeisland.engine.converter.node.Node;
@@ -34,11 +33,13 @@ import de.cubeisland.engine.converter.node.StringNode;
  */
 public class LevelConverter extends SimpleConverter<Level>
 {
+    @Override
     public Node toNode(Level object) throws ConversionException
     {
         return StringNode.of(object.toString());
     }
 
+    @Override
     public Level fromNode(Node node) throws ConversionException
     {
         if (node instanceof StringNode)

@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import de.cubeisland.engine.reflect.codec.Codec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
