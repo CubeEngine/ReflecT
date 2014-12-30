@@ -57,7 +57,7 @@ public class SectionFactory
      *
      * @return the instantiated Section
      */
-    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent) throws ReflectedInstantiationException
+    public static Section newSectionInstance(Class<? extends Section> sectionClass, Object parent)
     {
         try
         {

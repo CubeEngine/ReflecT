@@ -138,12 +138,15 @@ public class YamlCodec extends FileCodec
     private void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
     {
         StringBuilder sb = new StringBuilder();
-        if (!(value instanceof NullNode)) // null-Node ?
+        // null-Node ?
+        if (!(value instanceof NullNode))
         {
-            if (value instanceof StringNode) // String-Node ?
+            // String-Node ?
+            if (value instanceof StringNode)
             {
                 String string = ((StringNode)value).getValue();
-                if (string.contains(LINE_BREAK)) // MultiLine String
+                // MultiLine String
+                if (string.contains(LINE_BREAK))
                 {
                     String offsetString = getOffset(offset);
                     sb.append("|").append(LINE_BREAK).append(offsetString).append(OFFSET);
