@@ -74,8 +74,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <targetJdk>1.5</targetJdk>
-        <compilerJdk>1.6</compilerJdk>
+        <jdkVersion>1.6</jdkVersion>
     </properties>
 
     <dependencies>
@@ -93,7 +92,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.5.1</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
@@ -109,7 +108,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.5</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -120,13 +119,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.2</version>
                 <configuration>
-                    <fork>true</fork>
-                    <compilerVersion>${compilerJdk}</compilerVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <source>${targetJdk}</source>
-                    <target>${targetJdk}</target>
+                    <source>${jdkVersion}</source>
+                    <target>${jdkVersion}</target>
                     <optimize>true</optimize>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
@@ -135,7 +132,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.7</version>
                 <configuration>
                     <strictCheck>true</strictCheck>
                     <header>com/mycila/maven/plugin/license/templates/MIT.txt</header>
@@ -167,7 +164,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.3</version>
+                        <version>2.4</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -180,7 +177,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10</version>
+                        <version>2.10.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -211,7 +208,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[${compilerJdk},1.7.0)</version>
+                                    <version>[${jdkVersion},1.7.0)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
