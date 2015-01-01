@@ -72,7 +72,8 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
         {
             for (Field field : sectionConverter.getReflectedFields(section.getClass()))
             {
-                if (Section.class.isAssignableFrom(field.getType()) && field.get(section) == null)
+                if (Section.class.isAssignableFrom(field.getType()) && field.get(section) == null &&
+                    !NullSection.class.isAssignableFrom(field.getType()))
                 {
                     @SuppressWarnings("unchecked")
                     Class<? extends Section> sectionClass = (Class<? extends Section>)field.getType();
