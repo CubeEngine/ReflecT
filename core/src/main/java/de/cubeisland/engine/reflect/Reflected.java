@@ -69,7 +69,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     {
         try
         {
-            for (Field field : sectionConverter.getReflectedFields(this.getClass()))
+            for (Field field : sectionConverter.getReflectedFields(section.getClass()))
             {
                 if (Section.class.isAssignableFrom(field.getType()) && field.get(section) == null)
                 {
