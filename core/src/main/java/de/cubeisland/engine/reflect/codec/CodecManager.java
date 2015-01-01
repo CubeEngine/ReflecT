@@ -24,7 +24,9 @@ package de.cubeisland.engine.reflect.codec;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import de.cubeisland.engine.converter.ConverterManager;
+import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.SectionConverter;
 import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
@@ -36,9 +38,11 @@ public class CodecManager
 {
     private final ConverterManager defaultManager = ConverterManager.defaultManager();
     private final Map<Class<? extends Codec>, Codec> codecs = new HashMap<Class<? extends Codec>, Codec>();
+    private final Reflector reflector;
 
-    public CodecManager()
+    public CodecManager(Reflector reflector)
     {
+        this.reflector = reflector;
         defaultManager.registerConverter(new SectionConverter(), Section.class);
     }
 
@@ -82,7 +86,7 @@ public class CodecManager
     public <C extends Codec> void registerCodec(C codec)
     {
         this.codecs.put(codec.getClass(), codec);
-        codec.init(this.defaultManager.subManager());
+        codec.init(this.defaultManager.subManager(), this.reflector);
     }
 
     /**
@@ -93,5 +97,15 @@ public class CodecManager
     public ConverterManager getDefaultConverterManager()
     {
         return this.defaultManager;
+    }
+
+    /**
+     * Returns the Reflector that created this CodecManager
+     *
+     * @return the Reflector
+     */
+    public Reflector getReflector()
+    {
+        return reflector;
     }
 }

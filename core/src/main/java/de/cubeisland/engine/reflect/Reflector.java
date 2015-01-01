@@ -34,7 +34,7 @@ import de.cubeisland.engine.reflect.exception.ReflectedInstantiationException;
 public class Reflector
 {
     public static final Logger LOGGER = Logger.getLogger("ReflecT");
-    private CodecManager codecManager = new CodecManager();
+    private CodecManager codecManager = new CodecManager(this);
 
     /**
      * Loads the reflected from given source and optionally saves it afterwards

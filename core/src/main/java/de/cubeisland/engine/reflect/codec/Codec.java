@@ -26,6 +26,7 @@ import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.node.MapNode;
 import de.cubeisland.engine.reflect.Reflected;
+import de.cubeisland.engine.reflect.Reflector;
 
 /**
  * This abstract Codec can be implemented to read and write reflected objects that allow child-reflected
@@ -33,12 +34,14 @@ import de.cubeisland.engine.reflect.Reflected;
 public abstract class Codec<InputT, OutputT>
 {
     private ConverterManager converterManager;
+    private Reflector reflector;
 
     /**
      * Called via registering with the CodecManager
      */
-    final void init(ConverterManager converterManager)
+    final void init(ConverterManager converterManager, Reflector reflector)
     {
+        this.reflector = reflector;
         if (converterManager == null)
         {
             throw new IllegalArgumentException("The converter manager may not be null!");
@@ -138,5 +141,15 @@ public abstract class Codec<InputT, OutputT>
         {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Returns the Reflector this Codec was initialized with
+     *
+     * @return the Reflector
+     */
+    public Reflector getReflector()
+    {
+        return reflector;
     }
 }

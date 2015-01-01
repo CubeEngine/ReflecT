@@ -53,14 +53,7 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
     {
         final ConverterManager cm = getConverterManager();
         cm.registerConverter(new DateConverter(), Date.class);
-        if (cm instanceof ReflectedConverterManager)
-        {
-            cm.registerConverter(new ReferenceConverter(((ReflectedConverterManager)cm).getReflected().getReflector()));
-        }
-        else
-        {
-            throw new IllegalArgumentException("provided ConverterManager is not a ReflectedConverterManager");
-        }
+        cm.registerConverter(new ReferenceConverter(getReflector()));
     }
 
     @Override
