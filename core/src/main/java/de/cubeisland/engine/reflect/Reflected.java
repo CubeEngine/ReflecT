@@ -407,7 +407,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
             return;
         }
         this.inheritedFields = new HashSet<Field>();
-        SectionConverter sectionConverter = this.getConverterManager().getConverterByClass(SectionConverter.class);
+        SectionConverter sectionConverter = this.getCodec().getConverterManager().getConverterByClass(SectionConverter.class);
         try
         {
             this.updateInheritance(this, defaults, sectionConverter);
