@@ -152,9 +152,9 @@ public class ConverterManager
             if (entry.getKey() == clazz || entry.getValue().getClass() == clazz)
             {
                 it.remove();
-                convertersByClass.remove(entry.getValue().getClass());
             }
         }
+        convertersByClass.remove(clazz);
         return this;
     }
 
