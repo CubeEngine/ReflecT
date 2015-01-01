@@ -32,6 +32,7 @@ import java.util.Set;
 import de.cubeisland.engine.reflect.codec.Codec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
+import de.cubeisland.engine.reflect.util.SectionFactory;
 
 
 /**
@@ -60,7 +61,28 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     public final void init(Reflector reflector)
     {
         this.reflector = reflector;
+        initializeSections(this, getCodec().getConverterManager().getConverterByClass(SectionConverter.class));
         this.onInit();
+    }
+
+    private void initializeSections(Section section, SectionConverter sectionConverter)
+    {
+        try
+        {
+            for (Field field : sectionConverter.getReflectedFields(this.getClass()))
+            {
+                if (Section.class.isAssignableFrom(field.getType()) && field.get(section) == null)
+                {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends Section> sectionClass = (Class<? extends Section>)field.getType();
+                    Section createdSection = SectionFactory.newSectionInstance(sectionClass, null);
+                    field.set(section, createdSection);
+                    this.initializeSections(createdSection, sectionConverter);
+                }
+            }
+        }
+        catch (IllegalAccessException ignored)
+        {}
     }
 
     /**

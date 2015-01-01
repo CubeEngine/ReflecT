@@ -35,7 +35,6 @@ public class YamlReflectedTest
 {
     private ReflectedTest test1;
     private ReflectedTest2 test2;
-    private ReflectedFieldShadowing2 test3;
     private File file;
 
     private Reflector factory;
@@ -47,13 +46,11 @@ public class YamlReflectedTest
         factory = new Reflector();
         test1 = factory.create(ReflectedTest.class);
         test2 = factory.create(ReflectedTest2.class);
-        test3 = factory.create(ReflectedFieldShadowing2.class);
     }
 
     @Test
     public void test1() throws Exception
     {
-        test1.save(file);
         ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
         assertEquals(test1.getCodec().convertReflected(test1).toString(), test1.getCodec().convertReflected(loadConfig).toString());
@@ -71,13 +68,6 @@ public class YamlReflectedTest
     @Test(expected = DuplicatedPathException.class)
     public void test3() throws Exception
     {
-        try
-        {
-            test3.save(file);
-        }
-        finally
-        {
-            file.delete();
-        }
+        factory.create(ReflectedFieldShadowing2.class);
     }
 }

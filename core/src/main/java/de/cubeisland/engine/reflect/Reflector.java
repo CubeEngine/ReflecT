@@ -96,6 +96,7 @@ public class Reflector
         try
         {
             T reflected = clazz.newInstance();
+
             reflected.init(this);
             return reflected;
         }
