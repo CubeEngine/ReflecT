@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import de.cubeisland.engine.reflect.codec.Codec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 import de.cubeisland.engine.reflect.exception.MissingCodecException;
@@ -407,7 +408,8 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
             return;
         }
         this.inheritedFields = new HashSet<Field>();
-        SectionConverter sectionConverter = this.getCodec().getConverterManager().getConverterByClass(SectionConverter.class);
+        SectionConverter sectionConverter = this.getCodec().getConverterManager().getConverterByClass(
+            SectionConverter.class);
         try
         {
             this.updateInheritance(this, defaults, sectionConverter);

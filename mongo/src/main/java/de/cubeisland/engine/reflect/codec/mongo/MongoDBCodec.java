@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.DBRefBase;
@@ -37,7 +38,6 @@ import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.NullNode;
 import de.cubeisland.engine.converter.node.ParentNode;
 import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.ReflectedConverterManager;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.Codec;
 import de.cubeisland.engine.reflect.codec.mongo.node.DBRefBaseNode;

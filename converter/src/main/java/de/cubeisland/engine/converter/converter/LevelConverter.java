@@ -23,6 +23,7 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.util.logging.Level;
+
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.BooleanNode;
 import de.cubeisland.engine.converter.node.Node;

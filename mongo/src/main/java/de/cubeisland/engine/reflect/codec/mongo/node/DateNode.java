@@ -23,6 +23,7 @@
 package de.cubeisland.engine.reflect.codec.mongo.node;
 
 import java.util.Date;
+
 import de.cubeisland.engine.converter.node.Node;
 
 public class DateNode extends Node<Date>

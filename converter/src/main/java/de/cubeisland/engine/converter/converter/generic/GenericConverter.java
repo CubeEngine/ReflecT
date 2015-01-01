@@ -23,6 +23,7 @@
 package de.cubeisland.engine.converter.converter.generic;
 
 import java.lang.reflect.ParameterizedType;
+
 import de.cubeisland.engine.converter.converter.Converter;
 
 public interface GenericConverter<ConverterT> extends Converter<ConverterT, ParameterizedType>

@@ -23,6 +23,7 @@
 package de.cubeisland.engine.converter.converter;
 
 import java.lang.reflect.Type;
+
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.node.Node;
