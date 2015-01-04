@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Char Node
  */
-public class CharNode extends KeyNode<Character>
+public class CharNode extends ValueNode<Character>
 {
-    private char value;
-
     /**
      * Creates a CharNode
      *
@@ -36,24 +34,6 @@ public class CharNode extends KeyNode<Character>
      */
     public CharNode(char value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Character getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "CharNode=[" + value + "]";
+        super(value);
     }
 }

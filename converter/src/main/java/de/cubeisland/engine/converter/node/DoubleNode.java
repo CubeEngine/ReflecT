@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Double Node
  */
-public class DoubleNode extends KeyNode<Double>
+public class DoubleNode extends ValueNode<Double>
 {
-    private double value;
-
     /**
      * Creates a DoubleNode
      *
@@ -36,24 +34,6 @@ public class DoubleNode extends KeyNode<Double>
      */
     public DoubleNode(double value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Double getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "DoubleNode=[" + value + "]";
+        super(value);
     }
 }

@@ -55,7 +55,7 @@ public class NullNode extends Node
     }
 
     @Override
-    public String toString()
+    public String asString()
     {
         return "NullNode";
     }

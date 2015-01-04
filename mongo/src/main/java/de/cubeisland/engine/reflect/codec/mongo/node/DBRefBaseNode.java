@@ -24,31 +24,12 @@ package de.cubeisland.engine.reflect.codec.mongo.node;
 
 import com.mongodb.DBRefBase;
 import de.cubeisland.engine.converter.node.Node;
+import de.cubeisland.engine.converter.node.ValueNode;
 
-public class DBRefBaseNode extends Node<DBRefBase>
+public class DBRefBaseNode extends ValueNode<DBRefBase>
 {
-    private DBRefBase value;
-
     public DBRefBaseNode(DBRefBase value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return value.toString();
-    }
-
-    @Override
-    public DBRefBase getValue()
-    {
-        return this.value;
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.value.toString();
+        super(value);
     }
 }

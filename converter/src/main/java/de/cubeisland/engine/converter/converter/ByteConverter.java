@@ -26,8 +26,14 @@ import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.ByteNode;
 import de.cubeisland.engine.converter.node.Node;
 
-public class ByteConverter extends BasicConverter<Byte>
+public class ByteConverter extends SimpleConverter<Byte>
 {
+    @Override
+    public Node toNode(Byte object) throws ConversionException
+    {
+        return new ByteNode(object);
+    }
+
     @Override
     public Byte fromNode(Node node) throws ConversionException
     {

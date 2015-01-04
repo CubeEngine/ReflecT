@@ -33,7 +33,7 @@ import java.util.Set;
  * A MapNode
  * <p>It can map KeyNodes onto other Nodes
  */
-public class MapNode extends ParentNode<Map<String, Node>>
+public class MapNode extends ContainerNode<Map<String, Node>>
 {
     private Map<String, Node> mappedNodes = new LinkedHashMap<String, Node>();
     /**
@@ -42,26 +42,7 @@ public class MapNode extends ParentNode<Map<String, Node>>
     private Map<String, String> keys = new HashMap<String, String>();
     private Map<Node, String> reverseMappedNodes = new LinkedHashMap<Node, String>();
 
-    /**
-     * Creates a MapNode with given map as values.
-     * MapKeys of the MapNode will always be a lowercased and trimmed String.
-     *
-     * @param map the map to convert into Nodes
-     */
-    public MapNode(Map<?, ?> map)
-    {
-        if (map != null)
-        {
-            for (Map.Entry<?, ?> entry : map.entrySet())
-            {
-                Node node = wrapIntoNode(entry.getValue());
-                node.setParentNode(this);
-                this.setExactNode(entry.getKey().toString(), node);
-            }
-        }
-    }
-
-    private MapNode()
+    public MapNode()
     {
     }
 
@@ -73,7 +54,6 @@ public class MapNode extends ParentNode<Map<String, Node>>
 
     /**
      * Creates an empty MapNode
-     * <p>This is equivalent to {@link #MapNode(Map)} with null parameter
      *
      * @return an empty MapNode
      */
@@ -83,18 +63,13 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    public Node getExactNode(String key)
+    public Node get(String key)
     {
-        Node node = this.mappedNodes.get(key.trim().toLowerCase());
-        if (node == null)
-        {
-            node = NullNode.emptyNode();
-        }
-        return node;
+        return this.mappedNodes.get(key.trim().toLowerCase());
     }
 
     @Override
-    public final Node setExactNode(String key, Node node)
+    public final Node set(String key, Node node)
     {
         String loweredKey = key.trim().toLowerCase();
         if (loweredKey.isEmpty())
@@ -102,13 +77,12 @@ public class MapNode extends ParentNode<Map<String, Node>>
             throw new IllegalArgumentException("The key for the following node is empty!" + node.toString());
         }
         this.keys.put(loweredKey, key);
-        node.setParentNode(this);
         this.reverseMappedNodes.put(node, loweredKey);
         return this.mappedNodes.put(loweredKey, node);
     }
 
     @Override
-    protected final Node removeExactNode(String key)
+    protected final Node remove(String key)
     {
         Node node = this.mappedNodes.remove(key);
         if (node instanceof NullNode)
@@ -118,11 +92,6 @@ public class MapNode extends ParentNode<Map<String, Node>>
             return null;
         }
         return node;
-    }
-
-    public Node setNode(KeyNode keyNode, Node node)
-    {
-        return this.setExactNode(keyNode.toKey(), node);
     }
 
     public String getOriginalKey(String lowerCasedKey)
@@ -142,45 +111,15 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    protected ReflectedPath getPathOfSubNode(Node node, ReflectedPath path)
-    {
-        String key = this.reverseMappedNodes.get(node);
-        if (key == null)
-        {
-            throw new IllegalArgumentException("Parented Node not in map!");
-        }
-        ReflectedPath result;
-        if (path == null)
-        {
-            result = ReflectedPath.forName(key);
-        }
-        else
-        {
-            result = path.asSubPath(key);
-        }
-        if (this.getParentNode() != null)
-        {
-            return this.getParentNode().getPathOfSubNode(this, result);
-        }
-        return result;
-    }
-
-    @Override
-    public ReflectedPath getPathOfSubNode(Node node)
-    {
-        return this.getPathOfSubNode(node, null);
-    }
-
-    @Override
     public void cleanUpEmptyNodes()
     {
         Set<String> nodesToRemove = new HashSet<String>();
         for (String key : this.mappedNodes.keySet())
         {
-            if (this.mappedNodes.get(key) instanceof ParentNode)
+            if (this.mappedNodes.get(key) instanceof ContainerNode)
             {
-                ((ParentNode)this.mappedNodes.get(key)).cleanUpEmptyNodes();
-                if (((ParentNode)this.mappedNodes.get(key)).isEmpty())
+                ((ContainerNode)this.mappedNodes.get(key)).cleanUpEmptyNodes();
+                if (((ContainerNode)this.mappedNodes.get(key)).isEmpty())
                 {
                     nodesToRemove.add(key);
                 }
@@ -193,12 +132,12 @@ public class MapNode extends ParentNode<Map<String, Node>>
     }
 
     @Override
-    public String toString()
+    public String asString()
     {
         StringBuilder sb = new StringBuilder("MapNode=[");
         for (Entry<String, Node> entry : this.mappedNodes.entrySet())
         {
-            sb.append("\n").append(entry.getKey()).append(": ").append(entry.getValue().toString());
+            sb.append("\n").append(entry.getKey()).append(": ").append(entry.getValue().asString());
         }
         sb.append("]MapEnd");
         return sb.toString();

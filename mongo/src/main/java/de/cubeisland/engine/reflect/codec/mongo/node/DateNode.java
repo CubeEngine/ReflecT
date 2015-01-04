@@ -48,7 +48,7 @@ public class DateNode extends Node<Date>
     }
 
     @Override
-    public String toString()
+    public String asString()
     {
         return date.toString();
     }

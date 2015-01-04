@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.Node;
 /**
  * A Converter for {@link java.lang.Float}
  */
-public class FloatConverter extends BasicConverter<Float>
+public class FloatConverter extends SimpleConverter<Float>
 {
+    @Override
+    public Node toNode(Float object) throws ConversionException
+    {
+        return new FloatNode(object);
+    }
+
     @Override
     public Float fromNode(Node node) throws ConversionException
     {

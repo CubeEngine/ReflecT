@@ -24,7 +24,7 @@ package de.cubeisland.engine.reflect.exception;
 
 import java.lang.reflect.Field;
 
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.node.Path;
 import de.cubeisland.engine.reflect.Section;
 
 /**
@@ -44,7 +44,7 @@ public class InvalidReflectedObjectException extends RuntimeException
         super(msg, t);
     }
 
-    public static InvalidReflectedObjectException of(String message, ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    public static InvalidReflectedObjectException of(String message, Path path, Class<? extends Section> clazz, Field field, Throwable t)
     {
         String msg = message + "\nField: " + field.getName();
         msg += "\nSection: " + clazz.toString();

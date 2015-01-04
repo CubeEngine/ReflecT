@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Float Node
  */
-public class FloatNode extends KeyNode<Float>
+public class FloatNode extends ValueNode<Float>
 {
-    private float value;
-
     /**
      * Creates A FloatNode
      *
@@ -36,24 +34,6 @@ public class FloatNode extends KeyNode<Float>
      */
     public FloatNode(float value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Float getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "FloatNode=[" + value + "]";
+        super(value);
     }
 }

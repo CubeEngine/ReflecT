@@ -43,7 +43,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import static de.cubeisland.engine.converter.node.Node.wrapIntoNode;
 import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 
 /**
@@ -67,25 +66,20 @@ public class YamlCodec extends FileCodec
     @SuppressWarnings("unchecked")
     protected final MapNode load(InputStream in, Reflected reflected) throws ConversionException
     {
-        MapNode values;
         try
         {
             if (in == null)
             {
-                values = MapNode.emptyMap();
                 // InputStream null -> reflected was not existent
-                return values;
+                return MapNode.emptyMap();
             }
             Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(in);
             if (map == null)
             {
-                values = MapNode.emptyMap();
                 // loadValues null -> reflected exists but was empty
+                return MapNode.emptyMap();
             }
-            else
-            {
-                values = (MapNode)wrapIntoNode(map);
-            }
+            return (MapNode)reflected.getCodec().getConverterManager().convertToNode(map);
         }
         catch (ScannerException ex)
         {
@@ -95,7 +89,6 @@ public class YamlCodec extends FileCodec
         {
             throw ConversionException.of(this, in, "Failed to parse the YAML reflected object. Try encoding it as UTF-8 or validate on yamllint.com", ex);
         }
-        return values;
     }
 
     // Reflected saving Methods

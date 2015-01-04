@@ -31,55 +31,9 @@ import java.util.Set;
  * A List Node
  * <p>It can contain a list of other Nodes
  */
-public class ListNode extends ParentNode
+public class ListNode extends ContainerNode
 {
     private List<Node> listedNodes = new ArrayList<Node>();
-
-    /**
-     * Creates a ListNode from an Iterable
-     *
-     * @param list an Iterable
-     */
-    public ListNode(Iterable list)
-    {
-        if (list != null)
-        {
-            for (Object object : list)
-            {
-                Node node = wrapIntoNode(object);
-                node.setParentNode(this);
-                listedNodes.add(node);
-            }
-        }
-    }
-
-    /**
-     * Creates a ListNode from an Array
-     *
-     * @param array an array
-     */
-    public ListNode(Object[] array)
-    {
-        if (array != null)
-        {
-            for (Object object : array)
-            {
-                Node node = wrapIntoNode(object);
-                node.setParentNode(this);
-                listedNodes.add(node);
-            }
-        }
-    }
-
-    private ListNode()
-    {
-    }
-
-    @Override
-    public List<Node> getValue()
-    {
-        return this.listedNodes;
-    }
 
     /**
      * Creates an Empty ListNode
@@ -91,6 +45,12 @@ public class ListNode extends ParentNode
         return new ListNode();
     }
 
+    @Override
+    public List<Node> getValue()
+    {
+        return this.listedNodes;
+    }
+
     /**
      * Adds a node to the list
      *
@@ -99,82 +59,56 @@ public class ListNode extends ParentNode
     public void addNode(Node node)
     {
         this.listedNodes.add(node);
-        node.setParentNode(this);
     }
 
     @Override
-    protected Node setExactNode(String key, Node node)
+    public Node set(String key, Node node)
     {
-        if (key.startsWith(ReflectedPath.LIST))
+        try
         {
-            try
-            {
-                int pos = Integer.parseInt(key.substring(1));
-                node.setParentNode(this);
-                return this.listedNodes.set(pos, node);
-            }
-            catch (NumberFormatException ex)
-            {
-                throw new IllegalArgumentException("Cannot set Node! Could not parse ListPath", ex);
-            }
-            catch (IndexOutOfBoundsException ex)
-            {
-                throw new IllegalArgumentException("Cannot set Node! Out of Range!", ex);
-            }
+            return this.listedNodes.set(Integer.parseInt(key), node);
         }
-        else
+        catch (NumberFormatException ex)
         {
-            throw new IllegalArgumentException("Cannot set Node! ListPath has to start with [!");
+            throw new IllegalArgumentException("Cannot set Node! Could not parse ListPath", ex);
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            throw new IllegalArgumentException("Cannot set Node! Out of Range!", ex);
         }
     }
 
     @Override
-    public Node getExactNode(String key)
+    public Node get(String key)
     {
-        if (key.startsWith(ReflectedPath.LIST))
+        try
         {
-            try
-            {
-                int pos = Integer.parseInt(key.substring(1));
-                return this.listedNodes.get(pos);
-            }
-            catch (NumberFormatException ex)
-            {
-                throw new IllegalArgumentException("Cannot get Node! Could not parse ListPath", ex);
-            }
-            catch (IndexOutOfBoundsException ex)
-            {
-                throw new IllegalArgumentException("Cannot get Node! Out of Range!", ex);
-            }
+            return this.listedNodes.get(Integer.parseInt(key));
         }
-        else
+        catch (NumberFormatException ex)
         {
-            throw new IllegalArgumentException("Cannot get Node! ListPath has to start with [! | " + key);
+            throw new IllegalArgumentException("Cannot get Node! Could not parse ListPath", ex);
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            throw new IllegalArgumentException("Cannot get Node! Out of Range!", ex);
         }
     }
 
     @Override
-    protected Node removeExactNode(String key)
+    protected Node remove(String key)
     {
-        if (key.startsWith(ReflectedPath.LIST))
+        try
         {
-            try
-            {
-                int pos = Integer.parseInt(key.substring(1));
-                return this.listedNodes.remove(pos);
-            }
-            catch (NumberFormatException ex)
-            {
-                throw new IllegalArgumentException("Cannot remove Node! Could not parse ListPath!", ex);
-            }
-            catch (IndexOutOfBoundsException ex)
-            {
-                throw new IllegalArgumentException("Cannot remove Node! Out of Range!", ex);
-            }
+            return this.listedNodes.remove(Integer.parseInt(key));
         }
-        else
+        catch (NumberFormatException ex)
         {
-            throw new IllegalArgumentException("Cannot remove Node! ListPath has to start with [!");
+            throw new IllegalArgumentException("Cannot remove Node! Could not parse ListPath!", ex);
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            throw new IllegalArgumentException("Cannot remove Node! Out of Range!", ex);
         }
     }
 
@@ -190,10 +124,10 @@ public class ListNode extends ParentNode
         Set<Node> nodesToRemove = new HashSet<Node>();
         for (Node node : this.getValue())
         {
-            if (node instanceof ParentNode)
+            if (node instanceof ContainerNode)
             {
-                ((ParentNode)node).cleanUpEmptyNodes();
-                if (((ParentNode)node).isEmpty())
+                ((ContainerNode)node).cleanUpEmptyNodes();
+                if (((ContainerNode)node).isEmpty())
                 {
                     nodesToRemove.add(node);
                 }
@@ -203,42 +137,12 @@ public class ListNode extends ParentNode
     }
 
     @Override
-    protected ReflectedPath getPathOfSubNode(Node node, ReflectedPath path)
-    {
-        int pos = this.listedNodes.indexOf(node);
-        if (pos == -1)
-        {
-            throw new IllegalArgumentException("Parented Node not in list!");
-        }
-        ReflectedPath result;
-        if (path == null)
-        {
-            result = ReflectedPath.forName(ReflectedPath.LIST + pos);
-        }
-        else
-        {
-            result = path.asSubPath(ReflectedPath.LIST + pos);
-        }
-        if (this.getParentNode() != null)
-        {
-            return this.getParentNode().getPathOfSubNode(this, result);
-        }
-        return result;
-    }
-
-    @Override
-    public ReflectedPath getPathOfSubNode(Node node)
-    {
-        return this.getPathOfSubNode(node, null);
-    }
-
-    @Override
-    public String toString()
+    public String asString()
     {
         StringBuilder sb = new StringBuilder("ListNode=[");
         for (Node listedNode : this.listedNodes)
         {
-            sb.append("\n- ").append(listedNode.toString());
+            sb.append("\n- ").append(listedNode.asString());
         }
         sb.append("]ListEnd");
         return sb.toString();

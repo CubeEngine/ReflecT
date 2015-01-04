@@ -36,6 +36,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Name
 {
+    public static final String SEPARATOR = ".";
     /**
      * The path to save this Field in a reflected object
      *

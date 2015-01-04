@@ -25,30 +25,16 @@ package de.cubeisland.engine.converter.node;
 /**
  * A String Node
  */
-public class StringNode extends KeyNode<String>
+public class StringNode extends ValueNode<String>
 {
-    private String value;
-
     /**
      * Creates a StringNode
      *
-     * @param string a string
+     * @param value a string
      */
-    public StringNode(String string)
+    public StringNode(String value)
     {
-        this.value = string;
-    }
-
-    @Override
-    public String getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return value;
+        super(value);
     }
 
     /**
@@ -61,11 +47,5 @@ public class StringNode extends KeyNode<String>
     public static StringNode of(String string)
     {
         return new StringNode(string);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "StringNode=[" + value + "]";
     }
 }

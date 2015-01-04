@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Short Node
  */
-public class ShortNode extends KeyNode<Short>
+public class ShortNode extends ValueNode<Short>
 {
-    private short value;
-
     /**
      * Creates a ShortNode
      *
@@ -36,24 +34,6 @@ public class ShortNode extends KeyNode<Short>
      */
     public ShortNode(short value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Short getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ShortNode=[" + value + "]";
+        super(value);
     }
 }

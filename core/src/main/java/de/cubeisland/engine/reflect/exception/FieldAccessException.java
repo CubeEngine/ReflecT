@@ -24,7 +24,7 @@ package de.cubeisland.engine.reflect.exception;
 
 import java.lang.reflect.Field;
 
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.node.Path;
 import de.cubeisland.engine.reflect.Section;
 
 /**
@@ -42,7 +42,7 @@ public class FieldAccessException extends InvalidReflectedObjectException
         super(msg, t);
     }
 
-    public static FieldAccessException of(ReflectedPath path, Class<? extends Section> clazz, Field field, Throwable t)
+    public static FieldAccessException of(Path path, Class<? extends Section> clazz, Field field, Throwable t)
     {
         String msg = "Could not access a field to get or set a value";
         msg += "\nField: " + field.getName();

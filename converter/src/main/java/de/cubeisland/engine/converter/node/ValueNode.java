@@ -22,49 +22,30 @@
  */
 package de.cubeisland.engine.converter.node;
 
-/**
- * An Error Node.
- * <p>ErrorNodes indicate that something went wrong when converting
- */
-public class ErrorNode extends Node<Void>
+public abstract class ValueNode<V> extends Node<V>
 {
-    private final String message;
+    private V value;
 
-    /**
-     * Creates an ErrorNode with a Message
-     *
-     * @param message the message
-     */
-    public ErrorNode(String message)
+    public ValueNode(V value)
     {
-        this.message = message;
+        this.value = value;
     }
 
-    /**
-     * Returns the ErrorMessage of the Node
-     *
-     * @return the errorMessage
-     */
-    public String getErrorMessage()
+    @Override
+    public V getValue()
     {
-        return message;
+        return this.value;
+    }
+
+    @Override
+    public String asString()
+    {
+        return this.getClass().getSimpleName() + "=[" + getValue() + "]";
     }
 
     @Override
     public String asText()
     {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Void getValue()
-    {
-        return null;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ErrorNode=[" + message + "]";
+        return getValue().toString();
     }
 }

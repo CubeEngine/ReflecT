@@ -25,30 +25,16 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Boolean Node
  */
-public class BooleanNode extends Node<Boolean>
+public class BooleanNode extends ValueNode<Boolean>
 {
-    private final boolean bool;
-
     /**
      * Creates a BooleanNode
      *
-     * @param bool a boolean
+     * @param value a boolean
      */
-    public BooleanNode(boolean bool)
+    public BooleanNode(boolean value)
     {
-        this.bool = bool;
-    }
-
-    @Override
-    public Boolean getValue()
-    {
-        return this.bool;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(bool);
+        super(value);
     }
 
     /**
@@ -81,11 +67,5 @@ public class BooleanNode extends Node<Boolean>
     public static BooleanNode of(boolean bool)
     {
         return bool ? trueNode() : falseNode();
-    }
-
-    @Override
-    public String toString()
-    {
-        return "BooleanNode=[" + bool + "]";
     }
 }

@@ -54,7 +54,7 @@ public class YamlReflectedTest
     {
         ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
-        assertEquals(test1.getCodec().convertReflected(test1).toString(), test1.getCodec().convertReflected(loadConfig).toString());
+        assertEquals(test1.getCodec().convertReflected(test1).asString(), test1.getCodec().convertReflected(loadConfig).asString());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class YamlReflectedTest
         test2.save(file);
         ReflectedTest2 loadConfig = factory.load(ReflectedTest2.class, file);
         file.delete();
-        assertEquals(test2.getCodec().convertReflected(test2).toString(), test2.getCodec().convertReflected(loadConfig).toString());
+        assertEquals(test2.getCodec().convertReflected(test2).asString(), test2.getCodec().convertReflected(loadConfig).asString());
     }
 
     @Test(expected = DuplicatedPathException.class)

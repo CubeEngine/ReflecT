@@ -22,50 +22,12 @@
  */
 package de.cubeisland.engine.converter.node;
 
-import java.util.Collection;
-import java.util.Map;
-
 /**
  * A reflected Node
  */
 public abstract class Node<V> extends Commentable
 {
-    private ParentNode parentNode;
     private boolean inherited = false;
-
-    /**
-     * Gets the ParentNode
-     *
-     * @return the ParentNode OR null if not set
-     */
-    public ParentNode getParentNode()
-    {
-        return parentNode;
-    }
-
-    /**
-     * Sets a ParentNode for this Node
-     *
-     * @param parentNode the ParentNode
-     */
-    public void setParentNode(ParentNode parentNode)
-    {
-        this.parentNode = parentNode;
-    }
-
-    /**
-     * Constructs a path down too the root Node for this Node
-     *
-     * @return the path or null if this Node is a root-Node
-     */
-    public ReflectedPath getPath()
-    {
-        if (this.getParentNode() == null)
-        {
-            return null;
-        }
-        return this.getParentNode().getPathOfSubNode(this);
-    }
 
     /**
      * Tries to convert the value of the Node into a string
@@ -81,9 +43,7 @@ public abstract class Node<V> extends Commentable
      */
     public abstract V getValue();
 
-
-    @Override
-    public abstract String toString();
+    public abstract String asString();
 
     /**
      * Wraps a serialized Object into a Node
@@ -92,6 +52,7 @@ public abstract class Node<V> extends Commentable
      *
      * @return the wrapped object
      */
+    /*
     public static Node wrapIntoNode(Object o)
     {
         if (o == null)
@@ -148,6 +109,7 @@ public abstract class Node<V> extends Commentable
         }
         throw new IllegalArgumentException("Cannot wrap into Node: " + o.getClass());
     }
+*/
 
     public boolean isInherited()
     {

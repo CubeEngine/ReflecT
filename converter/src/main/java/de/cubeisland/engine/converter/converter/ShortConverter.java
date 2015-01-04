@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.ShortNode;
 /**
  * A Converter for {@link java.lang.Short}
  */
-public class ShortConverter extends BasicConverter<Short>
+public class ShortConverter extends SimpleConverter<Short>
 {
+    @Override
+    public Node toNode(Short object) throws ConversionException
+    {
+        return new ShortNode(object);
+    }
+
     @Override
     public Short fromNode(Node node) throws ConversionException
     {

@@ -35,11 +35,10 @@ import java.util.Set;
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.converter.ClassedConverter;
-import de.cubeisland.engine.converter.node.ErrorNode;
 import de.cubeisland.engine.converter.node.MapNode;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.NullNode;
-import de.cubeisland.engine.converter.node.ReflectedPath;
+import de.cubeisland.engine.converter.node.Path;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
@@ -49,6 +48,7 @@ import de.cubeisland.engine.reflect.util.SectionFactory;
 import de.cubeisland.engine.reflect.util.StringUtils;
 
 import static de.cubeisland.engine.reflect.Reflector.LOGGER;
+import static de.cubeisland.engine.reflect.annotations.Name.SEPARATOR;
 import static java.util.logging.Level.FINE;
 
 /**
@@ -59,7 +59,7 @@ import static java.util.logging.Level.FINE;
 public class SectionConverter implements ClassedConverter<Section>
 {
     private static final String[] NO_COMMENT = new String[0];
-    private final Map<Field, ReflectedPath> paths = new HashMap<Field, ReflectedPath>();
+    private final Map<Field, Path> paths = new HashMap<Field, Path>();
     private final Map<Class<? extends Section>, Field[]> cachedFields = new HashMap<Class<? extends Section>, Field[]>();
     private final Map<Field, String[]> comments = new HashMap<Field, String[]>();
 
@@ -84,18 +84,18 @@ public class SectionConverter implements ClassedConverter<Section>
      *
      * @return the ReflectedPath
      */
-    protected final ReflectedPath getPathFor(Field field)
+    protected final Path getPathFor(Field field)
     {
-        ReflectedPath path = this.paths.get(field);
+        Path path = this.paths.get(field);
         if (path == null)
         {
             if (field.isAnnotationPresent(Name.class))
             {
-                path = ReflectedPath.forName(field.getAnnotation(Name.class).value());
+                path = new Path(SEPARATOR, field.getAnnotation(Name.class).value());
             }
             else
             {
-                path = ReflectedPath.forName(StringUtils.fieldNameToPath(field.getName())); // TODO configurable Naming convention #20
+                path = new Path(StringUtils.fieldNameToPath(field.getName())); // TODO configurable Naming convention #20
             }
             this.paths.put(field, path);
         }
@@ -124,20 +124,20 @@ public class SectionConverter implements ClassedConverter<Section>
                 Node newNode = toNode(section, rManager, field);
                 addComment(newNode, field);
 
-                Node prevNode = baseNode.getNodeAt(getPathFor(field));
+                Node prevNode = baseNode.get(getPathFor(field));
                 if (prevNode instanceof MapNode)
                 {
                     if (newNode instanceof MapNode)
                     {
                         for (Entry<String, Node> entry : ((MapNode)newNode).getMappedNodes().entrySet())
                         {
-                            ((MapNode)prevNode).setExactNode(entry.getKey(), entry.getValue());
+                            ((MapNode)prevNode).set(entry.getKey(), entry.getValue());
                         }
                     }
                 }
                 else
                 {
-                    baseNode.setNodeAt(getPathFor(field), newNode);
+                    baseNode.set(getPathFor(field), newNode);
                 }
             }
             catch (Exception e)
@@ -235,14 +235,10 @@ public class SectionConverter implements ClassedConverter<Section>
         {
             try
             {
-                ReflectedPath fieldPath = getPathFor(field);
-                Node fieldNode = mapNode.getNodeAt(fieldPath);
-                if (fieldNode instanceof ErrorNode)
-                {
-                    throw ConversionException.of(this, mapNode, ((ErrorNode)fieldNode).getErrorMessage());
-                }
+                Path fieldPath = getPathFor(field);
+                Node fieldNode = mapNode.get(fieldPath);
                 Object value;
-                if (fieldNode instanceof NullNode)
+                if (fieldNode == null || fieldNode instanceof NullNode)
                 {
                     LOGGER.log(FINE, fieldPath + " is NULL! Ignoring missing value");
                     continue; // Take existing field Value
@@ -300,7 +296,7 @@ public class SectionConverter implements ClassedConverter<Section>
                     continue;
                 }
 
-                if (!resolvedPaths.add(getPathFor(field).toString()))
+                if (!resolvedPaths.add(getPathFor(field).asString(SEPARATOR)))
                 {
                     throw new DuplicatedPathException("Duplicated Path detected! " + getPathFor(field));
                 }

@@ -47,7 +47,7 @@ public class ObjectIdNode extends Node<ObjectId>
     }
 
     @Override
-    public String toString()
+    public String asString()
     {
         return this.value.toString();
     }

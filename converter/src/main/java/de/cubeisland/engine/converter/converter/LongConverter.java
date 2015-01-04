@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.Node;
 /**
  * A Converter for {@link java.lang.Long}
  */
-public class LongConverter extends BasicConverter<Long>
+public class LongConverter extends SimpleConverter<Long>
 {
+    @Override
+    public Node toNode(Long object) throws ConversionException
+    {
+        return new LongNode(object);
+    }
+
     @Override
     public Long fromNode(Node node) throws ConversionException
     {

@@ -20,20 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.converter.node;
+package de.cubeisland.engine.converter;
 
 /**
- * KeyNodes can be used as Key in MapNodes
+ * This exception is thrown whenever a path is not applicable to a Node
  */
-public abstract class KeyNode<V> extends Node<V>
+public class InvalidPathException extends RuntimeException
 {
-    /**
-     * Converts the value of the node into a String to use as key
-     *
-     * @return the key
-     */
-    public String toKey()
+    public InvalidPathException(String message)
     {
-        return String.valueOf(this.getValue());
+        super(message);
     }
 }

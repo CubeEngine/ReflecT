@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Long Node
  */
-public class LongNode extends KeyNode<Long>
+public class LongNode extends ValueNode<Long>
 {
-    private long value;
-
     /**
      * Creates a LongNode
      *
@@ -36,24 +34,6 @@ public class LongNode extends KeyNode<Long>
      */
     public LongNode(long value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Long getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "LongNode=[" + value + "]";
+        super(value);
     }
 }

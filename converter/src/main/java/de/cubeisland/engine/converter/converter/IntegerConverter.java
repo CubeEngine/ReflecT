@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.Node;
 /**
  * A Converter for {@link java.lang.Integer}
  */
-public class IntegerConverter extends BasicConverter<Integer>
+public class IntegerConverter extends SimpleConverter<Integer>
 {
+    @Override
+    public Node toNode(Integer object) throws ConversionException
+    {
+        return new IntNode(object);
+    }
+
     @Override
     public Integer fromNode(Node node) throws ConversionException
     {

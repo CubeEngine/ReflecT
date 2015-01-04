@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.Node;
 /**
  * A Converter for {@link Boolean}
  */
-public class BooleanConverter extends BasicConverter<Boolean>
+public class BooleanConverter extends SimpleConverter<Boolean>
 {
+    @Override
+    public Node toNode(Boolean object) throws ConversionException
+    {
+        return BooleanNode.of(object);
+    }
+
     @Override
     public Boolean fromNode(Node node) throws ConversionException
     {

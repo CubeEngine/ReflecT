@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.StringNode;
 /**
  * A Converter for {@link java.lang.String}
  */
-public class StringConverter extends BasicConverter<String>
+public class StringConverter extends SimpleConverter<String>
 {
+    @Override
+    public Node toNode(String object) throws ConversionException
+    {
+        return new StringNode(object);
+    }
+
     @Override
     public String fromNode(Node node) throws ConversionException
     {

@@ -36,7 +36,7 @@ import de.cubeisland.engine.converter.node.ListNode;
 import de.cubeisland.engine.converter.node.MapNode;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.NullNode;
-import de.cubeisland.engine.converter.node.ParentNode;
+import de.cubeisland.engine.converter.node.ContainerNode;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.Codec;
@@ -114,7 +114,7 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
 
     private Object convertNode(Node node)
     {
-        if (node instanceof ParentNode)
+        if (node instanceof ContainerNode)
         {
             if (node instanceof MapNode)
             {
@@ -155,7 +155,7 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
         return convertDBObjectToNode(dbo);
     }
 
-    private MapNode convertDBObjectToNode(DBObject dbObject)
+    private MapNode convertDBObjectToNode(DBObject dbObject) throws ConversionException
     {
         MapNode mapNode = MapNode.emptyMap();
         for (String key : dbObject.keySet())
@@ -164,13 +164,13 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
             Node nodeValue = this.convertObjectToNode(value);
             if (!(nodeValue instanceof NullNode))
             {
-                mapNode.setExactNode(key, nodeValue);
+                mapNode.set(key, nodeValue);
             }
         }
         return mapNode;
     }
 
-    private Node convertObjectToNode(Object value)
+    private Node convertObjectToNode(Object value) throws ConversionException
     {
         Node nodeValue;
         if (value instanceof List)
@@ -195,12 +195,12 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
         }
         else
         {
-            nodeValue = Node.wrapIntoNode(value);
+            nodeValue = getConverterManager().convertToNode(value);
         }
         return nodeValue;
     }
 
-    private Node convertListToNode(List list)
+    private Node convertListToNode(List list) throws ConversionException
     {
         ListNode listNode = ListNode.emptyList();
         for (Object value : list)

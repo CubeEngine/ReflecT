@@ -29,8 +29,14 @@ import de.cubeisland.engine.converter.node.Node;
 /**
  * A Converter for {@link java.lang.Double}
  */
-public class DoubleConverter extends BasicConverter<Double>
+public class DoubleConverter extends SimpleConverter<Double>
 {
+    @Override
+    public Node toNode(Double object) throws ConversionException
+    {
+        return new DoubleNode(object);
+    }
+
     @Override
     public Double fromNode(Node node) throws ConversionException
     {

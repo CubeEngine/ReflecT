@@ -25,10 +25,8 @@ package de.cubeisland.engine.converter.node;
 /**
  * A Integer Node
  */
-public class IntNode extends KeyNode<Integer>
+public class IntNode extends ValueNode<Integer>
 {
-    private int value;
-
     /**
      * Creates an IntNode
      *
@@ -36,24 +34,6 @@ public class IntNode extends KeyNode<Integer>
      */
     public IntNode(int value)
     {
-        this.value = value;
-    }
-
-    @Override
-    public Integer getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public String asText()
-    {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "IntNode=[" + value + "]";
+        super(value);
     }
 }

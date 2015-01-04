@@ -32,7 +32,6 @@ import java.util.Set;
 
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
-import de.cubeisland.engine.converter.node.KeyNode;
 import de.cubeisland.engine.converter.node.MapNode;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.converter.node.StringNode;
@@ -75,14 +74,7 @@ public class MapConverter implements GenericConverter<Map>
         for (Entry entry : entrySet)
         {
             Node keyNode = manager.convertToNode(entry.getKey());
-            if (keyNode instanceof KeyNode)
-            {
-                result.setNode((KeyNode)keyNode, manager.convertToNode(entry.getValue()));
-            }
-            else
-            {
-                throw ConversionException.of(this, keyNode, "Node is not a KeyNode!");
-            }
+            result.set(keyNode.asText(), manager.convertToNode(entry.getValue()));
         }
         return result;
     }

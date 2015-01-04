@@ -22,7 +22,6 @@
  */
 package de.cubeisland.engine.reflect.codec.mongo;
 
-import com.mongodb.DBRefBase;
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.converter.SimpleConverter;
 import de.cubeisland.engine.converter.node.Node;
@@ -49,8 +48,8 @@ public class ReferenceConverter extends SimpleConverter<Reference>
     {
         if (node instanceof DBRefBaseNode)
         {
-            return new Reference(reflector, (DBRefBase)node.getValue());
+            return new Reference(reflector, ((DBRefBaseNode)node).getValue());
         }
-        throw ConversionException.of(this, node, "Node is not a map node!");
+        throw ConversionException.of(this, node, "Node is not DBRefBaseNode!");
     }
 }
