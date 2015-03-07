@@ -26,22 +26,22 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
 import de.cubeisland.engine.converter.ConversionException;
+import de.cubeisland.engine.converter.node.ListNode;
 import de.cubeisland.engine.converter.node.MapNode;
+import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A Codec using the HOCON format
  */
-public class HoconCodec extends FileCodec
-{
+public class HoconCodec extends FileCodec {
     @Override
     public String getExtension() {
         return "conf";
@@ -51,27 +51,67 @@ public class HoconCodec extends FileCodec
     @Override
     @SuppressWarnings("unchecked")
     protected MapNode load(InputStream in, Reflected reflected) throws ConversionException {
-        if (in == null)
-        {
+        if (in == null) {
             // InputStream null -> reflected was not existent
             return MapNode.emptyMap();
         }
         Config config = ConfigFactory.parseReader(new InputStreamReader(in));
-        if (config.isEmpty())
-        {
+        if (config.isEmpty()) {
             // loadValues null -> reflected exists but was empty
             return MapNode.emptyMap();
         }
         Map<String, Object> map = new HashMap<String, Object>();
-        for(Map.Entry<String, ConfigValue> entry : config.entrySet()) {
+        for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
             map.put(entry.getKey(), entry.getValue().unwrapped());
         }
-        return (MapNode)reflected.getCodec().getConverterManager().convertToNode(map);
+        return (MapNode) reflected.getCodec().getConverterManager().convertToNode(map);
     }
 
     // Reflected saving Methods
     @Override
     protected void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException {
+        Config config = ConfigFactory.parseMap(getHoconMap(node));
+        try {
+            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+            writer.append(config.root().render());
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            throw ConversionException.of(this, null, "Could not write into OutputStream", ex);
+        }
+    }
 
+    protected Map<String, Object> getHoconMap(MapNode node) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        getHoconMap(map, "", node);
+        return map;
+    }
+
+    protected void getHoconMap(Map<String, Object> map, String path, Node node) {
+        if (node instanceof MapNode) {
+            for (Map.Entry<String, Node> entry : ((MapNode) node).getMappedNodes().entrySet()) {
+                getHoconMap(map, path + (path == "" ? "" : ".") + entry.getKey(), entry.getValue());
+            }
+        } else if (node instanceof ListNode) {
+            map.put(path, getHoconList((ListNode) node));
+        } else {
+            map.put(path, node.getValue());
+        }
+    }
+
+    protected List<Object> getHoconList(ListNode listNode) {
+        List<Object> list = new LinkedList<Object>();
+        for (Node node : listNode.getValue()) {
+            if (node instanceof MapNode) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                getHoconMap(map, "", node);
+                list.add(map);
+            } else if (node instanceof ListNode) {
+                list.add(getHoconList((ListNode) node));
+            } else {
+                list.add(node.getValue());
+            }
+        }
+        return list;
     }
 }
