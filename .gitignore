@@ -2,6 +2,5 @@ target/
 .idea/*
 !.idea/codeStyleSettings.xml
 *.iml
-*.xml
-!pom.xml
-/.idea/
+/*.xml
+!/pom.xml

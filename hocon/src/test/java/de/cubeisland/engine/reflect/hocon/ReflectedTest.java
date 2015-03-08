@@ -22,15 +22,23 @@
  */
 package de.cubeisland.engine.reflect.hocon;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 import de.cubeisland.engine.reflect.codec.hocon.ReflectedHocon;
 
-import java.util.*;
-import java.util.logging.Level;
-
-public class ReflectedTest extends ReflectedHocon {
+public class ReflectedTest extends ReflectedHocon
+{
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
     public String s1 = "Using @Name(\"subsection-using.annotation.first\") Annotation for path";
@@ -53,6 +61,7 @@ public class ReflectedTest extends ReflectedHocon {
 
     @Comment("Set of SubSections:")
     public Set<SubSection> subsections = new HashSet<SubSection>();
+
     {
         subsections.add(new SubSection());
     }
@@ -105,7 +114,7 @@ public class ReflectedTest extends ReflectedHocon {
         };
 
         public String[] stringArray = {
-                "text1", "text2", "text3"
+            "text1", "text2", "text3"
         };
 
         public LinkedList<String> stringList = new LinkedList<String>()
@@ -127,6 +136,7 @@ public class ReflectedTest extends ReflectedHocon {
 
         @Comment("map in collection")
         public Collection<Map<String, String>> mapInCollection;
+
         {
             Map<String, String> map = new HashMap<String, String>();
             map.put("abc", "123");

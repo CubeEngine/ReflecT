@@ -22,14 +22,13 @@
  */
 package de.cubeisland.engine.reflect.hocon;
 
+import java.io.File;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-
-import static de.cubeisland.engine.reflect.hocon.ReflectedFieldShadowing.*;
+import static de.cubeisland.engine.reflect.hocon.ReflectedFieldShadowing.ReflectedFieldShadowing2;
 import static org.junit.Assert.assertEquals;
 
 public class HoconReflectedTest
@@ -54,7 +53,8 @@ public class HoconReflectedTest
     {
         ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
         file.delete();
-        assertEquals(test1.getCodec().convertReflected(test1).asString(), test1.getCodec().convertReflected(loadConfig).asString());
+        assertEquals(test1.getCodec().convertReflected(test1).asString(), test1.getCodec().convertReflected(
+            loadConfig).asString());
     }
 
     @Test
@@ -63,7 +63,8 @@ public class HoconReflectedTest
         test2.save(file);
         ReflectedTest2 loadConfig = factory.load(ReflectedTest2.class, file);
         file.delete();
-        assertEquals(test2.getCodec().convertReflected(test2).asString(), test2.getCodec().convertReflected(loadConfig).asString());
+        assertEquals(test2.getCodec().convertReflected(test2).asString(), test2.getCodec().convertReflected(
+            loadConfig).asString());
     }
 
     @Test(expected = DuplicatedPathException.class)

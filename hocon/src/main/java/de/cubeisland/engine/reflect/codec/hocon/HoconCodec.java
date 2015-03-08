@@ -22,6 +22,16 @@
  */
 package de.cubeisland.engine.reflect.codec.hocon;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
@@ -32,37 +42,41 @@ import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * A Codec using the HOCON format
  */
-public class HoconCodec extends FileCodec {
+public class HoconCodec extends FileCodec
+{
     @Override
-    public String getExtension() {
+    public String getExtension()
+    {
         return "conf";
     }
 
     // Reflected loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected MapNode load(InputStream in, Reflected reflected) throws ConversionException {
-        if (in == null) {
+    protected MapNode load(InputStream in, Reflected reflected) throws ConversionException
+    {
+        if (in == null)
+        {
             // InputStream null -> reflected was not existent
             return MapNode.emptyMap();
         }
         Config config = ConfigFactory.parseReader(new InputStreamReader(in));
-        if (config.isEmpty()) {
+        if (config.isEmpty())
+        {
             // loadValues null -> reflected exists but was empty
             return MapNode.emptyMap();
         }
-        return (MapNode) reflected.getCodec().getConverterManager().convertToNode(getReflectMap(config.entrySet()));
+        return (MapNode)reflected.getCodec().getConverterManager().convertToNode(getReflectMap(config.entrySet()));
     }
 
-    protected Map<String, Object> getReflectMap(Set<Map.Entry<String, ConfigValue>> set) {
+    protected Map<String, Object> getReflectMap(Set<Map.Entry<String, ConfigValue>> set)
+    {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        for (Map.Entry<String, ConfigValue> entry : set) {
+        for (Map.Entry<String, ConfigValue> entry : set)
+        {
             String[] path = entry.getKey().split("\\.");
             getReflectMapEntry(map, path, 0, entry.getValue());
         }
@@ -70,11 +84,16 @@ public class HoconCodec extends FileCodec {
     }
 
     @SuppressWarnings("unchecked")
-    protected void getReflectMapEntry(Map<String, Object> map, String[] path, int index, ConfigValue value) {
-        if (path.length - index == 1) {
+    protected void getReflectMapEntry(Map<String, Object> map, String[] path, int index, ConfigValue value)
+    {
+        if (path.length - index == 1)
+        {
             map.put(path[index], value.unwrapped());
-        } else {
-            if (!map.containsKey(path[index])) {
+        }
+        else
+        {
+            if (!map.containsKey(path[index]))
+            {
                 map.put(path[index], new LinkedHashMap<String, Object>());
             }
             getReflectMapEntry((Map<String, Object>)map.get(path[index]), path, ++index, value);
@@ -83,48 +102,70 @@ public class HoconCodec extends FileCodec {
 
     // Reflected saving Methods
     @Override
-    protected void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException {
+    protected void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException
+    {
         Config config = ConfigFactory.parseMap(getHoconMap(node));
-        try {
+        try
+        {
             OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
             writer.append(config.root().render());
             writer.flush();
             writer.close();
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             throw ConversionException.of(this, null, "Could not write into OutputStream", ex);
         }
     }
 
-    protected Map<String, Object> getHoconMap(MapNode node) {
+    protected Map<String, Object> getHoconMap(MapNode node)
+    {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         getHoconMap(map, "", node);
         return map;
     }
 
-    protected void getHoconMap(Map<String, Object> map, String path, Node node) {
-        if (node instanceof MapNode) {
-            if (((MapNode) node).isEmpty()) {
+    protected void getHoconMap(Map<String, Object> map, String path, Node node)
+    {
+        if (node instanceof MapNode)
+        {
+            if (((MapNode)node).isEmpty())
+            {
                 map.put(path, new LinkedHashMap<String, Object>());
-            } else {
-                for (Map.Entry<String, Node> entry : ((MapNode) node).getMappedNodes().entrySet()) {
+            }
+            else
+            {
+                for (Map.Entry<String, Node> entry : ((MapNode)node).getMappedNodes().entrySet())
+                {
                     getHoconMap(map, path + ("".equals(path) ? "" : ".") + entry.getKey(), entry.getValue());
                 }
             }
-        } else if (node instanceof ListNode) {
-            map.put(path, getHoconList((ListNode) node));
-        } else {
+        }
+        else if (node instanceof ListNode)
+        {
+            map.put(path, getHoconList((ListNode)node));
+        }
+        else
+        {
             map.put(path, node.getValue());
         }
     }
 
-    protected List<Object> getHoconList(ListNode listNode) {
+    protected List<Object> getHoconList(ListNode listNode)
+    {
         List<Object> list = new LinkedList<Object>();
-        for (Node node : listNode.getValue()) {
-            if (node instanceof MapNode) {
-                list.add(getHoconMap((MapNode) node));
-            } else if (node instanceof ListNode) {
-                list.add(getHoconList((ListNode) node));
-            } else {
+        for (Node node : listNode.getValue())
+        {
+            if (node instanceof MapNode)
+            {
+                list.add(getHoconMap((MapNode)node));
+            }
+            else if (node instanceof ListNode)
+            {
+                list.add(getHoconList((ListNode)node));
+            }
+            else
+            {
                 list.add(node.getValue());
             }
         }

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+    <component name="ProjectCodeStyleSettingsManager">
+        <option name="PER_PROJECT_SETTINGS">
+            <value>
+                <option name="OTHER_INDENT_OPTIONS">
+                    <value>
+                        <option name="INDENT_SIZE" value="4" />
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                        <option name="TAB_SIZE" value="4" />
+                        <option name="USE_TAB_CHARACTER" value="false" />
+                        <option name="SMART_TABS" value="false" />
+                        <option name="LABEL_INDENT_SIZE" value="0" />
+                        <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+                        <option name="USE_RELATIVE_INDENTS" value="false" />
+                    </value>
+                </option>
+                <option name="LINE_SEPARATOR" value="&#10;" />
+                <option name="GENERATE_FINAL_LOCALS" value="true" />
+                <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
+                <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+                <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
+                    <value />
+                </option>
+                <option name="IMPORT_LAYOUT_TABLE">
+                    <value>
+                        <package name="java" withSubpackages="true" static="false" />
+                        <package name="javax" withSubpackages="true" static="false" />
+                        <package name="" withSubpackages="true" static="false" />
+                        <emptyLine />
+                        <package name="net.minecraft.server.*" withSubpackages="true" static="false" />
+                        <package name="org.bukkit.craftbukkit.*" withSubpackages="true" static="false" />
+                        <emptyLine />
+                        <package name="org.bukkit.*" withSubpackages="true" static="false" />
+                        <emptyLine />
+                        <package name="de.cubeisland.*" withSubpackages="true" static="false" />
+                        <emptyLine />
+                        <package name="" withSubpackages="true" static="true" />
+                    </value>
+                </option>
+                <option name="STATIC_METHODS_ORDER_WEIGHT" value="5" />
+                <option name="METHODS_ORDER_WEIGHT" value="4" />
+                <option name="STATIC_INNER_CLASSES_ORDER_WEIGHT" value="7" />
+                <option name="INNER_CLASSES_ORDER_WEIGHT" value="6" />
+                <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
+                <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
+                <option name="JD_KEEP_EMPTY_PARAMETER" value="false" />
+                <option name="JD_KEEP_EMPTY_EXCEPTION" value="false" />
+                <option name="JD_KEEP_EMPTY_RETURN" value="false" />
+                <option name="HTML_ATTRIBUTE_WRAP" value="0" />
+                <option name="HTML_KEEP_BLANK_LINES" value="1" />
+                <option name="HTML_DO_NOT_INDENT_CHILDREN_OF" value="" />
+                <CssCodeStyleSettings>
+                    <option name="HEX_COLOR_LOWER_CASE" value="true" />
+                    <option name="HEX_COLOR_LONG_FORMAT" value="true" />
+                    <option name="VALUE_ALIGNMENT" value="2" />
+                </CssCodeStyleSettings>
+                <HoconCodeStyleSettings>
+                    <option name="OBJECTS_WRAP" value="5" />
+                    <option name="OBJECTS_ALIGN_WHEN_MULTILINE" value="true" />
+                    <option name="KEEP_BLANK_LINES_IN_OBJECTS" value="1" />
+                    <option name="KEEP_BLANK_LINES_IN_LISTS" value="1" />
+                    <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+                    <option name="KEEP_BLANK_LINES_BEFORE_RBRACKET" value="0" />
+                </HoconCodeStyleSettings>
+                <ScalaCodeStyleSettings>
+                    <option name="REPLACE_CASE_ARROW_WITH_UNICODE_CHAR" value="true" />
+                    <option name="REPLACE_MAP_ARROW_WITH_UNICODE_CHAR" value="true" />
+                    <option name="REPLACE_FOR_GENERATOR_ARROW_WITH_UNICODE_CHAR" value="true" />
+                </ScalaCodeStyleSettings>
+                <XML>
+                    <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
+                </XML>
+                <editorconfig>
+                    <option name="ENABLED" value="false" />
+                </editorconfig>
+                <codeStyleSettings language="CSS">
+                    <indentOptions>
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="HOCON">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                        <option name="TAB_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="JAVA">
+                    <option name="KEEP_LINE_BREAKS" value="false" />
+                    <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+                    <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+                    <option name="BRACE_STYLE" value="2" />
+                    <option name="CLASS_BRACE_STYLE" value="2" />
+                    <option name="METHOD_BRACE_STYLE" value="2" />
+                    <option name="ELSE_ON_NEW_LINE" value="true" />
+                    <option name="WHILE_ON_NEW_LINE" value="true" />
+                    <option name="CATCH_ON_NEW_LINE" value="true" />
+                    <option name="FINALLY_ON_NEW_LINE" value="true" />
+                    <option name="ALIGN_MULTILINE_CHAINED_METHODS" value="true" />
+                    <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
+                    <option name="ALIGN_MULTILINE_ASSIGNMENT" value="true" />
+                    <option name="ALIGN_MULTILINE_TERNARY_OPERATION" value="true" />
+                    <option name="ALIGN_MULTILINE_THROWS_LIST" value="true" />
+                    <option name="ALIGN_MULTILINE_EXTENDS_LIST" value="true" />
+                    <option name="ALIGN_MULTILINE_METHOD_BRACKETS" value="true" />
+                    <option name="ALIGN_MULTILINE_ARRAY_INITIALIZER_EXPRESSION" value="true" />
+                    <option name="SPACE_AFTER_TYPE_CAST" value="false" />
+                    <option name="CALL_PARAMETERS_WRAP" value="1" />
+                    <option name="PREFER_PARAMETERS_WRAP" value="true" />
+                    <option name="METHOD_PARAMETERS_WRAP" value="1" />
+                    <option name="BINARY_OPERATION_WRAP" value="1" />
+                    <option name="BINARY_OPERATION_SIGN_ON_NEXT_LINE" value="true" />
+                    <option name="FOR_STATEMENT_RPAREN_ON_NEXT_LINE" value="true" />
+                    <option name="ARRAY_INITIALIZER_LBRACE_ON_NEXT_LINE" value="true" />
+                    <option name="ARRAY_INITIALIZER_RBRACE_ON_NEXT_LINE" value="true" />
+                    <option name="IF_BRACE_FORCE" value="3" />
+                    <option name="DOWHILE_BRACE_FORCE" value="3" />
+                    <option name="WHILE_BRACE_FORCE" value="3" />
+                    <option name="FOR_BRACE_FORCE" value="3" />
+                    <option name="ENUM_CONSTANTS_WRAP" value="2" />
+                    <indentOptions>
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                    </indentOptions>
+                    <arrangement>
+                        <groups>
+                            <group>
+                                <type>GETTERS_AND_SETTERS</type>
+                                <order>KEEP</order>
+                            </group>
+                            <group>
+                                <type>DEPENDENT_METHODS</type>
+                                <order>BREADTH_FIRST</order>
+                            </group>
+                        </groups>
+                    </arrangement>
+                </codeStyleSettings>
+                <codeStyleSettings language="JSON">
+                    <option name="KEEP_LINE_BREAKS" value="false" />
+                    <option name="SPACE_WITHIN_BRACES" value="true" />
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="JavaScript">
+                    <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+                </codeStyleSettings>
+                <codeStyleSettings language="LESS">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="SASS">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="SCSS">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="SQL">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                        <option name="TAB_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="Scala">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                        <option name="TAB_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="XML">
+                    <indentOptions>
+                        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+                <codeStyleSettings language="yaml">
+                    <indentOptions>
+                        <option name="INDENT_SIZE" value="4" />
+                    </indentOptions>
+                </codeStyleSettings>
+            </value>
+        </option>
+        <option name="USE_PER_PROJECT_SETTINGS" value="true" />
+    </component>
+</project>

@@ -22,10 +22,9 @@
  */
 package de.cubeisland.engine.reflect.hocon;
 
+import java.util.Locale;
 import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Name;
-
-import java.util.Locale;
 
 /**
  * A Section that is not a (static) inner class
@@ -36,6 +35,6 @@ public class ExternalSection implements Section
 
     public Locale defaultLocale = Locale.US;
 
-	@Name("class")
-	public Class<?> clazz = String.class;
+    @Name("class")
+    public Class<?> clazz = String.class;
 }
