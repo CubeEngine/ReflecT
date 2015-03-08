@@ -33,10 +33,7 @@ import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.codec.FileCodec;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Codec using the HOCON format
@@ -60,11 +57,28 @@ public class HoconCodec extends FileCodec {
             // loadValues null -> reflected exists but was empty
             return MapNode.emptyMap();
         }
-        Map<String, Object> map = new HashMap<String, Object>();
-        for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().unwrapped());
+        return (MapNode) reflected.getCodec().getConverterManager().convertToNode(getReflectMap(config.entrySet()));
+    }
+
+    protected Map<String, Object> getReflectMap(Set<Map.Entry<String, ConfigValue>> set) {
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        for (Map.Entry<String, ConfigValue> entry : set) {
+            String[] path = entry.getKey().split("\\.");
+            getReflectMapEntry(map, path, 0, entry.getValue());
         }
-        return (MapNode) reflected.getCodec().getConverterManager().convertToNode(map);
+        return map;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void getReflectMapEntry(Map<String, Object> map, String[] path, int index, ConfigValue value) {
+        if (path.length - index == 1) {
+            map.put(path[index], value.unwrapped());
+        } else {
+            if (!map.containsKey(path[index])) {
+                map.put(path[index], new LinkedHashMap<String, Object>());
+            }
+            getReflectMapEntry((Map<String, Object>)map.get(path[index]), path, ++index, value);
+        }
     }
 
     // Reflected saving Methods
@@ -82,15 +96,19 @@ public class HoconCodec extends FileCodec {
     }
 
     protected Map<String, Object> getHoconMap(MapNode node) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
         getHoconMap(map, "", node);
         return map;
     }
 
     protected void getHoconMap(Map<String, Object> map, String path, Node node) {
         if (node instanceof MapNode) {
-            for (Map.Entry<String, Node> entry : ((MapNode) node).getMappedNodes().entrySet()) {
-                getHoconMap(map, path + (path == "" ? "" : ".") + entry.getKey(), entry.getValue());
+            if (((MapNode) node).isEmpty()) {
+                map.put(path, new LinkedHashMap<String, Object>());
+            } else {
+                for (Map.Entry<String, Node> entry : ((MapNode) node).getMappedNodes().entrySet()) {
+                    getHoconMap(map, path + ("".equals(path) ? "" : ".") + entry.getKey(), entry.getValue());
+                }
             }
         } else if (node instanceof ListNode) {
             map.put(path, getHoconList((ListNode) node));
@@ -103,9 +121,7 @@ public class HoconCodec extends FileCodec {
         List<Object> list = new LinkedList<Object>();
         for (Node node : listNode.getValue()) {
             if (node instanceof MapNode) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                getHoconMap(map, "", node);
-                list.add(map);
+                list.add(getHoconMap((MapNode) node));
             } else if (node instanceof ListNode) {
                 list.add(getHoconList((ListNode) node));
             } else {
