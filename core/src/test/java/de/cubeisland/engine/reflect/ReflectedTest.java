@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.hocon;
+package de.cubeisland.engine.reflect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,12 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
-import de.cubeisland.engine.reflect.codec.hocon.ReflectedHocon;
 
-public class ReflectedTest extends ReflectedHocon
+public class ReflectedTest extends ReflectedFile
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")

@@ -20,12 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect;
 
+import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.codec.yaml.ReflectedYaml;
 
-public class ReflectedTest2 extends ReflectedYaml
+public class ReflectedTest2 extends ReflectedFile
 {
     public Section3 section3 = new Section3();
 

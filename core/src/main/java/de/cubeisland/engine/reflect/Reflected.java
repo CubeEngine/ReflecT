@@ -62,7 +62,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
     public final void init(Reflector reflector)
     {
         this.reflector = reflector;
-        initializeSections(this, getCodec().getConverterManager().getConverterByClass(SectionConverter.class));
+        initializeSections(this, reflector.getDefaultConverterManager().getConverterByClass(SectionConverter.class));
         this.onInit();
     }
 
@@ -247,7 +247,7 @@ public abstract class Reflected<CodecT extends Codec, SerialType> implements Sec
                     genericSuperclass = ((ParameterizedType)genericSuperclass).getRawType();
                 }
             }
-            throw new IllegalStateException("Unable to get Codec! " + genericSuperclass + " is not a class!");
+            return null;
         }
         catch (IllegalStateException ex)
         {

@@ -23,14 +23,19 @@
 package de.cubeisland.engine.reflect.yaml;
 
 import java.io.File;
-
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import de.cubeisland.engine.reflect.ReflectedTest;
+import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
+import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
-import de.cubeisland.engine.reflect.yaml.ReflectedFieldShadowing.ReflectedFieldShadowing2;
 import org.junit.Before;
 import org.junit.Test;
 
+import static de.cubeisland.engine.reflect.ReflectedFieldShadowing.ReflectedFieldShadowing2;
 import static org.junit.Assert.assertEquals;
+
 
 public class YamlReflectedTest
 {
@@ -39,6 +44,7 @@ public class YamlReflectedTest
     private File file;
 
     private Reflector factory;
+    private YamlCodec codec;
 
     @Before
     public void setUp() throws Exception
@@ -47,23 +53,27 @@ public class YamlReflectedTest
         factory = new Reflector();
         test1 = factory.create(ReflectedTest.class);
         test2 = factory.create(ReflectedTest2.class);
+        codec = factory.getCodecManager().getCodec(YamlCodec.class);
     }
 
     @Test
     public void test1() throws Exception
     {
-        ReflectedTest loadConfig = factory.load(ReflectedTest.class, file);
+        codec.saveReflected(test1, new FileOutputStream(file));
+        final ReflectedTest reflected = factory.create(ReflectedTest.class);
+        codec.loadReflected(reflected, new FileInputStream(file));
         file.delete();
-        assertEquals(test1.getCodec().convertReflected(test1).asString(), test1.getCodec().convertReflected(loadConfig).asString());
+        assertEquals(codec.convertReflected(test1).asString(), codec.convertReflected(reflected).asString());
     }
 
     @Test
     public void test2() throws Exception
     {
-        test2.save(file);
-        ReflectedTest2 loadConfig = factory.load(ReflectedTest2.class, file);
+        codec.saveReflected(test2, new FileOutputStream(file));
+        final ReflectedTest2 reflected = factory.create(ReflectedTest2.class);
+        codec.loadReflected(reflected, new FileInputStream(file));
         file.delete();
-        assertEquals(test2.getCodec().convertReflected(test2).asString(), test2.getCodec().convertReflected(loadConfig).asString());
+        assertEquals(codec.convertReflected(test2).asString(), codec.convertReflected(reflected).asString());
     }
 
     @Test(expected = DuplicatedPathException.class)

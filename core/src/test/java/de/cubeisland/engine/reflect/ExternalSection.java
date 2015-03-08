@@ -20,19 +20,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect;
 
-import de.cubeisland.engine.reflect.codec.yaml.ReflectedYaml;
+import java.util.Locale;
+import de.cubeisland.engine.reflect.Section;
+import de.cubeisland.engine.reflect.annotations.Name;
 
 /**
- * A Reflected Object used to test shadowing of fields
+ * A Section that is not a (static) inner class
  */
-public class ReflectedFieldShadowing extends ReflectedYaml
+public class ExternalSection implements Section
 {
-    public String aField = "aValue";
+    public byte aByte = 8;
 
-    public static class ReflectedFieldShadowing2 extends ReflectedFieldShadowing
-    {
-        public String aField = "anOtherValue";
-    }
+    public Locale defaultLocale = Locale.US;
+
+    @Name("class")
+    public Class<?> clazz = String.class;
 }

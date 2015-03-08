@@ -20,14 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.hocon;
-
-import de.cubeisland.engine.reflect.codec.hocon.ReflectedHocon;
+package de.cubeisland.engine.reflect;
 
 /**
  * A Reflected Object used to test shadowing of fields
  */
-public class ReflectedFieldShadowing extends ReflectedHocon
+public class ReflectedFieldShadowing extends ReflectedFile
 {
     public String aField = "aValue";
 

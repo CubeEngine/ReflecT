@@ -20,10 +20,10 @@
 
     <modules>
         <module>core</module>
+        <module>converter</module>
         <module>yaml</module>
         <module>hocon</module>
         <module>mongo</module>
-        <module>converter</module>
     </modules>
 
     <licenses>
