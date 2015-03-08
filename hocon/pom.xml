@@ -10,7 +10,7 @@
 
     <artifactId>reflect-hocon</artifactId>
 
-    <name><![CDATA[Reflec<T> Hocon]]></name>
+    <name><![CDATA[Reflec<T> HOCON]]></name>
 
     <dependencies>
         <dependency>

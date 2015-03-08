@@ -109,8 +109,6 @@ public class HoconCodec extends FileCodec
         {
             OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
             writer.append(config.root().render());
-            writer.flush();
-            writer.close();
         }
         catch (IOException ex)
         {
