@@ -20,22 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect.codec.hocon;
 
-import java.util.Locale;
-
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.annotations.Name;
+import de.cubeisland.engine.reflect.ReflectedFile;
 
 /**
- * A Section that is not a (static) inner class
+ * A Reflected using {@link HoconCodec} to save/load into/from Files
  */
-public class ExternalSection implements Section
+public abstract class ReflectedHocon extends ReflectedFile<HoconCodec>
 {
-    public byte aByte = 8;
-
-    public Locale defaultLocale = Locale.US;
-
-	@Name("class")
-	public Class<?> clazz = String.class;
 }

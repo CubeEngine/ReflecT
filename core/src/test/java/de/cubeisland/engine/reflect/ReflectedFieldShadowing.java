@@ -20,24 +20,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect;
 
-import de.cubeisland.engine.reflect.Section;
-import de.cubeisland.engine.reflect.codec.yaml.ReflectedYaml;
-
-public class ReflectedTest2 extends ReflectedYaml
+/**
+ * A Reflected Object used to test shadowing of fields
+ */
+public class ReflectedFieldShadowing extends ReflectedFile
 {
-    public Section3 section3 = new Section3();
+    public String aField = "aValue";
 
-    public static class Section3 implements Section
+    public static class ReflectedFieldShadowing2 extends ReflectedFieldShadowing
     {
-        public String section = "actually not a section";
-    }
-
-    public Section2 section = new Section2();
-
-    public static class Section2 implements Section
-    {
-        public String aValue = "aString";
+        public String aField = "anOtherValue";
     }
 }

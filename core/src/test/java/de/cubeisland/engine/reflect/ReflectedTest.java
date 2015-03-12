@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,16 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-
-import de.cubeisland.engine.reflect.Section;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
-import de.cubeisland.engine.reflect.codec.yaml.ReflectedYaml;
 
-/**
- * A Reflected implementation for unit test
- */
-public class ReflectedTest extends ReflectedYaml
+public class ReflectedTest extends ReflectedFile
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
@@ -65,6 +59,7 @@ public class ReflectedTest extends ReflectedYaml
 
     @Comment("Set of SubSections:")
     public Set<SubSection> subsections = new HashSet<SubSection>();
+
     {
         subsections.add(new SubSection());
     }
@@ -139,6 +134,7 @@ public class ReflectedTest extends ReflectedYaml
 
         @Comment("map in collection")
         public Collection<Map<String, String>> mapInCollection;
+
         {
             Map<String, String> map = new HashMap<String, String>();
             map.put("abc", "123");

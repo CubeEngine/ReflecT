@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.yaml;
+package de.cubeisland.engine.reflect.hocon;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +28,7 @@ import java.io.FileOutputStream;
 import de.cubeisland.engine.reflect.ReflectedTest;
 import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
-import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
+import de.cubeisland.engine.reflect.codec.hocon.HoconCodec;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,28 +36,27 @@ import org.junit.Test;
 import static de.cubeisland.engine.reflect.ReflectedFieldShadowing.ReflectedFieldShadowing2;
 import static org.junit.Assert.assertEquals;
 
-
-public class YamlReflectedTest
+public class HoconReflectedTest
 {
     private ReflectedTest test1;
     private ReflectedTest2 test2;
     private File file;
 
     private Reflector factory;
-    private YamlCodec codec;
+    private HoconCodec codec;
 
     @Before
     public void setUp() throws Exception
     {
-        this.file = new File("../testReflected.yml");
-        factory = new Reflector();
-        test1 = factory.create(ReflectedTest.class);
-        test2 = factory.create(ReflectedTest2.class);
-        codec = factory.getCodecManager().getCodec(YamlCodec.class);
+        this.file = new File("../testReflected.conf");
+        this.factory = new Reflector();
+        this.test1 = factory.create(ReflectedTest.class);
+        this.test2 = factory.create(ReflectedTest2.class);
+        codec = factory.getCodecManager().getCodec(HoconCodec.class);
     }
 
     @Test
-    public void test1() throws Exception
+    public void test() throws Exception
     {
         codec.saveReflected(test1, new FileOutputStream(file));
         final ReflectedTest reflected = factory.create(ReflectedTest.class);

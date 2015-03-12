@@ -20,9 +20,10 @@
 
     <modules>
         <module>core</module>
-        <module>yaml</module>
-        <module>mongo</module>
         <module>converter</module>
+        <module>yaml</module>
+        <module>hocon</module>
+        <module>mongo</module>
     </modules>
 
     <licenses>
@@ -66,6 +67,14 @@
             <id>pschichtel</id>
             <name>Phillip Schichtel</name>
             <email>phillip.public@schich.tel</email>
+            <roles>
+                <role>Contributor</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>JonasDann</id>
+            <name>Jonas Dann</name>
+            <email>jonas.chr.dann@gmail.com</email>
             <roles>
                 <role>Contributor</role>
             </roles>
