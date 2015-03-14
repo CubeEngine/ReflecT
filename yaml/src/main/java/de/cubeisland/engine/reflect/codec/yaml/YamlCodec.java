@@ -79,7 +79,7 @@ public class YamlCodec extends FileCodec
                 // loadValues null -> reflected exists but was empty
                 return MapNode.emptyMap();
             }
-            return (MapNode)reflected.getCodec().getConverterManager().convertToNode(map);
+            return (MapNode)this.getConverterManager().convertToNode(map);
         }
         catch (ScannerException ex)
         {
@@ -113,6 +113,7 @@ public class YamlCodec extends FileCodec
             {
                 writer.append("# ").append(StringUtils.implode("\n# ", fRef.tail()));
             }
+            writer.flush();
         }
         catch (IOException ex)
         {
