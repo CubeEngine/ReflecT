@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -38,6 +40,7 @@ import de.cubeisland.engine.converter.node.StringNode;
 import de.cubeisland.engine.reflect.Reflected;
 import de.cubeisland.engine.reflect.ReflectedFile;
 import de.cubeisland.engine.reflect.codec.FileCodec;
+import de.cubeisland.engine.reflect.codec.ReaderWriterFileCodec;
 import de.cubeisland.engine.reflect.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.parser.ParserException;
@@ -48,7 +51,7 @@ import static de.cubeisland.engine.reflect.util.StringUtils.isEmpty;
 /**
  * A Codec using the YAML format
  */
-public class YamlCodec extends FileCodec
+public class YamlCodec extends ReaderWriterFileCodec
 {
     private static final String COMMENT_PREFIX = "# ";
     private static final String OFFSET = "  ";
@@ -64,7 +67,7 @@ public class YamlCodec extends FileCodec
     // Reflected loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected final MapNode load(InputStream in, Reflected reflected) throws ConversionException
+    protected final MapNode load(Reader in, Reflected reflected) throws ConversionException
     {
         try
         {
@@ -93,11 +96,10 @@ public class YamlCodec extends FileCodec
 
     // Reflected saving Methods
     @Override
-    protected final void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException
+    protected final void save(MapNode node, Writer writer, Reflected reflected) throws ConversionException
     {
         try
         {
-            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
             ReflectedFile fRef = null;
             if (reflected instanceof ReflectedFile)
             {
@@ -127,7 +129,7 @@ public class YamlCodec extends FileCodec
      * @param value  the Node to serialize
      * @param offset the current offset
      */
-    private void convertValue(OutputStreamWriter writer, Node value, int offset) throws IOException
+    private void convertValue(Writer writer, Node value, int offset) throws IOException
     {
         StringBuilder sb = new StringBuilder();
         // null-Node ?
@@ -170,7 +172,7 @@ public class YamlCodec extends FileCodec
      * @param offset the current offset
      * @param inList true if currently directly under a ListNode
      */
-    private void convertMapNode(OutputStreamWriter writer, MapNode value, int offset, boolean inList) throws IOException
+    private void convertMapNode(Writer writer, MapNode value, int offset, boolean inList) throws IOException
     {
         Map<String, Node> map = value.getMappedNodes();
         boolean endOfMapOrList = false;
@@ -246,7 +248,7 @@ public class YamlCodec extends FileCodec
      * @param value  the ListNode to serialize
      * @param offset the current offset
      */
-    private void convertListNode(OutputStreamWriter writer, ListNode value, int offset) throws IOException
+    private void convertListNode(Writer writer, ListNode value, int offset) throws IOException
     {
         writer.append(LINE_BREAK);
         boolean endOfMapOrList = false;

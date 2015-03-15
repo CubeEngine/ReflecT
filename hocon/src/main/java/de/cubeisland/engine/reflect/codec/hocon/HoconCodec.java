@@ -23,10 +23,8 @@
 package de.cubeisland.engine.reflect.codec.hocon;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,12 +38,12 @@ import de.cubeisland.engine.converter.node.ListNode;
 import de.cubeisland.engine.converter.node.MapNode;
 import de.cubeisland.engine.converter.node.Node;
 import de.cubeisland.engine.reflect.Reflected;
-import de.cubeisland.engine.reflect.codec.FileCodec;
+import de.cubeisland.engine.reflect.codec.ReaderWriterFileCodec;
 
 /**
  * A Codec using the HOCON format
  */
-public class HoconCodec extends FileCodec
+public class HoconCodec extends ReaderWriterFileCodec
 {
     @Override
     public String getExtension()
@@ -56,14 +54,14 @@ public class HoconCodec extends FileCodec
     // Reflected loading Method
     @Override
     @SuppressWarnings("unchecked")
-    protected MapNode load(InputStream in, Reflected reflected) throws ConversionException
+    protected MapNode load(Reader in, Reflected reflected) throws ConversionException
     {
         if (in == null)
         {
             // InputStream null -> reflected was not existent
             return MapNode.emptyMap();
         }
-        Config config = ConfigFactory.parseReader(new InputStreamReader(in));
+        Config config = ConfigFactory.parseReader(in);
         if (config.isEmpty())
         {
             // loadValues null -> reflected exists but was empty
@@ -102,28 +100,27 @@ public class HoconCodec extends FileCodec
 
     // Reflected saving Methods
     @Override
-    protected void save(MapNode node, OutputStream out, Reflected reflected) throws ConversionException
+    protected void save(MapNode node, Writer writer, Reflected reflected) throws ConversionException
     {
         Config config = ConfigFactory.parseMap(getHoconMap(node));
         try
         {
-            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
             writer.append(config.root().render());
         }
         catch (IOException ex)
         {
-            throw ConversionException.of(this, null, "Could not write into OutputStream", ex);
+            throw ConversionException.of(this, null, "Could not write", ex);
         }
     }
 
-    protected Map<String, Object> getHoconMap(MapNode node)
+    private Map<String, Object> getHoconMap(MapNode node)
     {
         Map<String, Object> map = new LinkedHashMap<String, Object>();
-        getHoconMap(map, "", node);
+        buildHoconMap(map, "", node);
         return map;
     }
 
-    protected void getHoconMap(Map<String, Object> map, String path, Node node)
+    private void buildHoconMap(Map<String, Object> map, String path, Node node)
     {
         if (node instanceof MapNode)
         {
@@ -135,7 +132,7 @@ public class HoconCodec extends FileCodec
             {
                 for (Map.Entry<String, Node> entry : ((MapNode)node).getMappedNodes().entrySet())
                 {
-                    getHoconMap(map, path + ("".equals(path) ? "" : ".") + entry.getKey(), entry.getValue());
+                    buildHoconMap(map, path + ("".equals(path) ? "" : ".") + entry.getKey(), entry.getValue());
                 }
             }
         }

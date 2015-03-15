@@ -22,11 +22,13 @@
  */
 package de.cubeisland.engine.reflect.codec.yaml;
 
+import java.io.Reader;
+import java.io.Writer;
 import de.cubeisland.engine.reflect.ReflectedFile;
 
 /**
  * A Reflected using {@link YamlCodec} to save/load into/from Files
  */
-public abstract class ReflectedYaml extends ReflectedFile<YamlCodec>
+public abstract class ReflectedYaml extends ReflectedFile<Reader, Writer, YamlCodec>
 {
 }
