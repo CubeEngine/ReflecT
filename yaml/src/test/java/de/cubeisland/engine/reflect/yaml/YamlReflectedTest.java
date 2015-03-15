@@ -51,7 +51,7 @@ public class YamlReflectedTest
     {
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        test1 = factory.create(ReflectedTest.class);
+        test1 = ReflectedTest.getDefaultReflectedTest(factory);
         test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(YamlCodec.class);
     }
