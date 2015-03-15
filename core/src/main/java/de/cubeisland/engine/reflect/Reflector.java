@@ -23,6 +23,7 @@
 package de.cubeisland.engine.reflect;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.logging.Logger;
 
 import de.cubeisland.engine.converter.ConverterManager;
@@ -76,7 +77,7 @@ public class Reflector
      *
      * @return the loaded reflected
      */
-    public <T extends ReflectedFile> T load(Class<T> clazz, InputStream is)
+    public <T extends ReflectedFile> T load(Class<T> clazz, Reader is)
     {
         T reflected = create(clazz);
         reflected.loadFrom(is);

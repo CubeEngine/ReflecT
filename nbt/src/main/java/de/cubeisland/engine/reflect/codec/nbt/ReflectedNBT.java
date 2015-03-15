@@ -20,15 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.codec.yaml;
+package de.cubeisland.engine.reflect.codec.nbt;
 
-import java.io.Reader;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
 import de.cubeisland.engine.reflect.ReflectedFile;
 
-/**
- * A Reflected using {@link YamlCodec} to save/load into/from Files
- */
-public abstract class ReflectedYaml extends ReflectedFile<YamlCodec, Reader, Writer>
+public abstract class ReflectedNBT extends ReflectedFile<NBTCodec, InputStream, OutputStream>
 {
 }

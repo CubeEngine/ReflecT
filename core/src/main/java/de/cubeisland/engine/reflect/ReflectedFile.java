@@ -22,10 +22,12 @@
  */
 package de.cubeisland.engine.reflect;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
@@ -34,11 +36,12 @@ import de.cubeisland.engine.reflect.codec.FileCodec;
 import de.cubeisland.engine.reflect.exception.InvalidReflectedObjectException;
 
 import static de.cubeisland.engine.reflect.Reflector.LOGGER;
+import static java.util.logging.Level.WARNING;
 
 /**
  * A Reflected saving into a {@link File} using a {@link FileCodec}
  */
-public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, File>
+public abstract class ReflectedFile<C extends FileCodec<I, O>, I extends Closeable, O extends Closeable> extends Reflected<C, File>
 {
     private static final String[] EMPTY = new String[0];
 
@@ -48,14 +51,30 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         {
             throw new IllegalArgumentException("A reflected cannot be saved without a valid file!");
         }
+        O os = null;
         try
         {
-            this.save(new FileOutputStream(target));
+            os = getCodec().newOutput(target);
+            this.save(os);
             this.onSaved(target);
         }
-        catch (FileNotFoundException ex)
+        catch (IOException e)
         {
-            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", ex);
+            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", e);
+        }
+        finally
+        {
+            if (os != null)
+            {
+                try
+                {
+                    os.close();
+                }
+                catch (IOException e)
+                {
+                    Reflector.LOGGER.log(WARNING, "Failed to close the output stream", e);
+                }
+            }
         }
     }
 
@@ -64,7 +83,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
      *
      * @param os the OutputStream to write into
      */
-    public final void save(OutputStream os)
+    public final void save(O os)
     {
         this.onSave();
         this.getCodec().saveReflected(this, os);
@@ -78,13 +97,30 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         }
         if (source.exists())
         {
+            I in = null;
             try
             {
-                this.loadFrom(new FileInputStream(source));
+
+                in = getCodec().newInput(source);
+                this.loadFrom(in);
             }
-            catch (FileNotFoundException e)
+            catch (IOException e)
             {
                 throw new IllegalArgumentException("File to load from cannot be accessed!", e);
+            }
+            finally
+            {
+                if (in != null)
+                {
+                    try
+                    {
+                        in.close();
+                    }
+                    catch (IOException e)
+                    {
+                        Reflector.LOGGER.log(WARNING, "Failed to close the input stream!", e);
+                    }
+                }
             }
             this.onLoaded(source);
             return true;
@@ -98,7 +134,7 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
      *
      * @param is the InputStream to load from
      */
-    public final void loadFrom(InputStream is)
+    public final void loadFrom(I is)
     {
         if (is == null)
         {

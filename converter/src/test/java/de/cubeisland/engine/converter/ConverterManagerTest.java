@@ -22,7 +22,12 @@
  */
 package de.cubeisland.engine.converter;
 
+import java.lang.reflect.Type;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -66,14 +71,27 @@ public class ConverterManagerTest
         check(ConverterManagerTest.class);
     }
 
-    public void testGenericConverters()
+    List<String> list = new ArrayList<String>();
+    Map<String, String> map = new HashMap<String, String>();
+    String[] array = {"TEST"};
+
+    // TODO test generic
+    public void testGenericConverters() throws ConversionException
     {
-        // TODO
+        list.add("TEST");
+        check(list); // TODO pass type
+        check(array); // TODO pass type
+        check(map); // TODO pass type
     }
 
     private void check(Object value) throws ConversionException
     {
+        check(value, value.getClass());
+    }
+
+    private void check(Object value, Type type) throws ConversionException
+    {
         Node node = manager.convertToNode(value);
-        assertEquals(value, manager.convertFromNode(node, value.getClass()));
+        assertEquals(value, manager.convertFromNode(node, type));
     }
 }

@@ -22,10 +22,10 @@
  */
 package de.cubeisland.engine.reflect.codec;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Level;
 
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.reflect.Reflected;
@@ -36,9 +36,9 @@ import static de.cubeisland.engine.reflect.Reflector.LOGGER;
 /**
  * A Codec using {@link InputStream} and {@link OutputStream} to save/load into/from a File
  */
-public abstract class FileCodec extends Codec<InputStream, OutputStream>
+public abstract class FileCodec<I, O> extends Codec<I, O>
 {
-    public final void loadReflected(Reflected reflected, InputStream input)
+    public final void loadReflected(Reflected reflected, I input)
     {
         try
         {
@@ -52,20 +52,9 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             }
             LOGGER.warning("Could not load reflected" + ex);
         }
-        finally
-        {
-            try
-            {
-                input.close();
-            }
-            catch (IOException e)
-            {
-                LOGGER.log(Level.WARNING, "Failed to close InputStream", e);
-            }
-        }
     }
 
-    public final void saveReflected(Reflected reflected, OutputStream output)
+    public final void saveReflected(Reflected reflected, O output)
     {
         try
         {
@@ -79,18 +68,10 @@ public abstract class FileCodec extends Codec<InputStream, OutputStream>
             }
             LOGGER.warning("Could not save reflected" + ex);
         }
-        finally
-        {
-            try
-            {
-                output.close();
-            }
-            catch (IOException e)
-            {
-                LOGGER.log(Level.WARNING, "Failed to close OutputStream", e);
-            }
-        }
     }
+
+    public abstract I newInput(File f) throws IOException;
+    public abstract O newOutput(File f) throws IOException;
 
     /**
      * Returns the FileExtension as String

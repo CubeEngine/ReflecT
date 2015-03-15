@@ -20,15 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.codec.yaml;
+package de.cubeisland.engine.reflect.codec;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import de.cubeisland.engine.reflect.ReflectedFile;
 
-/**
- * A Reflected using {@link YamlCodec} to save/load into/from Files
- */
-public abstract class ReflectedYaml extends ReflectedFile<YamlCodec, Reader, Writer>
+public abstract class ReaderWriterFileCodec extends FileCodec<Reader, Writer>
 {
+    @Override
+    public Reader newInput(File f) throws IOException
+    {
+        return new FileReader(f);
+    }
+
+    @Override
+    public Writer newOutput(File f) throws IOException
+    {
+        return new FileWriter(f);
+    }
 }
