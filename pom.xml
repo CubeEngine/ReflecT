@@ -24,6 +24,7 @@
         <module>yaml</module>
         <module>hocon</module>
         <module>mongo</module>
+        <module>nbt</module>
     </modules>
 
     <licenses>

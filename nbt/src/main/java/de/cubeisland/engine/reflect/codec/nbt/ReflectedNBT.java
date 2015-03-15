@@ -20,25 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.cubeisland.engine.reflect.codec;
+package de.cubeisland.engine.reflect.codec.nbt;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
+import de.cubeisland.engine.reflect.ReflectedFile;
 
-public abstract class ReaderWriterFileCodec extends FileCodec<Reader, Writer>
+public abstract class ReflectedNBT extends ReflectedFile<InputStream, OutputStream, NBTCodec>
 {
-    @Override
-    public Reader newInput(File f) throws IOException
-    {
-        return new FileReader(f);
-    }
-
-    @Override
-    public Writer newOutput(File f) throws IOException
-    {
-        return null;
-    }
 }
