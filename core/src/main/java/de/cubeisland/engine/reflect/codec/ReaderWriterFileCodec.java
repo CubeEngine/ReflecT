@@ -24,6 +24,7 @@ package de.cubeisland.engine.reflect.codec;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -39,6 +40,6 @@ public abstract class ReaderWriterFileCodec extends FileCodec<Reader, Writer>
     @Override
     public Writer newOutput(File f) throws IOException
     {
-        return null;
+        return new FileWriter(f);
     }
 }
