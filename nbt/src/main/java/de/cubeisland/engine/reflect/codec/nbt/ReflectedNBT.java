@@ -26,6 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import de.cubeisland.engine.reflect.ReflectedFile;
 
-public abstract class ReflectedNBT extends ReflectedFile<InputStream, OutputStream, NBTCodec>
+public abstract class ReflectedNBT extends ReflectedFile<NBTCodec, InputStream, OutputStream>
 {
 }

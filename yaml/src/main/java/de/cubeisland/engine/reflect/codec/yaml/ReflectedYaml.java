@@ -29,6 +29,6 @@ import de.cubeisland.engine.reflect.ReflectedFile;
 /**
  * A Reflected using {@link YamlCodec} to save/load into/from Files
  */
-public abstract class ReflectedYaml extends ReflectedFile<Reader, Writer, YamlCodec>
+public abstract class ReflectedYaml extends ReflectedFile<YamlCodec, Reader, Writer>
 {
 }

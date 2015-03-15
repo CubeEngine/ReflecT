@@ -29,6 +29,6 @@ import de.cubeisland.engine.reflect.ReflectedFile;
 /**
  * A Reflected using {@link HoconCodec} to save/load into/from Files
  */
-public abstract class ReflectedHocon extends ReflectedFile<Reader, Writer, HoconCodec>
+public abstract class ReflectedHocon extends ReflectedFile<HoconCodec, Reader, Writer>
 {
 }

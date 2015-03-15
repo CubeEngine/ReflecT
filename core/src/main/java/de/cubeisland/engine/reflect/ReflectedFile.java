@@ -41,7 +41,7 @@ import static java.util.logging.Level.WARNING;
 /**
  * A Reflected saving into a {@link File} using a {@link FileCodec}
  */
-public abstract class ReflectedFile<I extends Closeable, O extends Closeable, C extends FileCodec<I, O>> extends Reflected<C, File>
+public abstract class ReflectedFile<C extends FileCodec<I, O>, I extends Closeable, O extends Closeable> extends Reflected<C, File>
 {
     private static final String[] EMPTY = new String[0];
 
