@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
@@ -48,14 +49,31 @@ public abstract class ReflectedFile<C extends FileCodec> extends Reflected<C, Fi
         {
             throw new IllegalArgumentException("A reflected cannot be saved without a valid file!");
         }
+        FileOutputStream os = null;
         try
         {
-            this.save(new FileOutputStream(target));
+            os = new FileOutputStream(target);
+            this.save(os);
+            os.flush();
             this.onSaved(target);
         }
-        catch (FileNotFoundException ex)
+        catch (IOException e)
         {
-            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", ex);
+            throw new InvalidReflectedObjectException("File to save into cannot be accessed!", e);
+        }
+        finally
+        {
+            if (os != null)
+            {
+                try
+                {
+                    os.close();
+                }
+                catch (IOException e)
+                {
+                    Reflector.LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+                }
+            }
         }
     }
 

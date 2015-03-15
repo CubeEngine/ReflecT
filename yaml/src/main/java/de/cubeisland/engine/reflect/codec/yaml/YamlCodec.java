@@ -113,7 +113,6 @@ public class YamlCodec extends FileCodec
             {
                 writer.append("# ").append(StringUtils.implode("\n# ", fRef.tail()));
             }
-            writer.flush();
         }
         catch (IOException ex)
         {
