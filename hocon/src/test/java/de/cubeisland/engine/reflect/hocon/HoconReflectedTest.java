@@ -23,8 +23,6 @@
 package de.cubeisland.engine.reflect.hocon;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import de.cubeisland.engine.reflect.ReflectedTest;
@@ -32,6 +30,7 @@ import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.hocon.HoconCodec;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,6 +42,7 @@ public class HoconReflectedTest
     private ReflectedTest test1;
     private ReflectedTest2 test2;
     private File file;
+    private FileWriter w;
 
     private Reflector factory;
     private HoconCodec codec;
@@ -51,16 +51,23 @@ public class HoconReflectedTest
     public void setUp() throws Exception
     {
         this.file = new File("../testReflected.conf");
+        this.w = new FileWriter(file);
         this.factory = new Reflector();
         this.test1 = ReflectedTest.getDefaultReflectedTest(factory);
         this.test2 = factory.create(ReflectedTest2.class);
-        codec = factory.getCodecManager().getCodec(HoconCodec.class);
+        this.codec = factory.getCodecManager().getCodec(HoconCodec.class);
+    }
+
+    @After
+    public void close() throws Exception {
+        this.w.close();
     }
 
     @Test
     public void test() throws Exception
     {
-        codec.saveReflected(test1, new FileWriter(file));
+        codec.saveReflected(test1, w);
+        w.flush();
         final ReflectedTest reflected = factory.create(ReflectedTest.class);
         codec.loadReflected(reflected, new FileReader(file));
         file.delete();
@@ -70,7 +77,8 @@ public class HoconReflectedTest
     @Test
     public void test2() throws Exception
     {
-        codec.saveReflected(test2, new FileWriter(file));
+        codec.saveReflected(test2, w);
+        w.flush();
         final ReflectedTest2 reflected = factory.create(ReflectedTest2.class);
         codec.loadReflected(reflected, new FileReader(file));
         file.delete();
