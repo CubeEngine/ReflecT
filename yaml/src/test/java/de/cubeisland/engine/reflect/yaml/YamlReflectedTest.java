@@ -61,9 +61,13 @@ public class YamlReflectedTest
     @Test
     public void test1() throws Exception
     {
-        codec.saveReflected(test1, new FileWriter(file));
+        FileWriter writer = new FileWriter(file);
+        codec.saveReflected(test1, writer);
+        writer.close();
         final ReflectedTest reflected = factory.create(ReflectedTest.class);
-        codec.loadReflected(reflected, new FileReader(file));
+        FileReader reader = new FileReader(file);
+        codec.loadReflected(reflected, reader);
+        reader.close();
         file.delete();
         assertEquals(codec.convertReflected(test1).asString(), codec.convertReflected(reflected).asString());
     }
@@ -71,9 +75,13 @@ public class YamlReflectedTest
     @Test
     public void test2() throws Exception
     {
-        codec.saveReflected(test2, new FileWriter(file));
+        FileWriter writer = new FileWriter(file);
+        codec.saveReflected(test2, writer);
+        writer.close();
         final ReflectedTest2 reflected = factory.create(ReflectedTest2.class);
-        codec.loadReflected(reflected, new FileReader(file));
+        FileReader reader = new FileReader(file);
+        codec.loadReflected(reflected, reader);
+        reader.close();
         file.delete();
         assertEquals(codec.convertReflected(test2).asString(), codec.convertReflected(reflected).asString());
     }
