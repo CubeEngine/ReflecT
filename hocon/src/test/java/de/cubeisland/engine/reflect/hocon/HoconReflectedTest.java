@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static de.cubeisland.engine.reflect.ReflectedFieldShadowing.ReflectedFieldShadowing2;
+import static de.cubeisland.engine.reflect.util.AssertionUtils.assertEqualsDeep;
 import static org.junit.Assert.assertEquals;
 
 public class HoconReflectedTest
@@ -68,7 +69,7 @@ public class HoconReflectedTest
         codec.loadReflected(reflected, reader);
         reader.close();
         file.delete();
-        assertEquals(codec.convertReflected(test1).asString(), codec.convertReflected(reflected).asString());
+        assertEqualsDeep(codec.getConverterManager(), test1, reflected);
     }
 
     @Test
@@ -82,7 +83,7 @@ public class HoconReflectedTest
         codec.loadReflected(reflected, reader);
         reader.close();
         file.delete();
-        assertEquals(codec.convertReflected(test2).asString(), codec.convertReflected(reflected).asString());
+        assertEqualsDeep(codec.getConverterManager(), test2, reflected);
     }
 
     @Test(expected = DuplicatedPathException.class)

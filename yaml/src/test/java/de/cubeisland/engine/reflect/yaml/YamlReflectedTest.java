@@ -23,8 +23,6 @@
 package de.cubeisland.engine.reflect.yaml;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import de.cubeisland.engine.reflect.ReflectedTest;
@@ -36,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static de.cubeisland.engine.reflect.ReflectedFieldShadowing.ReflectedFieldShadowing2;
-import static org.junit.Assert.assertEquals;
+import static de.cubeisland.engine.reflect.util.AssertionUtils.assertEqualsDeep;
 
 
 public class YamlReflectedTest
@@ -53,7 +51,7 @@ public class YamlReflectedTest
     {
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        test1 = factory.create(ReflectedTest.class);
+        test1 = ReflectedTest.getDefaultReflectedTest(factory);
         test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(YamlCodec.class);
     }
@@ -69,7 +67,7 @@ public class YamlReflectedTest
         codec.loadReflected(reflected, reader);
         reader.close();
         file.delete();
-        assertEquals(codec.convertReflected(test1).asString(), codec.convertReflected(reflected).asString());
+        assertEqualsDeep(codec.getConverterManager(), test1, reflected);
     }
 
     @Test
@@ -83,7 +81,7 @@ public class YamlReflectedTest
         codec.loadReflected(reflected, reader);
         reader.close();
         file.delete();
-        assertEquals(codec.convertReflected(test2).asString(), codec.convertReflected(reflected).asString());
+        assertEqualsDeep(codec.getConverterManager(), test2, reflected);
     }
 
     @Test(expected = DuplicatedPathException.class)
