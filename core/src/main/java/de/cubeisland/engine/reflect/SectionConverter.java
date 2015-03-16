@@ -95,7 +95,7 @@ public class SectionConverter implements ClassedConverter<Section>
             }
             else
             {
-                path = new Path(StringUtils.fieldNameToPath(field.getName())); // TODO configurable Naming convention #20
+                path = new Path(SEPARATOR, StringUtils.fieldNameToPath(field.getName())); // TODO configurable Naming convention #20
             }
             this.paths.put(field, path);
         }
