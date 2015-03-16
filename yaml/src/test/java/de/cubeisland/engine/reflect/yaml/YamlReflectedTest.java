@@ -32,7 +32,6 @@ import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
 import de.cubeisland.engine.reflect.exception.DuplicatedPathException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +44,6 @@ public class YamlReflectedTest
     private ReflectedTest test1;
     private ReflectedTest2 test2;
     private File file;
-    private FileWriter w;
 
     private Reflector factory;
     private YamlCodec codec;
@@ -54,25 +52,22 @@ public class YamlReflectedTest
     public void setUp() throws Exception
     {
         this.file = new File("../testReflected.yml");
-        this.w = new FileWriter(file);
         factory = new Reflector();
-        test1 = ReflectedTest.getDefaultReflectedTest(factory);
+        test1 = factory.create(ReflectedTest.class);
         test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(YamlCodec.class);
-    }
-
-    @After
-    public void close() throws Exception {
-        this.w.close();
     }
 
     @Test
     public void test1() throws Exception
     {
-        codec.saveReflected(test1, w);
-        w.flush();
+        FileWriter writer = new FileWriter(file);
+        codec.saveReflected(test1, writer);
+        writer.close();
         final ReflectedTest reflected = factory.create(ReflectedTest.class);
-        codec.loadReflected(reflected, new FileReader(file));
+        FileReader reader = new FileReader(file);
+        codec.loadReflected(reflected, reader);
+        reader.close();
         file.delete();
         assertEquals(codec.convertReflected(test1).asString(), codec.convertReflected(reflected).asString());
     }
@@ -80,10 +75,13 @@ public class YamlReflectedTest
     @Test
     public void test2() throws Exception
     {
-        codec.saveReflected(test2, w);
-        w.flush();
+        FileWriter writer = new FileWriter(file);
+        codec.saveReflected(test2, writer);
+        writer.close();
         final ReflectedTest2 reflected = factory.create(ReflectedTest2.class);
-        codec.loadReflected(reflected, new FileReader(file));
+        FileReader reader = new FileReader(file);
+        codec.loadReflected(reflected, reader);
+        reader.close();
         file.delete();
         assertEquals(codec.convertReflected(test2).asString(), codec.convertReflected(reflected).asString());
     }

@@ -67,7 +67,7 @@ public class HoconCodec extends ReaderWriterFileCodec
             // loadValues null -> reflected exists but was empty
             return MapNode.emptyMap();
         }
-        return (MapNode)reflected.getCodec().getConverterManager().convertToNode(getReflectMap(config.entrySet()));
+        return (MapNode)this.getConverterManager().convertToNode(getReflectMap(config.entrySet()));
     }
 
     protected Map<String, Object> getReflectMap(Set<Map.Entry<String, ConfigValue>> set)
