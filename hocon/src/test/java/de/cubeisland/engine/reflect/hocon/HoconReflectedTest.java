@@ -52,7 +52,7 @@ public class HoconReflectedTest
     {
         this.file = new File("../testReflected.conf");
         this.factory = new Reflector();
-        this.test1 = factory.create(ReflectedTest.class);
+        test1 = ReflectedTest.getDefaultReflectedTest(factory);
         this.test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(HoconCodec.class);
     }
