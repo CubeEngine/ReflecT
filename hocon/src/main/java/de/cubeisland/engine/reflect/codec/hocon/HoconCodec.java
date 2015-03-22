@@ -29,10 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValue;
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.node.ListNode;
 import de.cubeisland.engine.converter.node.MapNode;
@@ -67,35 +65,7 @@ public class HoconCodec extends ReaderWriterFileCodec
             // loadValues null -> reflected exists but was empty
             return MapNode.emptyMap();
         }
-        return (MapNode)this.getConverterManager().convertToNode(getReflectMap(config.entrySet()));
-    }
-
-    protected Map<String, Object> getReflectMap(Set<Map.Entry<String, ConfigValue>> set)
-    {
-        Map<String, Object> map = new LinkedHashMap<String, Object>();
-        for (Map.Entry<String, ConfigValue> entry : set)
-        {
-            String[] path = entry.getKey().split("\\.");
-            getReflectMapEntry(map, path, 0, entry.getValue());
-        }
-        return map;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void getReflectMapEntry(Map<String, Object> map, String[] path, int index, ConfigValue value)
-    {
-        if (path.length - index == 1)
-        {
-            map.put(path[index], value.unwrapped());
-        }
-        else
-        {
-            if (!map.containsKey(path[index]))
-            {
-                map.put(path[index], new LinkedHashMap<String, Object>());
-            }
-            getReflectMapEntry((Map<String, Object>)map.get(path[index]), path, ++index, value);
-        }
+        return (MapNode)this.getConverterManager().convertToNode(config.root().unwrapped());
     }
 
     // Reflected saving Methods
