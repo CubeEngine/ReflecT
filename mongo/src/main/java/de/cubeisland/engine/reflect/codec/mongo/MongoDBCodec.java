@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.DBRefBase;
+import com.mongodb.DBRef;
 import de.cubeisland.engine.converter.ConversionException;
 import de.cubeisland.engine.converter.ConverterManager;
 import de.cubeisland.engine.converter.node.ListNode;
@@ -185,9 +185,9 @@ public class MongoDBCodec extends Codec<DBObject, DBObject>
         {
             nodeValue = new ObjectIdNode((ObjectId)value);
         }
-        else if (value instanceof DBRefBase)
+        else if (value instanceof DBRef)
         {
-            nodeValue = new DBRefBaseNode((DBRefBase)value);
+            nodeValue = new DBRefBaseNode((DBRef)value);
         }
         else if (value instanceof Date)
         {

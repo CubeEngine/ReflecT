@@ -24,7 +24,7 @@ package de.cubeisland.engine.reflect.codec.mongo;
 
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.DBRefBase;
+import com.mongodb.DBRef;
 import de.cubeisland.engine.reflect.Reflector;
 
 public class Reference<T extends ReflectedDBObject>
@@ -32,10 +32,10 @@ public class Reference<T extends ReflectedDBObject>
     private final Reflector reflector;
     private final DBCollection collection;
     private final DBObject object;
-    private DBRefBase dbRef;
+    private DBRef dbRef;
     private T fetched = null;
 
-    public Reference(Reflector reflector, DBRefBase dbRefBase)
+    public Reference(Reflector reflector, DBRef dbRefBase)
     {
         this.reflector = reflector;
         this.dbRef = dbRefBase;
@@ -55,13 +55,13 @@ public class Reference<T extends ReflectedDBObject>
     {
         if (fetched == null)
         {
-            DBObject fetch = this.dbRef.fetch();
+            DBObject fetch = collection.findOne(this.dbRef.getId());
             if (fetch == null)
             {
                 Reflector.LOGGER.warning("The DB Reference points to nothing: " + this.dbRef);
                 return null;
             }
-            this.fetched = this.reflector.load(clazz, this.getDBRef().fetch());
+            this.fetched = this.reflector.load(clazz, collection.findOne(this.getDBRef().getId()));
         }
         return fetched;
     }
@@ -78,11 +78,11 @@ public class Reference<T extends ReflectedDBObject>
         return this.dbRef.hashCode();
     }
 
-    public DBRefBase getDBRef()
+    public DBRef getDBRef()
     {
         if (this.dbRef == null)
         {
-            this.dbRef = new DBRefBase(collection.getDB(), collection.getName(), object.get("_id"));
+            this.dbRef = new DBRef(collection.getName(), object.get("_id"));
         }
         return this.dbRef;
     }

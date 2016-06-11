@@ -22,13 +22,12 @@
  */
 package de.cubeisland.engine.reflect.codec.mongo.node;
 
-import com.mongodb.DBRefBase;
-import de.cubeisland.engine.converter.node.Node;
+import com.mongodb.DBRef;
 import de.cubeisland.engine.converter.node.ValueNode;
 
-public class DBRefBaseNode extends ValueNode<DBRefBase>
+public class DBRefBaseNode extends ValueNode<DBRef>
 {
-    public DBRefBaseNode(DBRefBase value)
+    public DBRefBaseNode(DBRef value)
     {
         super(value);
     }
