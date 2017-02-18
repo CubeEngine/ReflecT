@@ -22,6 +22,7 @@
  */
 package de.cubeisland.engine.converter;
 
+import java.io.File;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Date;
@@ -40,6 +41,7 @@ import de.cubeisland.engine.converter.converter.Converter;
 import de.cubeisland.engine.converter.converter.DateConverter;
 import de.cubeisland.engine.converter.converter.DoubleConverter;
 import de.cubeisland.engine.converter.converter.EnumConverter;
+import de.cubeisland.engine.converter.converter.FileConverter;
 import de.cubeisland.engine.converter.converter.FloatConverter;
 import de.cubeisland.engine.converter.converter.IntegerConverter;
 import de.cubeisland.engine.converter.converter.LevelConverter;
@@ -111,6 +113,7 @@ public class ConverterManager
         this.registerConverter(new LevelConverter(), Level.class);
         this.registerConverter(new ClassConverter(), Class.class);
         this.registerConverter(new EnumConverter(), Enum.class);
+        this.registerConverter(new FileConverter(), File.class);
 
         // Generic Converters:
         this.registerConverter(new MapConverter(), Map.class);
