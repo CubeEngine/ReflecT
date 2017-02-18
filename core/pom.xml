@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.cubeengine</groupId>
         <artifactId>reflect</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
 
     <artifactId>reflect-core</artifactId>
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>converter</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>3.0.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
