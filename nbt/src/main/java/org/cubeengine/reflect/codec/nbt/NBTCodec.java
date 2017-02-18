@@ -29,6 +29,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.flowpowered.nbt.ByteTag;
+import com.flowpowered.nbt.CompoundMap;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.DoubleTag;
+import com.flowpowered.nbt.EndTag;
+import com.flowpowered.nbt.FloatTag;
+import com.flowpowered.nbt.IntTag;
+import com.flowpowered.nbt.ListTag;
+import com.flowpowered.nbt.LongTag;
+import com.flowpowered.nbt.ShortTag;
+import com.flowpowered.nbt.StringTag;
+import com.flowpowered.nbt.Tag;
+import com.flowpowered.nbt.stream.NBTInputStream;
+import com.flowpowered.nbt.stream.NBTOutputStream;
+import com.flowpowered.nbt.util.NBTMapper;
 import org.cubeengine.converter.ConversionException;
 import org.cubeengine.converter.node.BooleanNode;
 import org.cubeengine.converter.node.ByteNode;
@@ -45,21 +60,6 @@ import org.cubeengine.converter.node.ShortNode;
 import org.cubeengine.converter.node.StringNode;
 import org.cubeengine.reflect.Reflected;
 import org.cubeengine.reflect.codec.StreamFileCodec;
-import org.spout.nbt.ByteTag;
-import org.spout.nbt.CompoundMap;
-import org.spout.nbt.CompoundTag;
-import org.spout.nbt.DoubleTag;
-import org.spout.nbt.EndTag;
-import org.spout.nbt.FloatTag;
-import org.spout.nbt.IntTag;
-import org.spout.nbt.ListTag;
-import org.spout.nbt.LongTag;
-import org.spout.nbt.ShortTag;
-import org.spout.nbt.StringTag;
-import org.spout.nbt.Tag;
-import org.spout.nbt.stream.NBTInputStream;
-import org.spout.nbt.stream.NBTOutputStream;
-import org.spout.nbt.util.NBTMapper;
 
 public class NBTCodec extends StreamFileCodec
 {
@@ -126,7 +126,7 @@ public class NBTCodec extends StreamFileCodec
             if (value instanceof CompoundTag)
             {
                 MapNode mapNode = MapNode.emptyMap();
-                this.toMapNode(mapNode,((CompoundTag)value).getValue());
+                this.toMapNode(mapNode, ((CompoundTag)value).getValue());
                 return mapNode;
             }
             else if (value instanceof ListTag)
@@ -138,12 +138,8 @@ public class NBTCodec extends StreamFileCodec
                 }
                 return listNode;
             }
-            else if (value instanceof ByteTag
-                || value instanceof StringTag
-                || value instanceof DoubleTag
-                || value instanceof FloatTag
-                || value instanceof IntTag
-                || value instanceof LongTag
+            else if (value instanceof ByteTag || value instanceof StringTag || value instanceof DoubleTag
+                || value instanceof FloatTag || value instanceof IntTag || value instanceof LongTag
                 || value instanceof ShortTag)
             {
                 try
@@ -160,23 +156,26 @@ public class NBTCodec extends StreamFileCodec
                 return NullNode.emptyNode();
             }
         }
-        throw new IllegalStateException("Unknown Tag! "+ value.getClass().getName());
+        throw new IllegalStateException("Unknown Tag! " + value.getClass().getName());
     }
 
     private CompoundTag convertMap(MapNode baseNode)
     {
-        Map<String,Node> map = baseNode.getValue();
+        Map<String, Node> map = baseNode.getValue();
         CompoundTag result = new CompoundTag("root", new CompoundMap());
-        if (map.isEmpty()) return result;
-        this.convertMap(result.getValue(),map, baseNode);
+        if (map.isEmpty())
+        {
+            return result;
+        }
+        this.convertMap(result.getValue(), map, baseNode);
         return result;
     }
 
-    private void convertMap(CompoundMap rootMap, Map<String,Node> map, MapNode base)
+    private void convertMap(CompoundMap rootMap, Map<String, Node> map, MapNode base)
     {
         for (Entry<String, Node> entry : map.entrySet())
         {
-            rootMap.put(this.convertValue(base.getOriginalKey(entry.getKey()),entry.getValue()));
+            rootMap.put(this.convertValue(base.getOriginalKey(entry.getKey()), entry.getValue()));
         }
     }
 
@@ -185,8 +184,8 @@ public class NBTCodec extends StreamFileCodec
         if (value instanceof MapNode)
         {
             CompoundMap map = new CompoundMap();
-            this.convertMap(map,((MapNode)value).getValue(), (MapNode)value);
-            return new CompoundTag(name,map);
+            this.convertMap(map, ((MapNode)value).getValue(), (MapNode)value);
+            return new CompoundTag(name, map);
         }
         else if (value instanceof ListNode)
         {
@@ -195,7 +194,7 @@ public class NBTCodec extends StreamFileCodec
             for (Node node : ((ListNode)value).getValue())
             {
                 i++;
-                tagList.add(this.convertValue(i.toString(),node));
+                tagList.add(this.convertValue(i.toString(), node));
             }
             if (tagList.size() == 0)
             {
@@ -243,6 +242,6 @@ public class NBTCodec extends StreamFileCodec
         {
             return new EndTag();
         }
-        throw new IllegalStateException("Unknown Node! "+ value.getClass().getName());
+        throw new IllegalStateException("Unknown Node! " + value.getClass().getName());
     }
 }
