@@ -11,5 +11,6 @@
 
   <artifactId>converter</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <name>Converter</name>
 
 </project>

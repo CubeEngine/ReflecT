@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import de.cubeisland.engine.reflect.ReflectedTest.SubSection2.SubSubSection;
+import de.cubeisland.engine.reflect.ReflectedTestFile.SubSection2.SubSubSection;
 import de.cubeisland.engine.reflect.annotations.Comment;
 import de.cubeisland.engine.reflect.annotations.Name;
 
-public class ReflectedTest extends ReflectedFile
+public class ReflectedTestFile extends ReflectedFile
 {
     @Comment("First Comment! [report here]")
     @Name("subsection-using.annotation.first")
@@ -263,9 +263,9 @@ public class ReflectedTest extends ReflectedFile
         return subSection2;
     }
 
-    public static ReflectedTest getDefaultReflectedTest(Reflector reflector)
+    public static ReflectedTestFile getDefaultReflectedTest(Reflector reflector)
     {
-        final ReflectedTest reflectedTest = reflector.create(ReflectedTest.class);
+        final ReflectedTestFile reflectedTest = reflector.create(ReflectedTestFile.class);
 
         reflectedTest.s1 = "Using @Name(\"subsection-using.annotation.first\") Annotation for path";
         reflectedTest.subsectionUsing_annotation_string = "Using fieldName = subsectionUsing_annotation_string for path";

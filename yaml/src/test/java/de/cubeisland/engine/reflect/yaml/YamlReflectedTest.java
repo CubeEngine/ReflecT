@@ -25,7 +25,7 @@ package de.cubeisland.engine.reflect.yaml;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import de.cubeisland.engine.reflect.ReflectedTest;
+import de.cubeisland.engine.reflect.ReflectedTestFile;
 import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.yaml.YamlCodec;
@@ -39,7 +39,7 @@ import static de.cubeisland.engine.reflect.util.AssertionUtils.assertEqualsDeep;
 
 public class YamlReflectedTest
 {
-    private ReflectedTest test1;
+    private ReflectedTestFile test1;
     private ReflectedTest2 test2;
     private File file;
 
@@ -51,7 +51,7 @@ public class YamlReflectedTest
     {
         this.file = new File("../testReflected.yml");
         factory = new Reflector();
-        test1 = ReflectedTest.getDefaultReflectedTest(factory);
+        test1 = ReflectedTestFile.getDefaultReflectedTest(factory);
         test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(YamlCodec.class);
     }
@@ -62,7 +62,7 @@ public class YamlReflectedTest
         FileWriter writer = new FileWriter(file);
         codec.saveReflected(test1, writer);
         writer.close();
-        final ReflectedTest reflected = factory.create(ReflectedTest.class);
+        final ReflectedTestFile reflected = factory.create(ReflectedTestFile.class);
         FileReader reader = new FileReader(file);
         codec.loadReflected(reflected, reader);
         reader.close();
