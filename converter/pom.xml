@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.cubeengine</groupId>
     <artifactId>reflect</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>converter</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <name>Converter</name>
 
 </project>
