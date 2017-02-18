@@ -23,11 +23,9 @@
 package de.cubeisland.engine.reflect.hocon;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import de.cubeisland.engine.reflect.ReflectedTest;
+import de.cubeisland.engine.reflect.ReflectedTestFile;
 import de.cubeisland.engine.reflect.ReflectedTest2;
 import de.cubeisland.engine.reflect.Reflector;
 import de.cubeisland.engine.reflect.codec.hocon.HoconCodec;
@@ -41,7 +39,7 @@ import static org.junit.Assert.assertEquals;
 
 public class HoconReflectedTest
 {
-    private ReflectedTest test1;
+    private ReflectedTestFile test1;
     private ReflectedTest2 test2;
     private File file;
 
@@ -53,7 +51,7 @@ public class HoconReflectedTest
     {
         this.file = new File("../testReflected.conf");
         this.factory = new Reflector();
-        test1 = ReflectedTest.getDefaultReflectedTest(factory);
+        test1 = ReflectedTestFile.getDefaultReflectedTest(factory);
         this.test2 = factory.create(ReflectedTest2.class);
         codec = factory.getCodecManager().getCodec(HoconCodec.class);
     }
@@ -64,7 +62,7 @@ public class HoconReflectedTest
         FileWriter writer = new FileWriter(file);
         codec.saveReflected(test1, writer);
         writer.close();
-        final ReflectedTest reflected = factory.create(ReflectedTest.class);
+        final ReflectedTestFile reflected = factory.create(ReflectedTestFile.class);
         FileReader reader = new FileReader(file);
         codec.loadReflected(reflected, reader);
         reader.close();
