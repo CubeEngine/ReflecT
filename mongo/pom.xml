@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.cubeengine</groupId>
         <artifactId>reflect</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>reflect-mongo</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
 
     <name><![CDATA[Reflec<T> Mongo]]></name>
 
