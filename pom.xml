@@ -37,7 +37,7 @@
     <scm>
         <url>https://github.com/CubeEngine/ReflecT</url>
         <connection>scm:git:https://github.com/CubeEngine/ReflecT</connection>
-        <developerConnection>scm:git:https://github.com/CubeEngine/ReflecT</developerConnection>
+        <developerConnection>scm:git:git@github.com:CubeEngine/ReflecT</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
