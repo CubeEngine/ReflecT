@@ -107,8 +107,9 @@
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
+                    <releaseProfiles>${releaseProfile}</releaseProfiles>
                     <goals>deploy</goals>
+                    <arguments>-P${releaseProfile}</arguments>
                 </configuration>
             </plugin>
             <plugin>
