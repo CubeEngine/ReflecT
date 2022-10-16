@@ -15,7 +15,7 @@
 
     <name><![CDATA[Reflec<T>]]></name>
     <description>Typesafe serialization of data</description>
-    <url>http://cubeengine.org/</url>
+    <url>https://cubeengine.org/</url>
     <inceptionYear>2013</inceptionYear>
 
     <modules>
@@ -83,7 +83,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jdkVersion>1.6</jdkVersion>
+        <jdkVersion>1.8</jdkVersion>
         <releaseProfile>release</releaseProfile>
     </properties>
 
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -221,7 +221,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[${jdkVersion},1.7.0)</version>
+                                    <version>[${jdkVersion},9.0)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
