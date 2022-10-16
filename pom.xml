@@ -15,7 +15,7 @@
 
     <name><![CDATA[Reflec<T>]]></name>
     <description>Typesafe serialization of data</description>
-    <url>http://cubeisland.de/engine</url>
+    <url>http://cubeengine.org/</url>
     <inceptionYear>2013</inceptionYear>
 
     <modules>
@@ -23,7 +23,6 @@
         <module>converter</module>
         <module>yaml</module>
         <module>hocon</module>
-        <module>mongo</module>
         <module>nbt</module>
     </modules>
 
