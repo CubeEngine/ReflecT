@@ -46,6 +46,8 @@ public class MapConverter implements GenericConverter<Map>
      *
      * @param pType the type
      *
+     * @throws IllegalAccessException when reflection fails
+     * @throws InstantiationException when reflection fails
      * @return the map of given type
      */
     public static Map getMapFor(ParameterizedType pType) throws IllegalAccessException, InstantiationException

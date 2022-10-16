@@ -29,10 +29,20 @@ import org.cubeengine.converter.node.Node;
 /**
  * A converter for a single Class
  *
- * @param <ConvertT>
+ * @param <ConvertT> the converted type
  */
 public abstract class SingleClassConverter<ConvertT> implements ClassedConverter<ConvertT>
 {
+    /**
+     * Converts the node back into the original object
+     *
+     * @param node    the node to convert
+     * @param type    the type
+     * @param manager the ConverterManager
+     *
+     * @throws ConversionException when conversion fails
+     * @return the converted node
+     */
     public final ConvertT fromNode(Node node, Class<? extends ConvertT> type, ConverterManager manager) throws ConversionException
     {
         return fromNode(node, manager);
@@ -44,6 +54,7 @@ public abstract class SingleClassConverter<ConvertT> implements ClassedConverter
      * @param node    the node to convert
      * @param manager the ConverterManager
      *
+     * @throws ConversionException when conversion fails
      * @return the converted node
      */
     public abstract ConvertT fromNode(Node node, ConverterManager manager) throws ConversionException;

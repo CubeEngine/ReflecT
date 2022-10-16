@@ -47,6 +47,7 @@ public abstract class SimpleConverter<ConvertT> implements ClassedConverter<Conv
      *
      * @param object the object to convert
      *
+     * @throws ConversionException when conversion fails
      * @return the converted object
      */
     public abstract Node toNode(ConvertT object) throws ConversionException;
@@ -56,6 +57,7 @@ public abstract class SimpleConverter<ConvertT> implements ClassedConverter<Conv
      *
      * @param node the node to convert
      *
+     * @throws ConversionException when conversion fails
      * @return the converted node
      */
     public abstract ConvertT fromNode(Node node) throws ConversionException;

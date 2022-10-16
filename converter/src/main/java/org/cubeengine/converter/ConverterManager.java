@@ -126,6 +126,8 @@ public class ConverterManager
      *
      * @param converter the converter
      * @param classes   the class
+     *
+     * @return fluent interface
      */
     public final ConverterManager registerConverter(Converter converter, Class... classes)
     {
@@ -145,6 +147,8 @@ public class ConverterManager
      * Removes a Converter from this manager
      *
      * @param clazz the class of the converter to remove
+     *
+     * @return fluent interface
      */
     public final ConverterManager removeConverter(Class clazz)
     {
@@ -164,6 +168,8 @@ public class ConverterManager
 
     /**
      * Removes all registered converters
+     *
+     * @return fluent interface
      */
     public final ConverterManager removeConverters()
     {
@@ -232,7 +238,9 @@ public class ConverterManager
      * Converts a convertible Object into a Node
      *
      * @param object the Object
+     * @param <T> the converted type
      *
+     * @throws ConversionException when conversion fails
      * @return the serialized Node
      */
     @SuppressWarnings("unchecked")
@@ -262,7 +270,9 @@ public class ConverterManager
      * Primarily used to convert Arrays.
      *
      * @param object the object to convert
+     * @param <T> the converted type
      *
+     * @throws ConversionException when conversion fails
      * @return the converted object or null if not converted
      */
     protected <T> Node toNode(T object) throws ConversionException
@@ -279,7 +289,9 @@ public class ConverterManager
      *
      * @param node the node
      * @param type the type of the object
+     * @param <T> the converted type
      *
+     * @throws ConversionException when conversion fails
      * @return the converted Node
      */
     @SuppressWarnings("unchecked")
@@ -320,6 +332,7 @@ public class ConverterManager
      * @param node the node to convert
      * @param type the type to convert to
      *
+     * @throws ConversionException when conversion fails
      * @return the converted node or null if not converted
      */
     protected Object fromNode(Node node, Type type) throws ConversionException

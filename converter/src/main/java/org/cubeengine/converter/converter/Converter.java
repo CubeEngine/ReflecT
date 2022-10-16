@@ -39,6 +39,7 @@ public interface Converter<ConvertT, TypeT extends Type>
      * @param object  the object to convert
      * @param manager the ConverterManager
      *
+     * @throws ConversionException when conversion fails
      * @return the converted object
      */
     Node toNode(ConvertT object, ConverterManager manager) throws ConversionException;
@@ -50,6 +51,7 @@ public interface Converter<ConvertT, TypeT extends Type>
      * @param type    the type to convert to
      * @param manager the manager
      *
+     * @throws ConversionException when conversion fails
      * @return the converted node
      */
     ConvertT fromNode(Node node, TypeT type, ConverterManager manager) throws ConversionException;
