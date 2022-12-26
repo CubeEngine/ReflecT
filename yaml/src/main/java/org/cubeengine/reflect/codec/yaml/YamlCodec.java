@@ -39,6 +39,7 @@ import org.cubeengine.reflect.ReflectedFile;
 import org.cubeengine.reflect.codec.ReaderWriterFileCodec;
 import org.cubeengine.reflect.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -72,7 +73,7 @@ public class YamlCodec extends ReaderWriterFileCodec
                 // InputStream null -> reflected was not existent
                 return MapNode.emptyMap();
             }
-            Map<Object, Object> map = (Map<Object, Object>)new Yaml().load(in);
+            Map<Object, Object> map = (Map<Object, Object>)new Yaml(new SafeConstructor()).load(in);
             if (map == null)
             {
                 // loadValues null -> reflected exists but was empty
